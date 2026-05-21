@@ -10,33 +10,271 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VentasIndexRouteImport } from './routes/ventas.index'
+import { Route as VentasFacturacionRouteImport } from './routes/ventas.facturacion'
+import { Route as VentasClientesRouteImport } from './routes/ventas.clientes'
+import { Route as VentasCajaRouteImport } from './routes/ventas.caja'
+import { Route as ReportesPrediccionesRouteImport } from './routes/reportes.predicciones'
+import { Route as ReportesMetricasRouteImport } from './routes/reportes.metricas'
+import { Route as ReportesAbcRouteImport } from './routes/reportes.abc'
+import { Route as InventarioMarcasRouteImport } from './routes/inventario.marcas'
+import { Route as InventarioDescuentosRouteImport } from './routes/inventario.descuentos'
+import { Route as InventarioCategoriasRouteImport } from './routes/inventario.categorias'
+import { Route as InventarioArticulosRouteImport } from './routes/inventario.articulos'
+import { Route as GestionUsuariosRouteImport } from './routes/gestion.usuarios'
+import { Route as GestionMovimientosRouteImport } from './routes/gestion.movimientos'
+import { Route as GestionAlmacenRouteImport } from './routes/gestion.almacen'
+import { Route as GestionAccesosRouteImport } from './routes/gestion.accesos'
+import { Route as ComprasProveedoresRouteImport } from './routes/compras.proveedores'
+import { Route as ComprasOrdenesRouteImport } from './routes/compras.ordenes'
+import { Route as ComprasFacturacionRouteImport } from './routes/compras.facturacion'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VentasIndexRoute = VentasIndexRouteImport.update({
+  id: '/ventas/',
+  path: '/ventas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VentasFacturacionRoute = VentasFacturacionRouteImport.update({
+  id: '/ventas/facturacion',
+  path: '/ventas/facturacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VentasClientesRoute = VentasClientesRouteImport.update({
+  id: '/ventas/clientes',
+  path: '/ventas/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VentasCajaRoute = VentasCajaRouteImport.update({
+  id: '/ventas/caja',
+  path: '/ventas/caja',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportesPrediccionesRoute = ReportesPrediccionesRouteImport.update({
+  id: '/reportes/predicciones',
+  path: '/reportes/predicciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportesMetricasRoute = ReportesMetricasRouteImport.update({
+  id: '/reportes/metricas',
+  path: '/reportes/metricas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportesAbcRoute = ReportesAbcRouteImport.update({
+  id: '/reportes/abc',
+  path: '/reportes/abc',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventarioMarcasRoute = InventarioMarcasRouteImport.update({
+  id: '/inventario/marcas',
+  path: '/inventario/marcas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventarioDescuentosRoute = InventarioDescuentosRouteImport.update({
+  id: '/inventario/descuentos',
+  path: '/inventario/descuentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventarioCategoriasRoute = InventarioCategoriasRouteImport.update({
+  id: '/inventario/categorias',
+  path: '/inventario/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventarioArticulosRoute = InventarioArticulosRouteImport.update({
+  id: '/inventario/articulos',
+  path: '/inventario/articulos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestionUsuariosRoute = GestionUsuariosRouteImport.update({
+  id: '/gestion/usuarios',
+  path: '/gestion/usuarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestionMovimientosRoute = GestionMovimientosRouteImport.update({
+  id: '/gestion/movimientos',
+  path: '/gestion/movimientos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestionAlmacenRoute = GestionAlmacenRouteImport.update({
+  id: '/gestion/almacen',
+  path: '/gestion/almacen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestionAccesosRoute = GestionAccesosRouteImport.update({
+  id: '/gestion/accesos',
+  path: '/gestion/accesos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComprasProveedoresRoute = ComprasProveedoresRouteImport.update({
+  id: '/compras/proveedores',
+  path: '/compras/proveedores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComprasOrdenesRoute = ComprasOrdenesRouteImport.update({
+  id: '/compras/ordenes',
+  path: '/compras/ordenes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComprasFacturacionRoute = ComprasFacturacionRouteImport.update({
+  id: '/compras/facturacion',
+  path: '/compras/facturacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/compras/facturacion': typeof ComprasFacturacionRoute
+  '/compras/ordenes': typeof ComprasOrdenesRoute
+  '/compras/proveedores': typeof ComprasProveedoresRoute
+  '/gestion/accesos': typeof GestionAccesosRoute
+  '/gestion/almacen': typeof GestionAlmacenRoute
+  '/gestion/movimientos': typeof GestionMovimientosRoute
+  '/gestion/usuarios': typeof GestionUsuariosRoute
+  '/inventario/articulos': typeof InventarioArticulosRoute
+  '/inventario/categorias': typeof InventarioCategoriasRoute
+  '/inventario/descuentos': typeof InventarioDescuentosRoute
+  '/inventario/marcas': typeof InventarioMarcasRoute
+  '/reportes/abc': typeof ReportesAbcRoute
+  '/reportes/metricas': typeof ReportesMetricasRoute
+  '/reportes/predicciones': typeof ReportesPrediccionesRoute
+  '/ventas/caja': typeof VentasCajaRoute
+  '/ventas/clientes': typeof VentasClientesRoute
+  '/ventas/facturacion': typeof VentasFacturacionRoute
+  '/ventas/': typeof VentasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/compras/facturacion': typeof ComprasFacturacionRoute
+  '/compras/ordenes': typeof ComprasOrdenesRoute
+  '/compras/proveedores': typeof ComprasProveedoresRoute
+  '/gestion/accesos': typeof GestionAccesosRoute
+  '/gestion/almacen': typeof GestionAlmacenRoute
+  '/gestion/movimientos': typeof GestionMovimientosRoute
+  '/gestion/usuarios': typeof GestionUsuariosRoute
+  '/inventario/articulos': typeof InventarioArticulosRoute
+  '/inventario/categorias': typeof InventarioCategoriasRoute
+  '/inventario/descuentos': typeof InventarioDescuentosRoute
+  '/inventario/marcas': typeof InventarioMarcasRoute
+  '/reportes/abc': typeof ReportesAbcRoute
+  '/reportes/metricas': typeof ReportesMetricasRoute
+  '/reportes/predicciones': typeof ReportesPrediccionesRoute
+  '/ventas/caja': typeof VentasCajaRoute
+  '/ventas/clientes': typeof VentasClientesRoute
+  '/ventas/facturacion': typeof VentasFacturacionRoute
+  '/ventas': typeof VentasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/compras/facturacion': typeof ComprasFacturacionRoute
+  '/compras/ordenes': typeof ComprasOrdenesRoute
+  '/compras/proveedores': typeof ComprasProveedoresRoute
+  '/gestion/accesos': typeof GestionAccesosRoute
+  '/gestion/almacen': typeof GestionAlmacenRoute
+  '/gestion/movimientos': typeof GestionMovimientosRoute
+  '/gestion/usuarios': typeof GestionUsuariosRoute
+  '/inventario/articulos': typeof InventarioArticulosRoute
+  '/inventario/categorias': typeof InventarioCategoriasRoute
+  '/inventario/descuentos': typeof InventarioDescuentosRoute
+  '/inventario/marcas': typeof InventarioMarcasRoute
+  '/reportes/abc': typeof ReportesAbcRoute
+  '/reportes/metricas': typeof ReportesMetricasRoute
+  '/reportes/predicciones': typeof ReportesPrediccionesRoute
+  '/ventas/caja': typeof VentasCajaRoute
+  '/ventas/clientes': typeof VentasClientesRoute
+  '/ventas/facturacion': typeof VentasFacturacionRoute
+  '/ventas/': typeof VentasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/compras/facturacion'
+    | '/compras/ordenes'
+    | '/compras/proveedores'
+    | '/gestion/accesos'
+    | '/gestion/almacen'
+    | '/gestion/movimientos'
+    | '/gestion/usuarios'
+    | '/inventario/articulos'
+    | '/inventario/categorias'
+    | '/inventario/descuentos'
+    | '/inventario/marcas'
+    | '/reportes/abc'
+    | '/reportes/metricas'
+    | '/reportes/predicciones'
+    | '/ventas/caja'
+    | '/ventas/clientes'
+    | '/ventas/facturacion'
+    | '/ventas/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/compras/facturacion'
+    | '/compras/ordenes'
+    | '/compras/proveedores'
+    | '/gestion/accesos'
+    | '/gestion/almacen'
+    | '/gestion/movimientos'
+    | '/gestion/usuarios'
+    | '/inventario/articulos'
+    | '/inventario/categorias'
+    | '/inventario/descuentos'
+    | '/inventario/marcas'
+    | '/reportes/abc'
+    | '/reportes/metricas'
+    | '/reportes/predicciones'
+    | '/ventas/caja'
+    | '/ventas/clientes'
+    | '/ventas/facturacion'
+    | '/ventas'
+  id:
+    | '__root__'
+    | '/'
+    | '/compras/facturacion'
+    | '/compras/ordenes'
+    | '/compras/proveedores'
+    | '/gestion/accesos'
+    | '/gestion/almacen'
+    | '/gestion/movimientos'
+    | '/gestion/usuarios'
+    | '/inventario/articulos'
+    | '/inventario/categorias'
+    | '/inventario/descuentos'
+    | '/inventario/marcas'
+    | '/reportes/abc'
+    | '/reportes/metricas'
+    | '/reportes/predicciones'
+    | '/ventas/caja'
+    | '/ventas/clientes'
+    | '/ventas/facturacion'
+    | '/ventas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ComprasFacturacionRoute: typeof ComprasFacturacionRoute
+  ComprasOrdenesRoute: typeof ComprasOrdenesRoute
+  ComprasProveedoresRoute: typeof ComprasProveedoresRoute
+  GestionAccesosRoute: typeof GestionAccesosRoute
+  GestionAlmacenRoute: typeof GestionAlmacenRoute
+  GestionMovimientosRoute: typeof GestionMovimientosRoute
+  GestionUsuariosRoute: typeof GestionUsuariosRoute
+  InventarioArticulosRoute: typeof InventarioArticulosRoute
+  InventarioCategoriasRoute: typeof InventarioCategoriasRoute
+  InventarioDescuentosRoute: typeof InventarioDescuentosRoute
+  InventarioMarcasRoute: typeof InventarioMarcasRoute
+  ReportesAbcRoute: typeof ReportesAbcRoute
+  ReportesMetricasRoute: typeof ReportesMetricasRoute
+  ReportesPrediccionesRoute: typeof ReportesPrediccionesRoute
+  VentasCajaRoute: typeof VentasCajaRoute
+  VentasClientesRoute: typeof VentasClientesRoute
+  VentasFacturacionRoute: typeof VentasFacturacionRoute
+  VentasIndexRoute: typeof VentasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +286,155 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ventas/': {
+      id: '/ventas/'
+      path: '/ventas'
+      fullPath: '/ventas/'
+      preLoaderRoute: typeof VentasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ventas/facturacion': {
+      id: '/ventas/facturacion'
+      path: '/ventas/facturacion'
+      fullPath: '/ventas/facturacion'
+      preLoaderRoute: typeof VentasFacturacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ventas/clientes': {
+      id: '/ventas/clientes'
+      path: '/ventas/clientes'
+      fullPath: '/ventas/clientes'
+      preLoaderRoute: typeof VentasClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ventas/caja': {
+      id: '/ventas/caja'
+      path: '/ventas/caja'
+      fullPath: '/ventas/caja'
+      preLoaderRoute: typeof VentasCajaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reportes/predicciones': {
+      id: '/reportes/predicciones'
+      path: '/reportes/predicciones'
+      fullPath: '/reportes/predicciones'
+      preLoaderRoute: typeof ReportesPrediccionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reportes/metricas': {
+      id: '/reportes/metricas'
+      path: '/reportes/metricas'
+      fullPath: '/reportes/metricas'
+      preLoaderRoute: typeof ReportesMetricasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reportes/abc': {
+      id: '/reportes/abc'
+      path: '/reportes/abc'
+      fullPath: '/reportes/abc'
+      preLoaderRoute: typeof ReportesAbcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventario/marcas': {
+      id: '/inventario/marcas'
+      path: '/inventario/marcas'
+      fullPath: '/inventario/marcas'
+      preLoaderRoute: typeof InventarioMarcasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventario/descuentos': {
+      id: '/inventario/descuentos'
+      path: '/inventario/descuentos'
+      fullPath: '/inventario/descuentos'
+      preLoaderRoute: typeof InventarioDescuentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventario/categorias': {
+      id: '/inventario/categorias'
+      path: '/inventario/categorias'
+      fullPath: '/inventario/categorias'
+      preLoaderRoute: typeof InventarioCategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventario/articulos': {
+      id: '/inventario/articulos'
+      path: '/inventario/articulos'
+      fullPath: '/inventario/articulos'
+      preLoaderRoute: typeof InventarioArticulosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestion/usuarios': {
+      id: '/gestion/usuarios'
+      path: '/gestion/usuarios'
+      fullPath: '/gestion/usuarios'
+      preLoaderRoute: typeof GestionUsuariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestion/movimientos': {
+      id: '/gestion/movimientos'
+      path: '/gestion/movimientos'
+      fullPath: '/gestion/movimientos'
+      preLoaderRoute: typeof GestionMovimientosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestion/almacen': {
+      id: '/gestion/almacen'
+      path: '/gestion/almacen'
+      fullPath: '/gestion/almacen'
+      preLoaderRoute: typeof GestionAlmacenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestion/accesos': {
+      id: '/gestion/accesos'
+      path: '/gestion/accesos'
+      fullPath: '/gestion/accesos'
+      preLoaderRoute: typeof GestionAccesosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compras/proveedores': {
+      id: '/compras/proveedores'
+      path: '/compras/proveedores'
+      fullPath: '/compras/proveedores'
+      preLoaderRoute: typeof ComprasProveedoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compras/ordenes': {
+      id: '/compras/ordenes'
+      path: '/compras/ordenes'
+      fullPath: '/compras/ordenes'
+      preLoaderRoute: typeof ComprasOrdenesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compras/facturacion': {
+      id: '/compras/facturacion'
+      path: '/compras/facturacion'
+      fullPath: '/compras/facturacion'
+      preLoaderRoute: typeof ComprasFacturacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ComprasFacturacionRoute: ComprasFacturacionRoute,
+  ComprasOrdenesRoute: ComprasOrdenesRoute,
+  ComprasProveedoresRoute: ComprasProveedoresRoute,
+  GestionAccesosRoute: GestionAccesosRoute,
+  GestionAlmacenRoute: GestionAlmacenRoute,
+  GestionMovimientosRoute: GestionMovimientosRoute,
+  GestionUsuariosRoute: GestionUsuariosRoute,
+  InventarioArticulosRoute: InventarioArticulosRoute,
+  InventarioCategoriasRoute: InventarioCategoriasRoute,
+  InventarioDescuentosRoute: InventarioDescuentosRoute,
+  InventarioMarcasRoute: InventarioMarcasRoute,
+  ReportesAbcRoute: ReportesAbcRoute,
+  ReportesMetricasRoute: ReportesMetricasRoute,
+  ReportesPrediccionesRoute: ReportesPrediccionesRoute,
+  VentasCajaRoute: VentasCajaRoute,
+  VentasClientesRoute: VentasClientesRoute,
+  VentasFacturacionRoute: VentasFacturacionRoute,
+  VentasIndexRoute: VentasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
