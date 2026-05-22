@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
+import { ProfileModal } from "@/components/modals/profile-modal";
 import {
   Home,
   Package,
@@ -102,18 +104,25 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [profileOpen, setProfileOpen] = useState(false);
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="border-b border-sidebar-border">
-        <Link to="/" className="flex items-center gap-2 px-1 py-2">
+        <button
+          type="button"
+          onClick={() => setProfileOpen(true)}
+          aria-label="Abrir perfil"
+          className="flex w-full items-center gap-2 rounded-md px-1 py-2 text-left transition hover:bg-sidebar-accent/50"
+        >
           <img src={logo} alt="Inventia" className="h-9 w-9 shrink-0" />
           {!collapsed && (
             <span className="text-2xl font-bold tracking-tight text-navy">
               INVENT<span className="text-brand">IA</span>
             </span>
           )}
-        </Link>
+        </button>
+        <ProfileModal open={profileOpen} onOpenChange={setProfileOpen} />
       </SidebarHeader>
 
       <SidebarContent className="gap-1 px-2 py-3">
