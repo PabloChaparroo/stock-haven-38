@@ -171,6 +171,3 @@ export function UsersTable({ users }: Props) {
     </>
   );
 }
-
-// Eye import kept for potential future use
-void Eye;
