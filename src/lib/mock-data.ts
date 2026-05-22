@@ -39,6 +39,27 @@ export type Article = {
   variants?: Variant[];
 };
 
+export type Role = {
+  id: string;
+  name: string;
+  createdAt: string;
+  permissions: string[]; // permission ids
+};
+
+export type User = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dni: string;
+  email: string;
+  phone: string;
+  image: string;
+  createdAt: string;
+  active: boolean;
+  roles: string[]; // role names
+  description?: string;
+};
+
 export const categories: Category[] = [
   { id: "1", code: "CAT-01", name: "Computadoras", description: "Notebooks, PCs de escritorio y workstations." },
   { id: "2", code: "CAT-02", name: "Periféricos", description: "Teclados, mouses, monitores y accesorios." },
@@ -82,3 +103,173 @@ export const articles: Article[] = Array.from({ length: 12 }).map((_, i) => ({
 
 export const formatCurrency = (n: number) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
+
+// ============== Roles & Permisos ==============
+
+export type PermissionGroup = {
+  group: string;
+  permissions: { id: string; name: string; description: string }[];
+};
+
+export const permissionGroups: PermissionGroup[] = [
+  {
+    group: "Inventario",
+    permissions: [
+      { id: "inv.view", name: "Ver artículos", description: "Consultar el listado de artículos" },
+      { id: "inv.create", name: "Crear artículos", description: "Dar de alta nuevos artículos" },
+      { id: "inv.edit", name: "Editar artículos", description: "Modificar artículos existentes" },
+      { id: "inv.delete", name: "Eliminar artículos", description: "Dar de baja artículos" },
+    ],
+  },
+  {
+    group: "Ventas",
+    permissions: [
+      { id: "sales.view", name: "Ver ventas", description: "Consultar registros de ventas" },
+      { id: "sales.create", name: "Crear ventas", description: "Registrar nuevas ventas" },
+      { id: "sales.refund", name: "Anular ventas", description: "Realizar devoluciones" },
+    ],
+  },
+  {
+    group: "Compras",
+    permissions: [
+      { id: "buy.view", name: "Ver compras", description: "Consultar órdenes de compra" },
+      { id: "buy.create", name: "Crear órdenes", description: "Generar órdenes de compra" },
+    ],
+  },
+  {
+    group: "Gestión",
+    permissions: [
+      { id: "users.manage", name: "Gestionar usuarios", description: "ABM de usuarios" },
+      { id: "roles.manage", name: "Gestionar roles", description: "ABM de roles y permisos" },
+      { id: "warehouse.manage", name: "Gestionar almacén", description: "Configurar depósitos" },
+    ],
+  },
+  {
+    group: "Reportes",
+    permissions: [
+      { id: "reports.view", name: "Ver reportes", description: "Acceder a métricas y reportes" },
+      { id: "reports.export", name: "Exportar reportes", description: "Descargar reportes en CSV/PDF" },
+    ],
+  },
+];
+
+export const allPermissionIds = permissionGroups.flatMap((g) => g.permissions.map((p) => p.id));
+
+export const roles: Role[] = [
+  {
+    id: "1",
+    name: "Administrador",
+    createdAt: "01/05/2026",
+    permissions: allPermissionIds,
+  },
+  {
+    id: "2",
+    name: "Vendedor",
+    createdAt: "03/05/2026",
+    permissions: ["inv.view", "sales.view", "sales.create"],
+  },
+  {
+    id: "3",
+    name: "Encargado de stock",
+    createdAt: "10/05/2026",
+    permissions: ["inv.view", "inv.create", "inv.edit", "warehouse.manage"],
+  },
+  {
+    id: "4",
+    name: "Auditor",
+    createdAt: "15/05/2026",
+    permissions: ["inv.view", "sales.view", "buy.view", "reports.view", "reports.export"],
+  },
+];
+
+const userImgs = [
+  "https://i.pravatar.cc/120?img=47",
+  "https://i.pravatar.cc/120?img=12",
+  "https://i.pravatar.cc/120?img=32",
+  "https://i.pravatar.cc/120?img=5",
+  "https://i.pravatar.cc/120?img=68",
+  "https://i.pravatar.cc/120?img=23",
+];
+
+export const users: User[] = [
+  {
+    id: "1",
+    firstName: "Olivia",
+    lastName: "Rhye",
+    dni: "35.123.456",
+    email: "olivia@inventia.com",
+    phone: "+54 9 11 5555-0101",
+    image: userImgs[0],
+    createdAt: "12/07/2026",
+    active: true,
+    roles: ["Administrador"],
+    description: "Fundadora y administradora general del sistema.",
+  },
+  {
+    id: "2",
+    firstName: "Mateo",
+    lastName: "González",
+    dni: "40.987.654",
+    email: "mateo@inventia.com",
+    phone: "+54 9 11 5555-0102",
+    image: userImgs[1],
+    createdAt: "14/07/2026",
+    active: true,
+    roles: ["Vendedor"],
+    description: "Vendedor del local centro.",
+  },
+  {
+    id: "3",
+    firstName: "Lucía",
+    lastName: "Fernández",
+    dni: "38.456.123",
+    email: "lucia@inventia.com",
+    phone: "+54 9 11 5555-0103",
+    image: userImgs[2],
+    createdAt: "20/07/2026",
+    active: false,
+    roles: ["Encargado de stock"],
+    description: "Encargada del depósito principal.",
+  },
+  {
+    id: "4",
+    firstName: "Tomás",
+    lastName: "Pérez",
+    dni: "42.111.222",
+    email: "tomas@inventia.com",
+    phone: "+54 9 11 5555-0104",
+    image: userImgs[3],
+    createdAt: "01/08/2026",
+    active: true,
+    roles: ["Vendedor", "Auditor"],
+    description: "Doble función comercial y auditoría.",
+  },
+  {
+    id: "5",
+    firstName: "Camila",
+    lastName: "Suárez",
+    dni: "39.333.444",
+    email: "camila@inventia.com",
+    phone: "+54 9 11 5555-0105",
+    image: userImgs[4],
+    createdAt: "05/08/2026",
+    active: true,
+    roles: ["Auditor"],
+    description: "Auditora de movimientos y stock.",
+  },
+  {
+    id: "6",
+    firstName: "Bruno",
+    lastName: "Martínez",
+    dni: "41.555.666",
+    email: "bruno@inventia.com",
+    phone: "+54 9 11 5555-0106",
+    image: userImgs[5],
+    createdAt: "10/08/2026",
+    active: false,
+    roles: ["Vendedor"],
+    description: "Vendedor sucursal norte.",
+  },
+];
+
+export const currentUser: User = users[0];
