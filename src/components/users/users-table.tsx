@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, Pencil, ShieldCheck, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { Pencil, ShieldCheck, Trash2, CheckCircle2, XCircle } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
