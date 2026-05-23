@@ -28,11 +28,13 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   mode?: "create" | "edit";
   article?: Article;
+  defaultCategory?: string;
+  defaultBrand?: string;
 };
 
 type LocalVariant = { id: string; code: string; name: string; description: string };
 
-export function ArticleFormModal({ open, onOpenChange, mode = "create", article }: Props) {
+export function ArticleFormModal({ open, onOpenChange, mode = "create", article, defaultCategory, defaultBrand }: Props) {
   const [hasVariants, setHasVariants] = useState((article?.variants?.length ?? 0) > 0);
   const [variants, setVariants] = useState<LocalVariant[]>(article?.variants ?? []);
   const [description, setDescription] = useState(article?.description ?? "");
@@ -113,7 +115,7 @@ export function ArticleFormModal({ open, onOpenChange, mode = "create", article 
               <div className="space-y-1.5">
                 <Label>Categoría *</Label>
                 <div className="flex gap-2">
-                  <Select defaultValue={article?.category}>
+                  <Select defaultValue={article?.category ?? defaultCategory}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Seleccionar categoría" />
                     </SelectTrigger>
@@ -139,7 +141,7 @@ export function ArticleFormModal({ open, onOpenChange, mode = "create", article 
               <div className="space-y-1.5">
                 <Label>Marca *</Label>
                 <div className="flex gap-2">
-                  <Select defaultValue={article?.brand}>
+                  <Select defaultValue={article?.brand ?? defaultBrand}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Seleccionar marca" />
                     </SelectTrigger>
