@@ -79,7 +79,7 @@ export const brands: Brand[] = [
 const lorem =
   "Computadora versátil pensada para entornos corporativos exigentes, con procesador de última generación, memoria expansible y autonomía prolongada para uso intensivo en oficina.";
 
-export const articles: Article[] = Array.from({ length: 12 }).map((_, i) => ({
+export const articles: Article[] = Array.from({ length: 28 }).map((_, i) => ({
   id: String(i + 1),
   code: `12345${i}`,
   name: i % 3 === 0 ? "T10 G5" : i % 3 === 1 ? "EliteBook 840" : "Latitude 7420",
@@ -273,3 +273,92 @@ export const users: User[] = [
 ];
 
 export const currentUser: User = users[0];
+
+// ============== Descuentos ==============
+
+export type DiscountType = "category" | "combo";
+
+export type ComboItem = {
+  articleId: string;
+  minQuantity: number;
+};
+
+export type Discount = {
+  id: string;
+  name: string;
+  description: string;
+  percentage: number;
+  fromDate: string;
+  toDate?: string;
+  active: boolean;
+  type: DiscountType;
+  categoryName?: string;
+  comboItems?: ComboItem[];
+  createdAt: string;
+};
+
+export const discounts: Discount[] = [
+  {
+    id: "d1",
+    name: "Promo Verano",
+    description: "Descuento por temporada en periféricos.",
+    percentage: 15,
+    fromDate: "01/12/2026",
+    toDate: undefined,
+    active: true,
+    type: "category",
+    categoryName: "Periféricos",
+    createdAt: "10/11/2026",
+  },
+  {
+    id: "d2",
+    name: "Black Friday Hardware",
+    description: "Mega descuento de Black Friday en computadoras.",
+    percentage: 25,
+    fromDate: "20/11/2026",
+    toDate: "30/11/2026",
+    active: true,
+    type: "category",
+    categoryName: "Computadoras",
+    createdAt: "01/10/2026",
+  },
+  {
+    id: "d3",
+    name: "Combo Oficina Pro",
+    description: "Llevando 2 notebooks + 1 impresora.",
+    percentage: 10,
+    fromDate: "01/06/2026",
+    toDate: "31/12/2026",
+    active: true,
+    type: "combo",
+    comboItems: [
+      { articleId: "1", minQuantity: 2 },
+      { articleId: "5", minQuantity: 1 },
+    ],
+    createdAt: "15/05/2026",
+  },
+  {
+    id: "d4",
+    name: "Combo Gamer",
+    description: "Periférico + monitor.",
+    percentage: 12,
+    fromDate: "01/07/2026",
+    toDate: "31/12/2026",
+    active: true,
+    type: "combo",
+    comboItems: [{ articleId: "3", minQuantity: 1 }],
+    createdAt: "20/06/2026",
+  },
+  {
+    id: "d5",
+    name: "Liquidación Redes",
+    description: "Stock de routers en oferta.",
+    percentage: 30,
+    fromDate: "01/03/2026",
+    toDate: "30/04/2026",
+    active: false,
+    type: "category",
+    categoryName: "Redes",
+    createdAt: "20/02/2026",
+  },
+];
