@@ -79,7 +79,7 @@ export const brands: Brand[] = [
 const lorem =
   "Computadora versátil pensada para entornos corporativos exigentes, con procesador de última generación, memoria expansible y autonomía prolongada para uso intensivo en oficina.";
 
-export const articles: Article[] = Array.from({ length: 12 }).map((_, i) => ({
+export const articles: Article[] = Array.from({ length: 28 }).map((_, i) => ({
   id: String(i + 1),
   code: `12345${i}`,
   name: i % 3 === 0 ? "T10 G5" : i % 3 === 1 ? "EliteBook 840" : "Latitude 7420",
