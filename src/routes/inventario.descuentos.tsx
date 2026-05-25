@@ -194,14 +194,14 @@ function DetailPanel({ discount }: { discount: Discount }) {
 
   const items: ItemRow[] = useMemo(() => {
     if (discount.type === "category") {
-      return articles.filter((a) => a.category === discount.categoryName);
+      return articles.filter((a) => a.category === discount.categoryName) as ItemRow[];
     }
-    return (discount.comboItems ?? [])
-      .map((c) => {
-        const art = articles.find((a) => a.id === c.articleId);
-        return art ? { ...art, _minQty: c.minQuantity } : null;
-      })
-      .filter((x): x is ItemRow => Boolean(x));
+    const out: ItemRow[] = [];
+    for (const c of discount.comboItems ?? []) {
+      const art = articles.find((a) => a.id === c.articleId);
+      if (art) out.push({ ...art, _minQty: c.minQuantity });
+    }
+    return out;
   }, [discount]);
 
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
