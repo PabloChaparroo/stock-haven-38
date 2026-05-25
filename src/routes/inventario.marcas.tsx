@@ -7,9 +7,10 @@ import { articles, brands as initialBrands, type Brand } from "@/lib/mock-data";
 import { ArticlesTable } from "@/components/articles/articles-table";
 import { SimpleEntityModal } from "@/components/modals/simple-entity-modal";
 import { DeleteConfirmModal } from "@/components/modals/delete-confirm-modal";
-import { ArticleFormModal } from "@/components/modals/article-form-modal";
+import { LinkArticlesModal } from "@/components/modals/link-articles-modal";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { cn } from "@/lib/utils";
+import type { Article } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/inventario/marcas")({
   component: BrandsPage,
@@ -26,6 +27,7 @@ function BrandsPage() {
   const [brandPage, setBrandPage] = useState(1);
   const [artPage, setArtPage] = useState(1);
   const [addArticle, setAddArticle] = useState(false);
+  const [unlink, setUnlink] = useState<Article | null>(null);
 
   const filtered = useMemo(
     () => (selected ? articles.filter((a) => a.brand === selected.name) : []),
@@ -102,7 +104,7 @@ function BrandsPage() {
               <Plus className="h-4 w-4" /> Agregar artículo
             </Button>
           </div>
-          <ArticlesTable articles={artSlice} />
+          <ArticlesTable articles={artSlice} onUnlink={setUnlink} unlinkTitle="Desvincular de la marca" />
           <SimplePagination page={artPage} totalPages={artTotal} onPageChange={setArtPage} />
         </section>
       )}
@@ -110,7 +112,18 @@ function BrandsPage() {
       <SimpleEntityModal open={create} onOpenChange={setCreate} entity="Marca" />
       <SimpleEntityModal open={!!edit} onOpenChange={(v) => !v && setEdit(null)} entity="Marca" mode="edit" initial={edit ?? undefined} />
       <DeleteConfirmModal open={!!del} onOpenChange={(v) => !v && setDel(null)} itemName={`la marca "${del?.name}"`} onConfirm={() => setDel(null)} />
-      <ArticleFormModal open={addArticle} onOpenChange={setAddArticle} defaultBrand={selected?.name} />
+      <LinkArticlesModal
+        open={addArticle}
+        onOpenChange={setAddArticle}
+        targetLabel={selected ? `a la marca "${selected.name}"` : undefined}
+        excludeIds={filtered.map((a) => a.id)}
+      />
+      <DeleteConfirmModal
+        open={!!unlink}
+        onOpenChange={(v) => !v && setUnlink(null)}
+        itemName={`el artículo "${unlink?.name}" de esta marca`}
+        onConfirm={() => setUnlink(null)}
+      />
     </div>
   );
 }
