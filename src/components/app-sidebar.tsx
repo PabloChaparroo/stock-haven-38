@@ -158,10 +158,10 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           tooltip={group.title}
                           className={cn(
-                            "h-10 bg-sidebar-accent/60 font-semibold text-sidebar-foreground hover:bg-sidebar-accent",
+                            "h-10 bg-brand/15 font-semibold text-navy hover:bg-brand/25",
                           )}
                         >
-                          <group.icon className="h-5 w-5" />
+                          <group.icon className="h-5 w-5 text-brand" />
                           <span>{group.title}</span>
                           <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=closed]/coll:-rotate-90" />
                         </SidebarMenuButton>
