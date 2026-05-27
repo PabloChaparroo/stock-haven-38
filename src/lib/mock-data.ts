@@ -103,6 +103,13 @@ export const articles: Article[] = Array.from({ length: 28 }).map((_, i) => ({
           { id: "v2", code: "VAR-02", name: "16GB / 512GB", description: "Configuración avanzada" },
         ]
       : [],
+  variantStocks:
+    i % 4 === 0
+      ? [
+          { variantId: "v1", stock: 10 + i, safetyStock: 5 },
+          { variantId: "v2", stock: 4 + i, safetyStock: 8 },
+        ]
+      : [],
 }));
 
 export const formatCurrency = (n: number) =>
