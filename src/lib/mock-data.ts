@@ -23,6 +23,8 @@ export type Variant = {
   description: string;
 };
 
+export type VariantStock = { variantId: string; stock: number; safetyStock?: number };
+
 export type Article = {
   id: string;
   code: string;
@@ -36,7 +38,9 @@ export type Article = {
   stock: number;
   safetyStock: number;
   category: string;
+  supplier?: string;
   variants?: Variant[];
+  variantStocks?: VariantStock[];
 };
 
 export type Role = {
