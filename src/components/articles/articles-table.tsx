@@ -176,7 +176,7 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               );
             })}
             {articles.length === 0 && (
