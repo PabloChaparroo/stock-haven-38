@@ -130,8 +130,8 @@ export function SuppliersTable({ suppliers }: Props) {
         </Table>
       </div>
 
-      <SupplierFormModal open={!!view} onOpenChange={(v) => !v && setView(null)} mode="view" supplier={view ?? undefined} />
-      <SupplierFormModal open={!!edit} onOpenChange={(v) => !v && setEdit(null)} mode="edit" supplier={edit ?? undefined} />
+      <SupplierFormModal open={!!view} onOpenChange={(v: boolean) => !v && setView(null)} mode="view" supplier={view ?? undefined} />
+      <SupplierFormModal open={!!edit} onOpenChange={(v: boolean) => !v && setEdit(null)} mode="edit" supplier={edit ?? undefined} />
       <DeleteConfirmModal
         open={!!del}
         onOpenChange={(v) => !v && setDel(null)}
