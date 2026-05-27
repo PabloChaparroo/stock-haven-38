@@ -373,3 +373,100 @@ export const discounts: Discount[] = [
     createdAt: "20/02/2026",
   },
 ];
+
+// ============== Proveedores ==============
+
+export type IvaCondition = "Responsable Inscripto" | "Monotributo" | "Exento" | "Consumidor Final";
+
+export type Supplier = {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  phone: string;
+  socialRelation: string;
+  address: string;
+  email: string;
+  cuit: string;
+  createdAt: string;
+  ivaCondition: IvaCondition;
+  acceptsCheck: boolean;
+  acceptsCredit: boolean;
+  paymentDays: number;
+  rating: number; // 1-5
+  articleIds: string[];
+};
+
+export const ivaConditions: IvaCondition[] = [
+  "Responsable Inscripto",
+  "Monotributo",
+  "Exento",
+  "Consumidor Final",
+];
+
+const supplierNames = [
+  "TecnoMayorista S.A.",
+  "Distribuidora Andina",
+  "ImporHardware SRL",
+  "Periféricos del Sur",
+  "ByteImport",
+  "RedesPro Argentina",
+  "OfficeStock SA",
+  "MegaInsumos",
+  "PrintZone SRL",
+  "DigitalWare",
+  "NovaTech",
+  "GlobalChip",
+  "Servicios Norte",
+  "Compumundo Mayorista",
+];
+
+export const suppliers: Supplier[] = supplierNames.map((name, i) => ({
+  id: String(i + 1),
+  code: `PROV-${String(i + 1).padStart(3, "0")}`,
+  name,
+  description: i % 2 === 0 ? "Distribuidor oficial de tecnología corporativa." : "Importación directa de hardware.",
+  phone: `+54 11 4${100 + i}-${1000 + i * 7}`,
+  socialRelation: i % 3 === 0 ? "Cuenta clave" : i % 3 === 1 ? "Frecuente" : "Ocasional",
+  address: `Av. Siempre Viva ${1000 + i * 17}, CABA`,
+  email: `ventas@${name.toLowerCase().replace(/[^a-z]/g, "")}.com.ar`,
+  cuit: `30-${String(12345678 + i).slice(0, 8)}-${i % 10}`,
+  createdAt: `${String((i % 28) + 1).padStart(2, "0")}/${String((i % 12) + 1).padStart(2, "0")}/2026`,
+  ivaCondition: ivaConditions[i % ivaConditions.length],
+  acceptsCheck: i % 2 === 0,
+  acceptsCredit: i % 3 !== 0,
+  paymentDays: [30, 60, 90, 15][i % 4],
+  rating: (i % 5) + 1,
+  articleIds: [],
+}));
+
+// ============== Clientes ==============
+
+export type Client = {
+  id: string;
+  number: string;
+  firstName: string;
+  lastName: string;
+  dni: string;
+  phone: string;
+  email: string;
+  address: string;
+  createdAt: string;
+  active: boolean;
+};
+
+const cliFirst = ["Olivia", "Mateo", "Lucía", "Tomás", "Camila", "Bruno", "Sofía", "Lucas", "Valentina", "Joaquín", "Martina", "Diego", "Renata", "Nicolás", "Julieta"];
+const cliLast = ["Rhye", "González", "Fernández", "Pérez", "Suárez", "Martínez", "Romero", "López", "Díaz", "Sosa", "Ruiz", "Acosta", "Molina", "Castro", "Vega"];
+
+export const clients: Client[] = Array.from({ length: 14 }).map((_, i) => ({
+  id: String(i + 1),
+  number: `CLI-${1000 + i + 42}`,
+  firstName: cliFirst[i % cliFirst.length],
+  lastName: cliLast[i % cliLast.length],
+  dni: `${30 + i}.${String(100 + i * 7).padStart(3, "0")}.${String(456 + i).padStart(3, "0")}`,
+  phone: `+54 9 11 5555-${String(2000 + i).slice(-4)}`,
+  email: `${cliFirst[i % cliFirst.length].toLowerCase()}.${cliLast[i % cliLast.length].toLowerCase()}@mail.com`,
+  address: `Calle ${100 + i * 3}, Piso ${1 + (i % 9)}, CABA`,
+  createdAt: `${String((i % 28) + 1).padStart(2, "0")}/${String((i % 12) + 1).padStart(2, "0")}/2026`,
+  active: i % 5 !== 0,
+}));
