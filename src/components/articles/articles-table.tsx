@@ -53,8 +53,8 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
               const low = !hasVariants && a.stock < a.safetyStock;
               const isOpen = !!expanded[a.id];
               return (
-                <>
-                  <TableRow key={a.id} className="hover:bg-muted/30">
+                <Fragment key={a.id}>
+                  <TableRow className="hover:bg-muted/30">
                     <TableCell className="font-mono text-xs">{a.code}</TableCell>
                     <TableCell className="font-medium text-navy">{a.name}</TableCell>
                     <TableCell>{a.brand}</TableCell>
