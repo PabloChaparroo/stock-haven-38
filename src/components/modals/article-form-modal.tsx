@@ -27,6 +27,7 @@ import {
   type Article,
 } from "@/lib/mock-data";
 import { SimpleEntityModal } from "./simple-entity-modal";
+import { SupplierFormModal } from "./supplier-form-modal";
 
 type Props = {
   open: boolean;
@@ -64,13 +65,12 @@ export function ArticleFormModal({
   const [description, setDescription] = useState(article?.description ?? "");
   const [openCat, setOpenCat] = useState(false);
   const [openBrand, setOpenBrand] = useState(false);
+  const [openSupplier, setOpenSupplier] = useState(false);
 
   const isEdit = mode === "edit";
-  // In edit mode, stock fields are locked UNLESS the user is adding NEW variants
   const hadVariantsAtOpen = (article?.variants?.length ?? 0) > 0;
   const stockLocked = isEdit && (hasVariants === hadVariantsAtOpen) && variants.length === initialVariants.length;
 
-  // Supplier
   const [withSupplier, setWithSupplier] = useState<boolean>(!!article?.supplier);
   const [supplier, setSupplier] = useState<string | undefined>(article?.supplier);
   const [supplierSearch, setSupplierSearch] = useState("");
@@ -163,18 +163,11 @@ export function ArticleFormModal({
                     </SelectTrigger>
                     <SelectContent>
                       {allCategories.map((c) => (
-                        <SelectItem key={c.id} value={c.name}>
-                          {c.name}
-                        </SelectItem>
+                        <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="shrink-0 border-navy/30 text-navy"
-                    onClick={() => setOpenCat(true)}
-                  >
+                  <Button type="button" variant="outline" className="shrink-0 border-navy/30 text-navy" onClick={() => setOpenCat(true)}>
                     <Plus className="mr-1 h-4 w-4" /> Nueva
                   </Button>
                 </div>
@@ -189,18 +182,11 @@ export function ArticleFormModal({
                     </SelectTrigger>
                     <SelectContent>
                       {allBrands.map((b) => (
-                        <SelectItem key={b.id} value={b.name}>
-                          {b.name}
-                        </SelectItem>
+                        <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="shrink-0 border-navy/30 text-navy"
-                    onClick={() => setOpenBrand(true)}
-                  >
+                  <Button type="button" variant="outline" className="shrink-0 border-navy/30 text-navy" onClick={() => setOpenBrand(true)}>
                     <Plus className="mr-1 h-4 w-4" /> Nueva
                   </Button>
                 </div>
@@ -209,7 +195,6 @@ export function ArticleFormModal({
 
             <Separator />
 
-            {/* Supplier section */}
             <section className="space-y-3">
               <label className="flex cursor-pointer items-center gap-3 rounded-lg border bg-muted/30 p-3">
                 <Checkbox checked={withSupplier} onCheckedChange={(c) => setWithSupplier(Boolean(c))} />
@@ -235,14 +220,24 @@ export function ArticleFormModal({
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <div className="relative">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          value={supplierSearch}
-                          onChange={(e) => setSupplierSearch(e.target.value)}
-                          className="pl-9"
-                          placeholder="Buscar proveedor..."
-                        />
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            value={supplierSearch}
+                            onChange={(e) => setSupplierSearch(e.target.value)}
+                            className="pl-9"
+                            placeholder="Buscar proveedor..."
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="shrink-0 border-navy/30 text-navy"
+                          onClick={() => setOpenSupplier(true)}
+                        >
+                          <Plus className="mr-1 h-4 w-4" /> Crear Proveedor
+                        </Button>
                       </div>
                       <ul className="max-h-44 divide-y overflow-y-auto rounded-md border">
                         {supplierResults.map((sp) => (
@@ -288,13 +283,7 @@ export function ArticleFormModal({
                 <div className="space-y-3 rounded-xl border bg-card p-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold text-navy">Variantes y stock</h4>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={addVariant}
-                      className="border-brand/40 text-brand hover:bg-brand/10"
-                    >
+                    <Button type="button" size="sm" variant="outline" onClick={addVariant} className="border-brand/40 text-brand hover:bg-brand/10">
                       <Plus className="mr-1 h-4 w-4" /> Agregar variante
                     </Button>
                   </div>
@@ -308,53 +297,15 @@ export function ArticleFormModal({
                       const isNew = !initialVariants.some((iv) => iv.id === v.id);
                       const lock = stockLocked && !isNew;
                       return (
-                        <div
-                          key={v.id}
-                          className="grid gap-2 rounded-lg border border-border/70 bg-muted/30 p-3 md:grid-cols-[90px_1fr_1fr_90px_100px_auto]"
-                        >
-                          <Input
-                            placeholder="Cód."
-                            value={v.code}
-                            onChange={(e) => updateVariant(v.id, { code: e.target.value })}
-                            aria-label={`Código variante ${i + 1}`}
-                          />
-                          <Input
-                            placeholder="Nombre variante"
-                            value={v.name}
-                            onChange={(e) => updateVariant(v.id, { name: e.target.value })}
-                          />
-                          <Input
-                            placeholder="Descripción"
-                            value={v.description}
-                            onChange={(e) => updateVariant(v.id, { description: e.target.value })}
-                          />
-                          <Input
-                            type="number"
-                            placeholder="Stock"
-                            value={v.stock}
-                            disabled={lock}
-                            onChange={(e) => updateVariant(v.id, { stock: parseInt(e.target.value) || 0 })}
-                            title="Stock actual"
-                          />
-                          <Input
-                            type="number"
-                            placeholder="Stock mín."
-                            value={v.safetyStock}
-                            disabled={lock}
-                            onChange={(e) =>
-                              updateVariant(v.id, {
-                                safetyStock: e.target.value === "" ? "" : parseInt(e.target.value) || 0,
-                              })
-                            }
-                            title="Stock de seguridad"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeVariant(v.id)}
-                            className="text-destructive hover:bg-destructive/10"
-                          >
+                        <div key={v.id} className="grid gap-2 rounded-lg border border-border/70 bg-muted/30 p-3 md:grid-cols-[90px_1fr_1fr_90px_100px_auto]">
+                          <Input placeholder="Cód." value={v.code} onChange={(e) => updateVariant(v.id, { code: e.target.value })} aria-label={`Código variante ${i + 1}`} />
+                          <Input placeholder="Nombre variante" value={v.name} onChange={(e) => updateVariant(v.id, { name: e.target.value })} />
+                          <Input placeholder="Descripción" value={v.description} onChange={(e) => updateVariant(v.id, { description: e.target.value })} />
+                          <Input type="number" placeholder="Stock" value={v.stock} disabled={lock} onChange={(e) => updateVariant(v.id, { stock: parseInt(e.target.value) || 0 })} title="Stock actual" />
+                          <Input type="number" placeholder="Stock mín." value={v.safetyStock} disabled={lock}
+                            onChange={(e) => updateVariant(v.id, { safetyStock: e.target.value === "" ? "" : parseInt(e.target.value) || 0 })}
+                            title="Stock de seguridad" />
+                          <Button type="button" variant="ghost" size="icon" onClick={() => removeVariant(v.id)} className="text-destructive hover:bg-destructive/10">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -366,21 +317,11 @@ export function ArticleFormModal({
                 <div className="grid gap-4 rounded-xl border bg-card p-4 md:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>Stock actual</Label>
-                    <Input
-                      type="number"
-                      defaultValue={article?.stock ?? 0}
-                      placeholder="0"
-                      disabled={stockLocked}
-                    />
+                    <Input type="number" defaultValue={article?.stock ?? 0} placeholder="0" disabled={stockLocked} />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Stock de seguridad (mínimo)</Label>
-                    <Input
-                      type="number"
-                      defaultValue={article?.safetyStock ?? ""}
-                      placeholder="Opcional"
-                      disabled={stockLocked}
-                    />
+                    <Input type="number" defaultValue={article?.safetyStock ?? ""} placeholder="Opcional" disabled={stockLocked} />
                   </div>
                   {stockLocked && (
                     <p className="md:col-span-2 text-xs text-muted-foreground">
@@ -392,9 +333,7 @@ export function ArticleFormModal({
             </section>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-                Descartar
-              </Button>
+              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Descartar</Button>
               <Button type="submit" className="bg-navy text-navy-foreground hover:bg-navy/90">
                 {mode === "create" ? "Crear artículo" : "Guardar cambios"}
               </Button>
@@ -405,6 +344,7 @@ export function ArticleFormModal({
 
       <SimpleEntityModal open={openCat} onOpenChange={setOpenCat} entity="Categoría" />
       <SimpleEntityModal open={openBrand} onOpenChange={setOpenBrand} entity="Marca" />
+      <SupplierFormModal open={openSupplier} onOpenChange={setOpenSupplier} mode="create" />
     </>
   );
 }

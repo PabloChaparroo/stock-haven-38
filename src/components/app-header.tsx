@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Bell, LogOut, Search } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/modals/profile-modal";
@@ -13,14 +12,7 @@ export function AppHeader() {
   return (
     <header className="bg-header-gradient sticky top-0 z-30 flex h-20 items-center gap-4 border-b border-border/60 px-6 backdrop-blur">
       <SidebarTrigger className="text-navy hover:bg-navy/10" />
-
-      <div className="relative max-w-xl flex-1">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar"
-          className="h-11 rounded-full border-border/70 bg-card pl-10 text-sm shadow-sm focus-visible:ring-brand"
-        />
-      </div>
+      <div className="flex-1" />
 
       <div className="ml-auto flex items-center gap-4">
         <Button variant="ghost" size="icon" className="rounded-full text-navy hover:bg-navy/10">
