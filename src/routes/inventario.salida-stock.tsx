@@ -35,7 +35,7 @@ function ExitStockPage() {
   const hasValid = Object.values(rows).some((r) => parseInt(r.qty) > 0 && r.reason);
 
   const setRow = (id: string, patch: Partial<ExitRow>) =>
-    setRows((p) => ({ ...p, [id]: { reason: "", qty: "", ...p[id], ...patch } }));
+    setRows((p) => ({ ...p, [id]: { reason: "", qty: "", ...(p[id] ?? {}), ...patch } }));
 
   const pickArticle = (a: Article) => {
     setSelected(a);
