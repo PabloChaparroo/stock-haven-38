@@ -23,9 +23,6 @@ import {
   PieChart,
   TrendingUp,
   ChevronDown,
-  PackagePlus,
-  PackageMinus,
-  TagsIcon,
 } from "lucide-react";
 import logo from "@/assets/inventia-logo.png";
 import {
@@ -58,9 +55,6 @@ const groups: Group[] = [
     icon: Package,
     items: [
       { title: "Artículos", url: "/inventario/articulos", icon: Boxes },
-      { title: "Ajuste de Stock", url: "/inventario/ajuste-stock", icon: PackagePlus },
-      { title: "Salida de Stock", url: "/inventario/salida-stock", icon: PackageMinus },
-      { title: "Actualización de Precios", url: "/inventario/precios", icon: TagsIcon },
       { title: "Categoría", url: "/inventario/categorias", icon: LayoutGrid },
       { title: "Marcas", url: "/inventario/marcas", icon: Tags },
       { title: "Descuento", url: "/inventario/descuentos", icon: Percent },
@@ -136,7 +130,12 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/"} tooltip="Inicio" className="h-10">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/"}
+                  tooltip="Inicio"
+                  className="h-10"
+                >
                   <Link to="/">
                     <Home className="h-5 w-5" />
                     <span className="font-medium">Inicio</span>
@@ -158,7 +157,9 @@ export function AppSidebar() {
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton
                           tooltip={group.title}
-                          className={cn("h-10 bg-brand/15 font-semibold text-navy hover:bg-brand/25")}
+                          className={cn(
+                            "h-10 bg-brand/15 font-semibold text-navy hover:bg-brand/25",
+                          )}
                         >
                           <group.icon className="h-5 w-5 text-brand" />
                           <span>{group.title}</span>
@@ -178,7 +179,8 @@ export function AppSidebar() {
                                 isActive={active}
                                 className={cn(
                                   "h-9 gap-2 text-sidebar-foreground",
-                                  active && "bg-brand/15 text-navy font-medium",
+                                  active &&
+                                    "bg-brand/15 text-navy font-medium",
                                 )}
                               >
                                 <Link to={item.url}>

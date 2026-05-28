@@ -12,20 +12,18 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { articles, formatCurrency } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-import { SimplePagination } from "@/components/ui/simple-pagination";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** e.g. 'a la categoría "Periféricos"' */
   targetLabel?: string;
+  /** IDs already linked, hidden from the picker */
   excludeIds?: string[];
+  /** When confirming a combo, the parent may want default qty */
   withQuantity?: boolean;
-  /** Permite elegir variante por artículo (combos) */
-  withVariantSelection?: boolean;
-  onConfirm?: (selected: { id: string; variantId?: string; quantity?: number }[]) => void;
+  onConfirm?: (selected: { id: string; quantity?: number }[]) => void;
 };
-
-const PAGE_SIZE = 12;
 
 export function LinkArticlesModal({
   open,
@@ -33,18 +31,15 @@ export function LinkArticlesModal({
   targetLabel,
   excludeIds = [],
   withQuantity = false,
-  withVariantSelection = false,
   onConfirm,
 }: Props) {
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [picked, setPicked] = useState<Record<string, { quantity: number; variantId?: string }>>({});
+  const [picked, setPicked] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (!open) {
       setSearch("");
       setPicked({});
-      setPage(1);
     }
   }, [open]);
 
@@ -58,22 +53,16 @@ export function LinkArticlesModal({
     [search, excludeIds],
   );
 
-  const totalPages = Math.max(1, Math.ceil(available.length / PAGE_SIZE));
-  const slice = available.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
   const toggle = (id: string) =>
     setPicked((p) => {
       const n = { ...p };
       if (id in n) delete n[id];
-      else n[id] = { quantity: 1 };
+      else n[id] = 1;
       return n;
     });
 
   const setQty = (id: string, q: number) =>
-    setPicked((p) => ({ ...p, [id]: { ...(p[id] ?? { quantity: 1 }), quantity: Math.max(1, q || 1) } }));
-
-  const setVariant = (id: string, variantId: string) =>
-    setPicked((p) => ({ ...p, [id]: { ...(p[id] ?? { quantity: 1 }), variantId } }));
+    setPicked((p) => ({ ...p, [id]: Math.max(1, q || 1) }));
 
   const count = Object.keys(picked).length;
 
@@ -91,20 +80,18 @@ export function LinkArticlesModal({
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre o código..."
             className="pl-9"
           />
         </div>
 
-        <ScrollArea className="h-[42vh] rounded-lg border bg-card">
+        <ScrollArea className="h-[44vh] rounded-lg border bg-card">
           <ul className="divide-y">
-            {slice.map((a) => {
-              const sel = picked[a.id];
-              const selected = !!sel;
-              const hasVariants = (a.variants?.length ?? 0) > 0;
+            {available.map((a) => {
+              const selected = a.id in picked;
               return (
-                <li key={a.id} className={cn("flex flex-wrap items-center gap-3 p-3 transition", selected && "bg-brand/5")}>
+                <li key={a.id} className={cn("flex items-center gap-3 p-3 transition", selected && "bg-brand/5")}>
                   <button
                     type="button"
                     onClick={() => toggle(a.id)}
@@ -125,24 +112,11 @@ export function LinkArticlesModal({
                     </div>
                   </div>
                   <div className="hidden text-sm text-muted-foreground sm:block">{formatCurrency(a.price)}</div>
-                  {selected && withVariantSelection && hasVariants && (
-                    <select
-                      value={sel.variantId ?? ""}
-                      onChange={(e) => setVariant(a.id, e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="h-8 rounded border bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand"
-                    >
-                      <option value="">Variante…</option>
-                      {a.variants!.map((v) => (
-                        <option key={v.id} value={v.id}>{v.code} — {v.name}</option>
-                      ))}
-                    </select>
-                  )}
                   {withQuantity && selected && (
                     <Input
                       type="number"
                       min={1}
-                      value={sel.quantity}
+                      value={picked[a.id]}
                       onChange={(e) => setQty(a.id, parseInt(e.target.value))}
                       className="h-8 w-20"
                       onClick={(e) => e.stopPropagation()}
@@ -151,13 +125,11 @@ export function LinkArticlesModal({
                 </li>
               );
             })}
-            {slice.length === 0 && (
+            {available.length === 0 && (
               <li className="p-8 text-center text-sm text-muted-foreground">No hay artículos disponibles.</li>
             )}
           </ul>
         </ScrollArea>
-
-        <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
         <div className="flex items-center justify-between pt-2">
           <span className="text-sm text-muted-foreground">
@@ -176,13 +148,7 @@ export function LinkArticlesModal({
             <Button
               disabled={count === 0}
               onClick={() => {
-                onConfirm?.(
-                  Object.entries(picked).map(([id, s]) => ({
-                    id,
-                    variantId: s.variantId,
-                    quantity: withQuantity ? s.quantity : undefined,
-                  })),
-                );
+                onConfirm?.(Object.entries(picked).map(([id, q]) => ({ id, quantity: withQuantity ? q : undefined })));
                 onOpenChange(false);
               }}
               className="bg-navy text-navy-foreground hover:bg-navy/90"

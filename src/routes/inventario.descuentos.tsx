@@ -5,7 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
@@ -51,7 +55,11 @@ function DiscountsPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleTypeChange = (t: DiscountType) => { setType(t); setPage(1); setSelected(null); };
+  const handleTypeChange = (t: DiscountType) => {
+    setType(t);
+    setPage(1);
+    setSelected(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -65,6 +73,7 @@ function DiscountsPage() {
         </Button>
       </div>
 
+      {/* Tabs */}
       <div className="inline-flex rounded-xl border bg-muted/40 p-1">
         {[
           { v: "category" as const, label: "Descuento por Categoría" },
@@ -75,7 +84,9 @@ function DiscountsPage() {
             onClick={() => handleTypeChange(t.v)}
             className={cn(
               "rounded-lg px-4 py-2 text-sm font-medium transition",
-              type === t.v ? "bg-navy text-navy-foreground shadow-sm" : "text-muted-foreground hover:text-navy",
+              type === t.v
+                ? "bg-navy text-navy-foreground shadow-sm"
+                : "text-muted-foreground hover:text-navy",
             )}
           >
             {t.label}
@@ -83,6 +94,7 @@ function DiscountsPage() {
         ))}
       </div>
 
+      {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[240px] max-w-md">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -94,7 +106,9 @@ function DiscountsPage() {
           />
         </div>
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as "active" | "inactive"); setPage(1); }}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="active">Activos</SelectItem>
             <SelectItem value="inactive">Inactivos</SelectItem>
@@ -102,6 +116,7 @@ function DiscountsPage() {
         </Select>
       </div>
 
+      {/* Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {slice.map((d) => {
           const active = selected?.id === d.id;
@@ -111,7 +126,9 @@ function DiscountsPage() {
               onClick={() => setSelected(d)}
               className={cn(
                 "group relative cursor-pointer overflow-hidden p-5 transition",
-                active ? "border-brand bg-brand/5 shadow-md ring-2 ring-brand/40" : "hover:border-navy/30 hover:shadow-md",
+                active
+                  ? "border-brand bg-brand/5 shadow-md ring-2 ring-brand/40"
+                  : "hover:border-navy/30 hover:shadow-md",
               )}
             >
               <div className="mb-3 flex items-start justify-between">
@@ -132,10 +149,12 @@ function DiscountsPage() {
               <h3 className="text-lg font-semibold text-navy">{d.name}</h3>
               <div className="my-2 text-3xl font-bold text-brand">{d.percentage}%</div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" /> Desde: {d.fromDate}
+                <Calendar className="h-3 w-3" />
+                Desde: {d.fromDate}
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Calendar className="h-3 w-3" /> Hasta: {d.toDate ?? "Sin límite"}
+                <Calendar className="h-3 w-3" />
+                Hasta: {d.toDate ?? "Sin límite"}
               </div>
               <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{d.description}</p>
               {d.type === "category" && d.categoryName && (
@@ -165,11 +184,10 @@ function DiscountsPage() {
   );
 }
 
-type ItemRow = (typeof articles)[number] & { _minQty?: number; _variantId?: string };
+type ItemRow = (typeof articles)[number] & { _minQty?: number };
 
 function DetailPanel({ discount }: { discount: Discount }) {
   const [artPage, setArtPage] = useState(1);
-  const [artSearch, setArtSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [unlink, setUnlink] = useState<ItemRow | null>(null);
   const [editQty, setEditQty] = useState<ItemRow | null>(null);
@@ -181,47 +199,30 @@ function DetailPanel({ discount }: { discount: Discount }) {
     const out: ItemRow[] = [];
     for (const c of discount.comboItems ?? []) {
       const art = articles.find((a) => a.id === c.articleId);
-      if (art) out.push({ ...art, _minQty: c.minQuantity, _variantId: c.variantId });
+      if (art) out.push({ ...art, _minQty: c.minQuantity });
     }
     return out;
   }, [discount]);
 
-  const filteredItems = useMemo(() => {
-    const s = artSearch.trim().toLowerCase();
-    if (!s) return items;
-    return items.filter((a) => a.name.toLowerCase().includes(s) || a.code.includes(s));
-  }, [items, artSearch]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
-  const slice = filteredItems.slice((artPage - 1) * PAGE_SIZE, artPage * PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const slice = items.slice((artPage - 1) * PAGE_SIZE, artPage * PAGE_SIZE);
   const isCombo = discount.type === "combo";
 
   return (
     <section className="space-y-3 pt-2">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center justify-between">
         <div className="flex items-baseline gap-2">
           <h2 className="text-lg font-semibold text-navy">Artículos en</h2>
-          <span className="rounded-full bg-brand/15 px-3 py-0.5 text-sm font-medium text-brand">{discount.name}</span>
+          <span className="rounded-full bg-brand/15 px-3 py-0.5 text-sm font-medium text-brand">
+            {discount.name}
+          </span>
         </div>
-        <div className="flex items-center gap-2">
-          {isCombo && (
-            <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
-              <Plus className="h-4 w-4" /> Agregar artículo
-            </Button>
-          )}
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={artSearch}
-              onChange={(e) => { setArtSearch(e.target.value); setArtPage(1); }}
-              placeholder="Buscar artículo"
-              className="h-10 w-64 rounded-full pl-10"
-            />
-          </div>
-        </div>
+        <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
+          <Plus className="h-4 w-4" /> Agregar artículo
+        </Button>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border bg-card">
+      <div className="overflow-hidden rounded-xl border bg-card">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
@@ -229,7 +230,6 @@ function DetailPanel({ discount }: { discount: Discount }) {
               <TableHead className="text-navy">Nombre</TableHead>
               {isCombo ? (
                 <>
-                  <TableHead className="text-navy">Variante</TableHead>
                   <TableHead className="text-navy">Precio Base</TableHead>
                   <TableHead className="text-navy">Cant. Mín. Requerida</TableHead>
                   <TableHead className="text-right text-navy">Acciones</TableHead>
@@ -240,6 +240,7 @@ function DetailPanel({ discount }: { discount: Discount }) {
                   <TableHead className="text-navy">Precio Base</TableHead>
                   <TableHead className="text-navy">Precio c/Desc.</TableHead>
                   <TableHead className="text-navy">Categoría</TableHead>
+                  <TableHead className="text-right text-navy">Acciones</TableHead>
                 </>
               )}
             </TableRow>
@@ -247,22 +248,12 @@ function DetailPanel({ discount }: { discount: Discount }) {
           <TableBody>
             {slice.map((a) => {
               const discounted = Math.round(a.price * (1 - discount.percentage / 100));
-              const variant = a._variantId ? a.variants?.find((v) => v.id === a._variantId) : undefined;
               return (
-                <TableRow key={`${a.id}-${a._variantId ?? ""}`} className="hover:bg-muted/30">
+                <TableRow key={a.id} className="hover:bg-muted/30">
                   <TableCell className="font-mono text-xs">{a.code}</TableCell>
                   <TableCell className="font-medium text-navy">{a.name}</TableCell>
                   {isCombo ? (
                     <>
-                      <TableCell>
-                        {variant ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-navy/10 px-2 py-0.5 text-xs font-medium text-navy">
-                            <span className="font-mono">{variant.code}</span> · {variant.name}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
                       <TableCell>{formatCurrency(a.price)}</TableCell>
                       <TableCell>
                         <span className="inline-flex items-center rounded-full bg-brand/15 px-3 py-0.5 text-sm font-semibold text-brand">
@@ -271,11 +262,32 @@ function DetailPanel({ discount }: { discount: Discount }) {
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-1">
-                          <Button size="icon" variant="ghost" title="Editar cantidad" onClick={() => setEditQty(a)} className="h-8 w-8 text-brand hover:bg-brand/10">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Editar cantidad"
+                            onClick={() => setEditQty(a)}
+                            className="h-8 w-8 text-brand hover:bg-brand/10"
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" title="Desvincular del combo" onClick={() => setUnlink(a)} className="h-8 w-8 text-orange-600 hover:bg-orange-500/10">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Desvincular del combo"
+                            onClick={() => setUnlink(a)}
+                            className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
+                          >
                             <Link2Off className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Eliminar"
+                            onClick={() => setUnlink(a)}
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -286,6 +298,19 @@ function DetailPanel({ discount }: { discount: Discount }) {
                       <TableCell>{formatCurrency(a.price)}</TableCell>
                       <TableCell className="font-semibold text-brand">{formatCurrency(discounted)}</TableCell>
                       <TableCell>{a.category}</TableCell>
+                      <TableCell>
+                        <div className="flex justify-end">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Desvincular del descuento"
+                            onClick={() => setUnlink(a)}
+                            className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
+                          >
+                            <Link2Off className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </>
                   )}
                 </TableRow>
@@ -293,7 +318,7 @@ function DetailPanel({ discount }: { discount: Discount }) {
             })}
             {slice.length === 0 && (
               <TableRow>
-                <TableCell colSpan={isCombo ? 6 : 6} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={isCombo ? 5 : 7} className="py-10 text-center text-muted-foreground">
                   Sin artículos para mostrar.
                 </TableCell>
               </TableRow>
@@ -310,7 +335,6 @@ function DetailPanel({ discount }: { discount: Discount }) {
         targetLabel={`al descuento "${discount.name}"`}
         excludeIds={items.map((i) => i.id)}
         withQuantity={isCombo}
-        withVariantSelection={isCombo}
       />
       <EditQuantityModal
         open={!!editQty}

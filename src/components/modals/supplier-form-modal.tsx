@@ -35,7 +35,7 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
   const readOnly = mode === "view";
   const [acceptsCheck, setAcceptsCheck] = useState(supplier?.acceptsCheck ?? false);
   const [acceptsCredit, setAcceptsCredit] = useState(supplier?.acceptsCredit ?? false);
-  const [rating, setRating] = useState<number | null>(supplier?.rating ?? null);
+  const [rating, setRating] = useState<number>(supplier?.rating ?? 3);
   const [linked, setLinked] = useState<string[]>(supplier?.articleIds ?? []);
   const [search, setSearch] = useState("");
   const [createArticle, setCreateArticle] = useState(false);
@@ -46,12 +46,6 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
       setAcceptsCredit(supplier.acceptsCredit);
       setRating(supplier.rating);
       setLinked(supplier.articleIds ?? []);
-    }
-    if (open && !supplier) {
-      setAcceptsCheck(false);
-      setAcceptsCredit(false);
-      setRating(null);
-      setLinked([]);
     }
     if (!open) setSearch("");
   }, [open, supplier]);
@@ -90,7 +84,13 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
             </div>
           </DialogHeader>
 
-          <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); onOpenChange(false); }}>
+          <form
+            className="space-y-5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              onOpenChange(false);
+            }}
+          >
             <section className="grid gap-4 sm:grid-cols-2">
               <Field label="Nombre *" defaultValue={supplier?.name} readOnly={readOnly} placeholder="Razón social" />
               <Field label="CUIT *" defaultValue={supplier?.cuit} readOnly={readOnly} placeholder="30-12345678-9" />
@@ -121,25 +121,22 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
 
             <section className="grid gap-4 sm:grid-cols-3">
               <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2">
-                <div className="text-sm font-medium text-navy">¿Acepta cheque?</div>
+                <div>
+                  <div className="text-sm font-medium text-navy">¿Acepta cheque?</div>
+                </div>
                 <Switch checked={acceptsCheck} onCheckedChange={setAcceptsCheck} disabled={readOnly} />
               </div>
               <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2">
-                <div className="text-sm font-medium text-navy">¿Acepta crédito?</div>
+                <div>
+                  <div className="text-sm font-medium text-navy">¿Acepta crédito?</div>
+                </div>
                 <Switch checked={acceptsCredit} onCheckedChange={setAcceptsCredit} disabled={readOnly} />
               </div>
               <Field label="Días de plazo" type="number" defaultValue={supplier?.paymentDays ?? 30} readOnly={readOnly} />
             </section>
 
             <section className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Calificación inicial (opcional)</Label>
-                {rating !== null && !readOnly && (
-                  <button type="button" onClick={() => setRating(null)} className="text-xs text-muted-foreground hover:text-destructive">
-                    Quitar calificación
-                  </button>
-                )}
-              </div>
+              <Label>Calificación inicial</Label>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
@@ -149,12 +146,9 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
                     onClick={() => setRating(n)}
                     className="p-1 transition hover:scale-110 disabled:hover:scale-100"
                   >
-                    <Star className={cn("h-6 w-6", rating !== null && n <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30")} />
+                    <Star className={cn("h-6 w-6", n <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30")} />
                   </button>
                 ))}
-                {rating === null && (
-                  <span className="ml-2 text-xs text-muted-foreground">Sin calificar — aún no lo conozco</span>
-                )}
               </div>
             </section>
 
@@ -185,7 +179,10 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
                         <button
                           key={a.id}
                           type="button"
-                          onClick={() => { setLinked((p) => [...p, a.id]); setSearch(""); }}
+                          onClick={() => {
+                            setLinked((p) => [...p, a.id]);
+                            setSearch("");
+                          }}
                           className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-muted"
                         >
                           <span className="font-medium text-navy">{a.name}</span>
