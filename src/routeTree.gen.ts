@@ -21,6 +21,7 @@ import { Route as InventarioMarcasRouteImport } from './routes/inventario.marcas
 import { Route as InventarioDescuentosRouteImport } from './routes/inventario.descuentos'
 import { Route as InventarioCategoriasRouteImport } from './routes/inventario.categorias'
 import { Route as InventarioArticulosRouteImport } from './routes/inventario.articulos'
+import { Route as InventarioAjusteStockRouteImport } from './routes/inventario.ajuste-stock'
 import { Route as GestionUsuariosRouteImport } from './routes/gestion.usuarios'
 import { Route as GestionMovimientosRouteImport } from './routes/gestion.movimientos'
 import { Route as GestionAlmacenRouteImport } from './routes/gestion.almacen'
@@ -89,6 +90,11 @@ const InventarioArticulosRoute = InventarioArticulosRouteImport.update({
   path: '/inventario/articulos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InventarioAjusteStockRoute = InventarioAjusteStockRouteImport.update({
+  id: '/inventario/ajuste-stock',
+  path: '/inventario/ajuste-stock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GestionUsuariosRoute = GestionUsuariosRouteImport.update({
   id: '/gestion/usuarios',
   path: '/gestion/usuarios',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/gestion/almacen': typeof GestionAlmacenRoute
   '/gestion/movimientos': typeof GestionMovimientosRoute
   '/gestion/usuarios': typeof GestionUsuariosRoute
+  '/inventario/ajuste-stock': typeof InventarioAjusteStockRoute
   '/inventario/articulos': typeof InventarioArticulosRoute
   '/inventario/categorias': typeof InventarioCategoriasRoute
   '/inventario/descuentos': typeof InventarioDescuentosRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/gestion/almacen': typeof GestionAlmacenRoute
   '/gestion/movimientos': typeof GestionMovimientosRoute
   '/gestion/usuarios': typeof GestionUsuariosRoute
+  '/inventario/ajuste-stock': typeof InventarioAjusteStockRoute
   '/inventario/articulos': typeof InventarioArticulosRoute
   '/inventario/categorias': typeof InventarioCategoriasRoute
   '/inventario/descuentos': typeof InventarioDescuentosRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/gestion/almacen': typeof GestionAlmacenRoute
   '/gestion/movimientos': typeof GestionMovimientosRoute
   '/gestion/usuarios': typeof GestionUsuariosRoute
+  '/inventario/ajuste-stock': typeof InventarioAjusteStockRoute
   '/inventario/articulos': typeof InventarioArticulosRoute
   '/inventario/categorias': typeof InventarioCategoriasRoute
   '/inventario/descuentos': typeof InventarioDescuentosRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/gestion/almacen'
     | '/gestion/movimientos'
     | '/gestion/usuarios'
+    | '/inventario/ajuste-stock'
     | '/inventario/articulos'
     | '/inventario/categorias'
     | '/inventario/descuentos'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/gestion/almacen'
     | '/gestion/movimientos'
     | '/gestion/usuarios'
+    | '/inventario/ajuste-stock'
     | '/inventario/articulos'
     | '/inventario/categorias'
     | '/inventario/descuentos'
@@ -242,6 +253,7 @@ export interface FileRouteTypes {
     | '/gestion/almacen'
     | '/gestion/movimientos'
     | '/gestion/usuarios'
+    | '/inventario/ajuste-stock'
     | '/inventario/articulos'
     | '/inventario/categorias'
     | '/inventario/descuentos'
@@ -264,6 +276,7 @@ export interface RootRouteChildren {
   GestionAlmacenRoute: typeof GestionAlmacenRoute
   GestionMovimientosRoute: typeof GestionMovimientosRoute
   GestionUsuariosRoute: typeof GestionUsuariosRoute
+  InventarioAjusteStockRoute: typeof InventarioAjusteStockRoute
   InventarioArticulosRoute: typeof InventarioArticulosRoute
   InventarioCategoriasRoute: typeof InventarioCategoriasRoute
   InventarioDescuentosRoute: typeof InventarioDescuentosRoute
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventarioArticulosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inventario/ajuste-stock': {
+      id: '/inventario/ajuste-stock'
+      path: '/inventario/ajuste-stock'
+      fullPath: '/inventario/ajuste-stock'
+      preLoaderRoute: typeof InventarioAjusteStockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gestion/usuarios': {
       id: '/gestion/usuarios'
       path: '/gestion/usuarios'
@@ -424,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   GestionAlmacenRoute: GestionAlmacenRoute,
   GestionMovimientosRoute: GestionMovimientosRoute,
   GestionUsuariosRoute: GestionUsuariosRoute,
+  InventarioAjusteStockRoute: InventarioAjusteStockRoute,
   InventarioArticulosRoute: InventarioArticulosRoute,
   InventarioCategoriasRoute: InventarioCategoriasRoute,
   InventarioDescuentosRoute: InventarioDescuentosRoute,
@@ -439,3 +460,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
