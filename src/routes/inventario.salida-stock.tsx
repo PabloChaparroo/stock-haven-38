@@ -46,7 +46,7 @@ function SalidaStockPage() {
   const hasValidQty = Object.values(rows).some((r) => Number(r.cantidad) > 0);
 
   const setRow = (id: string, patch: Partial<Row>) =>
-    setRows((p) => ({ ...p, [id]: { motivo: "", cantidad: "", ...p[id], ...patch } }));
+    setRows((p) => ({ ...p, [id]: { motivo: "", cantidad: "", ...(p[id] ?? {}), ...patch } }));
 
   const selectArticle = (a: Article) => {
     setSelected(a);
