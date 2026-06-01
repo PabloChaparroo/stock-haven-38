@@ -17,6 +17,7 @@ import { Route as VentasCajaRouteImport } from './routes/ventas.caja'
 import { Route as ReportesPrediccionesRouteImport } from './routes/reportes.predicciones'
 import { Route as ReportesMetricasRouteImport } from './routes/reportes.metricas'
 import { Route as ReportesAbcRouteImport } from './routes/reportes.abc'
+import { Route as InventarioSalidaStockRouteImport } from './routes/inventario.salida-stock'
 import { Route as InventarioMarcasRouteImport } from './routes/inventario.marcas'
 import { Route as InventarioDescuentosRouteImport } from './routes/inventario.descuentos'
 import { Route as InventarioCategoriasRouteImport } from './routes/inventario.categorias'
@@ -68,6 +69,11 @@ const ReportesMetricasRoute = ReportesMetricasRouteImport.update({
 const ReportesAbcRoute = ReportesAbcRouteImport.update({
   id: '/reportes/abc',
   path: '/reportes/abc',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventarioSalidaStockRoute = InventarioSalidaStockRouteImport.update({
+  id: '/inventario/salida-stock',
+  path: '/inventario/salida-stock',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InventarioMarcasRoute = InventarioMarcasRouteImport.update({
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/inventario/categorias': typeof InventarioCategoriasRoute
   '/inventario/descuentos': typeof InventarioDescuentosRoute
   '/inventario/marcas': typeof InventarioMarcasRoute
+  '/inventario/salida-stock': typeof InventarioSalidaStockRoute
   '/reportes/abc': typeof ReportesAbcRoute
   '/reportes/metricas': typeof ReportesMetricasRoute
   '/reportes/predicciones': typeof ReportesPrediccionesRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/inventario/categorias': typeof InventarioCategoriasRoute
   '/inventario/descuentos': typeof InventarioDescuentosRoute
   '/inventario/marcas': typeof InventarioMarcasRoute
+  '/inventario/salida-stock': typeof InventarioSalidaStockRoute
   '/reportes/abc': typeof ReportesAbcRoute
   '/reportes/metricas': typeof ReportesMetricasRoute
   '/reportes/predicciones': typeof ReportesPrediccionesRoute
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   '/inventario/categorias': typeof InventarioCategoriasRoute
   '/inventario/descuentos': typeof InventarioDescuentosRoute
   '/inventario/marcas': typeof InventarioMarcasRoute
+  '/inventario/salida-stock': typeof InventarioSalidaStockRoute
   '/reportes/abc': typeof ReportesAbcRoute
   '/reportes/metricas': typeof ReportesMetricasRoute
   '/reportes/predicciones': typeof ReportesPrediccionesRoute
@@ -214,6 +223,7 @@ export interface FileRouteTypes {
     | '/inventario/categorias'
     | '/inventario/descuentos'
     | '/inventario/marcas'
+    | '/inventario/salida-stock'
     | '/reportes/abc'
     | '/reportes/metricas'
     | '/reportes/predicciones'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/inventario/categorias'
     | '/inventario/descuentos'
     | '/inventario/marcas'
+    | '/inventario/salida-stock'
     | '/reportes/abc'
     | '/reportes/metricas'
     | '/reportes/predicciones'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/inventario/categorias'
     | '/inventario/descuentos'
     | '/inventario/marcas'
+    | '/inventario/salida-stock'
     | '/reportes/abc'
     | '/reportes/metricas'
     | '/reportes/predicciones'
@@ -281,6 +293,7 @@ export interface RootRouteChildren {
   InventarioCategoriasRoute: typeof InventarioCategoriasRoute
   InventarioDescuentosRoute: typeof InventarioDescuentosRoute
   InventarioMarcasRoute: typeof InventarioMarcasRoute
+  InventarioSalidaStockRoute: typeof InventarioSalidaStockRoute
   ReportesAbcRoute: typeof ReportesAbcRoute
   ReportesMetricasRoute: typeof ReportesMetricasRoute
   ReportesPrediccionesRoute: typeof ReportesPrediccionesRoute
@@ -346,6 +359,13 @@ declare module '@tanstack/react-router' {
       path: '/reportes/abc'
       fullPath: '/reportes/abc'
       preLoaderRoute: typeof ReportesAbcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventario/salida-stock': {
+      id: '/inventario/salida-stock'
+      path: '/inventario/salida-stock'
+      fullPath: '/inventario/salida-stock'
+      preLoaderRoute: typeof InventarioSalidaStockRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inventario/marcas': {
@@ -449,6 +469,7 @@ const rootRouteChildren: RootRouteChildren = {
   InventarioCategoriasRoute: InventarioCategoriasRoute,
   InventarioDescuentosRoute: InventarioDescuentosRoute,
   InventarioMarcasRoute: InventarioMarcasRoute,
+  InventarioSalidaStockRoute: InventarioSalidaStockRoute,
   ReportesAbcRoute: ReportesAbcRoute,
   ReportesMetricasRoute: ReportesMetricasRoute,
   ReportesPrediccionesRoute: ReportesPrediccionesRoute,
