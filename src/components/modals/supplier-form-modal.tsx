@@ -35,7 +35,7 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
   const readOnly = mode === "view";
   const [acceptsCheck, setAcceptsCheck] = useState(supplier?.acceptsCheck ?? false);
   const [acceptsCredit, setAcceptsCredit] = useState(supplier?.acceptsCredit ?? false);
-  const [rating, setRating] = useState<number>(supplier?.rating ?? 3);
+  const [rating, setRating] = useState<number>(supplier?.rating ?? 0);
   const [linked, setLinked] = useState<string[]>(supplier?.articleIds ?? []);
   const [search, setSearch] = useState("");
   const [createArticle, setCreateArticle] = useState(false);
@@ -47,6 +47,7 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
       setRating(supplier.rating);
       setLinked(supplier.articleIds ?? []);
     }
+    if (open && !supplier) setRating(0);
     if (!open) setSearch("");
   }, [open, supplier]);
 
