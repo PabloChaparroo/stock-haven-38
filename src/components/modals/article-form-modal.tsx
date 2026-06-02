@@ -237,14 +237,24 @@ export function ArticleFormModal({
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <div className="relative">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          value={supplierSearch}
-                          onChange={(e) => setSupplierSearch(e.target.value)}
-                          className="pl-9"
-                          placeholder="Buscar proveedor..."
-                        />
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            value={supplierSearch}
+                            onChange={(e) => setSupplierSearch(e.target.value)}
+                            className="pl-9"
+                            placeholder="Buscar proveedor..."
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="shrink-0 border-navy/30 text-navy"
+                          onClick={() => setOpenSupplier(true)}
+                        >
+                          <Plus className="mr-1 h-4 w-4" /> Crear Proveedor
+                        </Button>
                       </div>
                       <ul className="max-h-44 divide-y overflow-y-auto rounded-md border">
                         {supplierResults.map((sp) => (
