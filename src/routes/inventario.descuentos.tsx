@@ -184,13 +184,14 @@ function DiscountsPage() {
   );
 }
 
-type ItemRow = (typeof articles)[number] & { _minQty?: number };
+type ItemRow = (typeof articles)[number] & { _minQty?: number; _variantId?: string };
 
 function DetailPanel({ discount }: { discount: Discount }) {
   const [artPage, setArtPage] = useState(1);
   const [addOpen, setAddOpen] = useState(false);
   const [unlink, setUnlink] = useState<ItemRow | null>(null);
   const [editQty, setEditQty] = useState<ItemRow | null>(null);
+  const [search, setSearch] = useState("");
 
   const items: ItemRow[] = useMemo(() => {
     if (discount.type === "category") {
@@ -204,22 +205,43 @@ function DetailPanel({ discount }: { discount: Discount }) {
     return out;
   }, [discount]);
 
-  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
-  const slice = items.slice((artPage - 1) * PAGE_SIZE, artPage * PAGE_SIZE);
+  const filtered = useMemo(() => {
+    const s = search.trim().toLowerCase();
+    if (!s) return items;
+    return items.filter((a) =>
+      [a.code, a.name, a.brand, a.category].join(" ").toLowerCase().includes(s),
+    );
+  }, [items, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const slice = filtered.slice((artPage - 1) * PAGE_SIZE, artPage * PAGE_SIZE);
   const isCombo = discount.type === "combo";
 
   return (
     <section className="space-y-3 pt-2">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-baseline gap-2">
           <h2 className="text-lg font-semibold text-navy">Artículos en</h2>
           <span className="rounded-full bg-brand/15 px-3 py-0.5 text-sm font-medium text-brand">
             {discount.name}
           </span>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
-          <Plus className="h-4 w-4" /> Agregar artículo
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setArtPage(1); }}
+              placeholder="Buscar artículo"
+              className="h-10 w-72 rounded-full pl-10"
+            />
+          </div>
+          {isCombo && (
+            <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
+              <Plus className="h-4 w-4" /> Agregar artículo
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-xl border bg-card">
@@ -230,6 +252,7 @@ function DetailPanel({ discount }: { discount: Discount }) {
               <TableHead className="text-navy">Nombre</TableHead>
               {isCombo ? (
                 <>
+                  <TableHead className="text-navy">Variante</TableHead>
                   <TableHead className="text-navy">Precio Base</TableHead>
                   <TableHead className="text-navy">Cant. Mín. Requerida</TableHead>
                   <TableHead className="text-right text-navy">Acciones</TableHead>
@@ -240,7 +263,6 @@ function DetailPanel({ discount }: { discount: Discount }) {
                   <TableHead className="text-navy">Precio Base</TableHead>
                   <TableHead className="text-navy">Precio c/Desc.</TableHead>
                   <TableHead className="text-navy">Categoría</TableHead>
-                  <TableHead className="text-right text-navy">Acciones</TableHead>
                 </>
               )}
             </TableRow>
@@ -248,12 +270,26 @@ function DetailPanel({ discount }: { discount: Discount }) {
           <TableBody>
             {slice.map((a) => {
               const discounted = Math.round(a.price * (1 - discount.percentage / 100));
+              const variant = a._variantId
+                ? a.variants?.find((v) => v.id === a._variantId)
+                : null;
               return (
                 <TableRow key={a.id} className="hover:bg-muted/30">
                   <TableCell className="font-mono text-xs">{a.code}</TableCell>
                   <TableCell className="font-medium text-navy">{a.name}</TableCell>
                   {isCombo ? (
                     <>
+                      <TableCell>
+                        {variant ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-navy/10 px-2 py-0.5 text-xs font-medium text-navy">
+                            {variant.code} — {variant.name}
+                          </span>
+                        ) : (a.variants?.length ?? 0) > 0 ? (
+                          <span className="text-xs italic text-amber-600">Sin variante asignada</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
                       <TableCell>{formatCurrency(a.price)}</TableCell>
                       <TableCell>
                         <span className="inline-flex items-center rounded-full bg-brand/15 px-3 py-0.5 text-sm font-semibold text-brand">
@@ -262,32 +298,11 @@ function DetailPanel({ discount }: { discount: Discount }) {
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Editar cantidad"
-                            onClick={() => setEditQty(a)}
-                            className="h-8 w-8 text-brand hover:bg-brand/10"
-                          >
+                          <Button size="icon" variant="ghost" title="Editar cantidad" onClick={() => setEditQty(a)} className="h-8 w-8 text-brand hover:bg-brand/10">
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Desvincular del combo"
-                            onClick={() => setUnlink(a)}
-                            className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
-                          >
+                          <Button size="icon" variant="ghost" title="Desvincular del combo" onClick={() => setUnlink(a)} className="h-8 w-8 text-orange-600 hover:bg-orange-500/10">
                             <Link2Off className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Eliminar"
-                            onClick={() => setUnlink(a)}
-                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -298,19 +313,6 @@ function DetailPanel({ discount }: { discount: Discount }) {
                       <TableCell>{formatCurrency(a.price)}</TableCell>
                       <TableCell className="font-semibold text-brand">{formatCurrency(discounted)}</TableCell>
                       <TableCell>{a.category}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Desvincular del descuento"
-                            onClick={() => setUnlink(a)}
-                            className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
-                          >
-                            <Link2Off className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
                     </>
                   )}
                 </TableRow>
@@ -318,7 +320,7 @@ function DetailPanel({ discount }: { discount: Discount }) {
             })}
             {slice.length === 0 && (
               <TableRow>
-                <TableCell colSpan={isCombo ? 5 : 7} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={isCombo ? 6 : 6} className="py-10 text-center text-muted-foreground">
                   Sin artículos para mostrar.
                 </TableCell>
               </TableRow>
