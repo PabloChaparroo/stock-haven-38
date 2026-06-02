@@ -69,16 +69,13 @@ export function DiscountFormModal({ open, onOpenChange, mode = "create", discoun
         <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); onOpenChange(false); }}>
           <div className="space-y-1.5">
             <Label>Tipo de descuento *</Label>
-            <Select value={type} onValueChange={(v) => setType(v as DiscountType)} disabled={mode === "edit"}>
+            <Select value={type} onValueChange={(v) => setType(v as DiscountType)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="category">Por Categoría</SelectItem>
                 <SelectItem value="combo">Por Combo</SelectItem>
               </SelectContent>
             </Select>
-            {mode === "edit" && (
-              <p className="text-xs text-muted-foreground">El tipo no puede modificarse al editar.</p>
-            )}
           </div>
 
           <section className="grid gap-4 md:grid-cols-2">
