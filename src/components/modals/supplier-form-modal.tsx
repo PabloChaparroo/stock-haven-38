@@ -137,19 +137,34 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
             </section>
 
             <section className="space-y-2">
-              <Label>Calificación inicial</Label>
+              <Label>
+                Calificación inicial{" "}
+                <span className="text-xs font-normal text-muted-foreground">(opcional — podés dejarla vacía)</span>
+              </Label>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
                     type="button"
                     key={n}
                     disabled={readOnly}
-                    onClick={() => setRating(n)}
+                    onClick={() => setRating((r) => (r === n ? 0 : n))}
                     className="p-1 transition hover:scale-110 disabled:hover:scale-100"
                   >
                     <Star className={cn("h-6 w-6", n <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30")} />
                   </button>
                 ))}
+                {rating > 0 && !readOnly && (
+                  <button
+                    type="button"
+                    onClick={() => setRating(0)}
+                    className="ml-2 text-xs text-muted-foreground hover:text-destructive hover:underline"
+                  >
+                    Quitar
+                  </button>
+                )}
+                {rating === 0 && (
+                  <span className="ml-2 text-xs italic text-muted-foreground">Sin calificación</span>
+                )}
               </div>
             </section>
 
