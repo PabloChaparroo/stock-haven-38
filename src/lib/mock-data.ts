@@ -7,6 +7,8 @@ export type Category = {
   code: string;
   name: string;
   description: string;
+  createdAt: string;
+  active: boolean;
 };
 
 export type Brand = {
@@ -14,6 +16,8 @@ export type Brand = {
   code: string;
   name: string;
   description: string;
+  createdAt: string;
+  active: boolean;
 };
 
 export type Variant = {
