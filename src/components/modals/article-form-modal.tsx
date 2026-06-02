@@ -417,6 +417,7 @@ export function ArticleFormModal({
 
       <SimpleEntityModal open={openCat} onOpenChange={setOpenCat} entity="Categoría" />
       <SimpleEntityModal open={openBrand} onOpenChange={setOpenBrand} entity="Marca" />
+      <SupplierFormModal open={openSupplier} onOpenChange={setOpenSupplier} mode="create" />
     </>
   );
 }
