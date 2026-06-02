@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Fragment, useMemo, useState } from "react";
-import { Filter, Search, ChevronDown, ChevronUp, Save } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,6 +15,12 @@ import { articles } from "@/lib/mock-data";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  CatalogFilter,
+  DEFAULT_CATALOG_FILTER,
+  filterByStock,
+  type CatalogFilterValue,
+} from "@/components/catalog-filter";
 
 export const Route = createFileRoute("/inventario/ajuste-stock")({
   component: AjusteStockPage,
@@ -30,14 +36,20 @@ function AjusteStockPage() {
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [newStock, setNewStock] = useState<NewStockMap>({});
+  const [filter, setFilter] = useState<CatalogFilterValue>(DEFAULT_CATALOG_FILTER);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return articles;
-    return articles.filter((a) =>
-      [a.code, a.name, a.brand].join(" ").toLowerCase().includes(s),
-    );
-  }, [q]);
+    let list = articles;
+    if (s) {
+      list = list.filter((a) =>
+        [a.code, a.name, a.brand, a.category].join(" ").toLowerCase().includes(s),
+      );
+    }
+    list = filterByStock(list, filter.stock);
+    if (filter.status === "inactive") list = [];
+    return list;
+  }, [q, filter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -75,17 +87,12 @@ function AjusteStockPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Buscar artículo por código o nombre"
+            onChange={(e) => { setQ(e.target.value); setPage(1); }}
+            placeholder="Buscar por código, nombre, marca o categoría"
             className="h-10 rounded-full pl-10"
           />
         </div>
-        <Button variant="outline" className="gap-2 border-border/70">
-          <Filter className="h-4 w-4" /> Filtrar
-        </Button>
+        <CatalogFilter value={filter} onChange={(v) => { setFilter(v); setPage(1); }} />
       </div>
 
       <div className="overflow-hidden rounded-xl border bg-card">
@@ -96,6 +103,7 @@ function AjusteStockPage() {
               <TableHead className="text-navy">Código</TableHead>
               <TableHead className="text-navy">Nombre</TableHead>
               <TableHead className="text-navy">Marca</TableHead>
+              <TableHead className="text-navy">Categoría</TableHead>
               <TableHead className="text-navy">Imagen</TableHead>
               <TableHead className="text-navy">Stock Actual</TableHead>
               <TableHead className="text-navy">Stock Seg.</TableHead>
@@ -127,6 +135,7 @@ function AjusteStockPage() {
                     <TableCell className="font-mono text-xs">{a.code}</TableCell>
                     <TableCell className="font-medium text-navy">{a.name}</TableCell>
                     <TableCell>{a.brand}</TableCell>
+                    <TableCell>{a.category}</TableCell>
                     <TableCell>
                       <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-md border bg-muted/40">
                         <img src={a.image} alt={a.name} className="max-h-full max-w-full object-contain" />
@@ -173,7 +182,7 @@ function AjusteStockPage() {
 
                   {hasVariants && isOpen && (
                     <TableRow className="bg-muted/20 hover:bg-muted/20">
-                      <TableCell colSpan={8} className="py-3">
+                      <TableCell colSpan={9} className="py-3">
                         <div className="rounded-lg border bg-card p-3">
                           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand">
                             Variantes — {a.name}
