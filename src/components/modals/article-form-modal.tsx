@@ -27,6 +27,7 @@ import {
   type Article,
 } from "@/lib/mock-data";
 import { SimpleEntityModal } from "./simple-entity-modal";
+import { SupplierFormModal } from "./supplier-form-modal";
 
 type Props = {
   open: boolean;
