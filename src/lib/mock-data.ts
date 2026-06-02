@@ -7,6 +7,8 @@ export type Category = {
   code: string;
   name: string;
   description: string;
+  createdAt: string;
+  active: boolean;
 };
 
 export type Brand = {
@@ -14,6 +16,8 @@ export type Brand = {
   code: string;
   name: string;
   description: string;
+  createdAt: string;
+  active: boolean;
 };
 
 export type Variant = {
@@ -65,19 +69,19 @@ export type User = {
 };
 
 export const categories: Category[] = [
-  { id: "1", code: "CAT-01", name: "Computadoras", description: "Notebooks, PCs de escritorio y workstations." },
-  { id: "2", code: "CAT-02", name: "Periféricos", description: "Teclados, mouses, monitores y accesorios." },
-  { id: "3", code: "CAT-03", name: "Almacenamiento", description: "Discos rígidos, SSDs y memorias USB." },
-  { id: "4", code: "CAT-04", name: "Redes", description: "Routers, switches y placas de red." },
-  { id: "5", code: "CAT-05", name: "Impresión", description: "Impresoras, tóner y consumibles." },
+  { id: "1", code: "CAT-01", name: "Computadoras", description: "Notebooks, PCs de escritorio y workstations.", createdAt: "01/05/2026", active: true },
+  { id: "2", code: "CAT-02", name: "Periféricos", description: "Teclados, mouses, monitores y accesorios.", createdAt: "03/05/2026", active: true },
+  { id: "3", code: "CAT-03", name: "Almacenamiento", description: "Discos rígidos, SSDs y memorias USB.", createdAt: "10/05/2026", active: true },
+  { id: "4", code: "CAT-04", name: "Redes", description: "Routers, switches y placas de red.", createdAt: "15/05/2026", active: false },
+  { id: "5", code: "CAT-05", name: "Impresión", description: "Impresoras, tóner y consumibles.", createdAt: "20/05/2026", active: true },
 ];
 
 export const brands: Brand[] = [
-  { id: "1", code: "MAR-01", name: "Lenovo", description: "Equipos corporativos y consumo." },
-  { id: "2", code: "MAR-02", name: "HP", description: "Impresión, notebooks y servidores." },
-  { id: "3", code: "MAR-03", name: "Dell", description: "Workstations y desktops empresariales." },
-  { id: "4", code: "MAR-04", name: "Logitech", description: "Periféricos premium." },
-  { id: "5", code: "MAR-05", name: "Samsung", description: "Almacenamiento y monitores." },
+  { id: "1", code: "MAR-01", name: "Lenovo", description: "Equipos corporativos y consumo.", createdAt: "01/05/2026", active: true },
+  { id: "2", code: "MAR-02", name: "HP", description: "Impresión, notebooks y servidores.", createdAt: "03/05/2026", active: true },
+  { id: "3", code: "MAR-03", name: "Dell", description: "Workstations y desktops empresariales.", createdAt: "10/05/2026", active: true },
+  { id: "4", code: "MAR-04", name: "Logitech", description: "Periféricos premium.", createdAt: "15/05/2026", active: false },
+  { id: "5", code: "MAR-05", name: "Samsung", description: "Almacenamiento y monitores.", createdAt: "20/05/2026", active: true },
 ];
 
 const lorem =
