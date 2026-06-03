@@ -55,9 +55,6 @@ const groups: Group[] = [
     icon: Package,
     items: [
       { title: "Artículos", url: "/inventario/articulos", icon: Boxes },
-      { title: "Ajuste de Stock", url: "/inventario/ajuste-stock", icon: Activity },
-      { title: "Salida de Stock", url: "/inventario/salida-stock", icon: TrendingUp },
-      { title: "Actualización de precios", url: "/inventario/precios", icon: DollarSign },
       { title: "Categoría", url: "/inventario/categorias", icon: LayoutGrid },
       { title: "Marcas", url: "/inventario/marcas", icon: Tags },
       { title: "Descuento", url: "/inventario/descuentos", icon: Percent },
