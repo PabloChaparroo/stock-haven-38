@@ -207,6 +207,3 @@ function FilterRadio({ value, label, dotClass }: { value: string; label: string;
     </Label>
   );
 }
-
-// avoid unused import warning
-void categories;
