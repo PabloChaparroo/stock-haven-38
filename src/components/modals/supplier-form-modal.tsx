@@ -35,7 +35,7 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
   const readOnly = mode === "view";
   const [acceptsCheck, setAcceptsCheck] = useState(supplier?.acceptsCheck ?? false);
   const [acceptsCredit, setAcceptsCredit] = useState(supplier?.acceptsCredit ?? false);
-  const [rating, setRating] = useState<number>(supplier?.rating ?? 3);
+  const [rating, setRating] = useState<number>(supplier?.rating ?? 0);
   const [linked, setLinked] = useState<string[]>(supplier?.articleIds ?? []);
   const [search, setSearch] = useState("");
   const [createArticle, setCreateArticle] = useState(false);
@@ -136,7 +136,14 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
             </section>
 
             <section className="space-y-2">
-              <Label>Calificación inicial</Label>
+              <div className="flex items-center justify-between">
+                <Label>Calificación inicial (opcional)</Label>
+                {rating > 0 && !readOnly && (
+                  <button type="button" onClick={() => setRating(0)} className="text-xs text-muted-foreground hover:text-destructive">
+                    Quitar calificación
+                  </button>
+                )}
+              </div>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
@@ -149,6 +156,7 @@ export function SupplierFormModal({ open, onOpenChange, mode = "create", supplie
                     <Star className={cn("h-6 w-6", n <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30")} />
                   </button>
                 ))}
+                {rating === 0 && <span className="ml-2 text-xs text-muted-foreground">Sin calificar</span>}
               </div>
             </section>
 

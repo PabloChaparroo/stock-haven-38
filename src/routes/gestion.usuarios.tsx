@@ -6,23 +6,30 @@ import { Input } from "@/components/ui/input";
 import { users as initialUsers } from "@/lib/mock-data";
 import { UsersTable } from "@/components/users/users-table";
 import { UserFormModal } from "@/components/modals/user-form-modal";
+import { SimplePagination } from "@/components/ui/simple-pagination";
 
 export const Route = createFileRoute("/gestion/usuarios")({
   component: UsersPage,
   head: () => ({ meta: [{ title: "Usuarios — Inventia" }] }),
 });
 
+const PAGE_SIZE = 12;
+
 function UsersPage() {
   const [create, setCreate] = useState(false);
   const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return initialUsers;
     return initialUsers.filter((u) =>
-      [u.firstName, u.lastName, u.email, u.dni, u.phone].join(" ").toLowerCase().includes(s),
+      [u.firstName, u.lastName, u.email, u.dni, u.phone, u.username].join(" ").toLowerCase().includes(s),
     );
   }, [q]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -39,21 +46,20 @@ function UsersPage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => { setQ(e.target.value); setPage(1); }}
               placeholder="Buscar usuario"
               className="h-10 w-64 rounded-full pl-10"
             />
           </div>
-          <Button
-            onClick={() => setCreate(true)}
-            className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90"
-          >
+          <Button onClick={() => setCreate(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
             <Plus className="h-4 w-4" /> Crear usuario
           </Button>
         </div>
       </div>
 
-      <UsersTable users={filtered} />
+      <UsersTable users={slice} />
+
+      <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
       <UserFormModal open={create} onOpenChange={setCreate} mode="create" />
     </div>

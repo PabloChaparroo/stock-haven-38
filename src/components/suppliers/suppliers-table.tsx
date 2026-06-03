@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Eye, Pencil, Trash2, Check, Minus, Star, Mail } from "lucide-react";
+import { Eye, Pencil, Trash2, Check, Minus, Star, Mail, MapPin } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import type { Supplier } from "@/lib/mock-data";
 import { DeleteConfirmModal } from "@/components/modals/delete-confirm-modal";
@@ -26,6 +27,7 @@ function YesNo({ value }: { value: boolean }) {
 }
 
 function Rating({ value }: { value: number }) {
+  if (!value) return <span className="text-xs text-muted-foreground">Sin calificar</span>;
   return (
     <div className="flex gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
@@ -45,6 +47,8 @@ export function SuppliersTable({ suppliers }: Props) {
   const [view, setView] = useState<Supplier | null>(null);
   const [edit, setEdit] = useState<Supplier | null>(null);
   const [del, setDel] = useState<Supplier | null>(null);
+  const [details, setDetails] = useState<Supplier | null>(null);
+  const [addressOf, setAddressOf] = useState<Supplier | null>(null);
 
   return (
     <>
@@ -53,12 +57,10 @@ export function SuppliersTable({ suppliers }: Props) {
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
               <TableHead className="text-navy">Código</TableHead>
-              <TableHead className="text-navy">Nombre</TableHead>
-              <TableHead className="text-navy">Descripción</TableHead>
-              <TableHead className="text-navy">Teléfono</TableHead>
+              <TableHead className="text-navy">Proveedor</TableHead>
               <TableHead className="text-navy">Relación</TableHead>
               <TableHead className="text-navy">Dirección</TableHead>
-              <TableHead className="text-navy">Mail</TableHead>
+              <TableHead className="text-navy">Contacto</TableHead>
               <TableHead className="text-navy">CUIT</TableHead>
               <TableHead className="text-navy">Creación</TableHead>
               <TableHead className="text-navy">Cond. IVA</TableHead>
@@ -73,28 +75,35 @@ export function SuppliersTable({ suppliers }: Props) {
             {suppliers.map((s) => (
               <TableRow key={s.id} className="hover:bg-muted/30">
                 <TableCell className="font-mono text-xs">{s.code}</TableCell>
-                <TableCell className="font-medium text-navy">{s.name}</TableCell>
                 <TableCell>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className="text-left text-sm hover:text-brand">
-                        {truncate(s.description)}
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-72 text-sm">{s.description}</PopoverContent>
-                  </Popover>
+                  <div className="font-medium text-navy">{s.name}</div>
+                  {s.description && (
+                    <button
+                      onClick={() => setDetails(s)}
+                      className="text-xs text-muted-foreground hover:text-brand hover:underline"
+                    >
+                      Ver descripción
+                    </button>
+                  )}
                 </TableCell>
-                <TableCell className="whitespace-nowrap text-sm">{s.phone}</TableCell>
                 <TableCell>
                   <Badge variant="secondary" className="bg-navy/10 text-navy">
                     {s.socialRelation}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">{truncate(s.address, 24)}</TableCell>
                 <TableCell>
-                  <a href={`mailto:${s.email}`} className="inline-flex items-center gap-1 text-sm text-brand hover:underline">
-                    <Mail className="h-3.5 w-3.5" />
-                    {truncate(s.email, 20)}
+                  <button
+                    onClick={() => setAddressOf(s)}
+                    className="inline-flex items-center gap-1 text-sm text-brand hover:underline"
+                  >
+                    <MapPin className="h-3.5 w-3.5" />
+                    {truncate(s.address, 22)}
+                  </button>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">{s.phone}</div>
+                  <a href={`mailto:${s.email}`} className="inline-flex items-center gap-1 text-xs text-brand hover:underline">
+                    <Mail className="h-3 w-3" /> {truncate(s.email, 22)}
                   </a>
                 </TableCell>
                 <TableCell className="font-mono text-xs">{s.cuit}</TableCell>
@@ -121,7 +130,7 @@ export function SuppliersTable({ suppliers }: Props) {
             ))}
             {suppliers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={15} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={13} className="py-10 text-center text-muted-foreground">
                   No hay proveedores para mostrar.
                 </TableCell>
               </TableRow>
@@ -138,6 +147,27 @@ export function SuppliersTable({ suppliers }: Props) {
         itemName={`el proveedor "${del?.name}"`}
         onConfirm={() => setDel(null)}
       />
+
+      <Dialog open={!!details} onOpenChange={(v) => !v && setDetails(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-navy">{details?.name}</DialogTitle>
+          </DialogHeader>
+          <p className="rounded-lg bg-muted/40 p-3 text-sm leading-relaxed">{details?.description}</p>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!addressOf} onOpenChange={(v) => !v && setAddressOf(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-navy">Dirección — {addressOf?.name}</DialogTitle>
+          </DialogHeader>
+          <p className="flex items-start gap-2 rounded-lg bg-muted/40 p-3 text-sm leading-relaxed">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+            {addressOf?.address}
+          </p>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
