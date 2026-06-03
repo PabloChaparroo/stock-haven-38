@@ -281,7 +281,7 @@ export const discounts: Discount[] = [
     active: true,
     type: "combo",
     comboItems: [
-      { articleId: "1", minQuantity: 2 },
+      { articleId: "1", variantId: "v1", variantName: "8GB / 256GB", minQuantity: 2 },
       { articleId: "5", minQuantity: 1 },
     ],
     createdAt: "15/05/2026",
