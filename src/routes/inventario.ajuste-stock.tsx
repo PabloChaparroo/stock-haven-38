@@ -27,17 +27,20 @@ type NewStockMap = Record<string, string>; // key: articleId or `${articleId}:${
 
 function AjusteStockPage() {
   const [q, setQ] = useState("");
+  const [status, setStatus] = useState<"active" | "inactive">("active");
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [newStock, setNewStock] = useState<NewStockMap>({});
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return articles;
-    return articles.filter((a) =>
-      [a.code, a.name, a.brand].join(" ").toLowerCase().includes(s),
-    );
-  }, [q]);
+    return articles
+      // mock: treat all as active; if you later add `active`, filter by status here
+      .filter(() => status === "active")
+      .filter((a) =>
+        !s ? true : [a.code, a.name, a.brand, a.category].join(" ").toLowerCase().includes(s),
+      );
+  }, [q, status]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -70,7 +73,7 @@ function AjusteStockPage() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -79,9 +82,23 @@ function AjusteStockPage() {
               setQ(e.target.value);
               setPage(1);
             }}
-            placeholder="Buscar artículo por código o nombre"
+            placeholder="Buscar por código, nombre, marca o categoría"
             className="h-10 rounded-full pl-10"
           />
+        </div>
+        <div className="inline-flex rounded-full border bg-card p-1">
+          {(["active", "inactive"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => { setStatus(s); setPage(1); }}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-xs font-medium transition",
+                status === s ? "bg-brand text-brand-foreground" : "text-muted-foreground hover:text-navy",
+              )}
+            >
+              {s === "active" ? "Activos" : "Inactivos"}
+            </button>
+          ))}
         </div>
         <Button variant="outline" className="gap-2 border-border/70">
           <Filter className="h-4 w-4" /> Filtrar
@@ -96,6 +113,7 @@ function AjusteStockPage() {
               <TableHead className="text-navy">Código</TableHead>
               <TableHead className="text-navy">Nombre</TableHead>
               <TableHead className="text-navy">Marca</TableHead>
+              <TableHead className="text-navy">Categoría</TableHead>
               <TableHead className="text-navy">Imagen</TableHead>
               <TableHead className="text-navy">Stock Actual</TableHead>
               <TableHead className="text-navy">Stock Seg.</TableHead>
@@ -127,6 +145,11 @@ function AjusteStockPage() {
                     <TableCell className="font-mono text-xs">{a.code}</TableCell>
                     <TableCell className="font-medium text-navy">{a.name}</TableCell>
                     <TableCell>{a.brand}</TableCell>
+                    <TableCell>
+                      <span className="inline-flex rounded-full bg-navy/10 px-2 py-0.5 text-xs font-medium text-navy">
+                        {a.category}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-md border bg-muted/40">
                         <img src={a.image} alt={a.name} className="max-h-full max-w-full object-contain" />
