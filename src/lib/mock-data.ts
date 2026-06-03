@@ -7,6 +7,7 @@ export type Category = {
   code: string;
   name: string;
   description: string;
+  active: boolean;
 };
 
 export type Brand = {
@@ -14,6 +15,7 @@ export type Brand = {
   code: string;
   name: string;
   description: string;
+  active: boolean;
 };
 
 export type Variant = {
@@ -46,12 +48,14 @@ export type Article = {
 export type Role = {
   id: string;
   name: string;
+  description?: string;
   createdAt: string;
   permissions: string[]; // permission ids
 };
 
 export type User = {
   id: string;
+  username: string;
   firstName: string;
   lastName: string;
   dni: string;
@@ -65,19 +69,19 @@ export type User = {
 };
 
 export const categories: Category[] = [
-  { id: "1", code: "CAT-01", name: "Computadoras", description: "Notebooks, PCs de escritorio y workstations." },
-  { id: "2", code: "CAT-02", name: "Periféricos", description: "Teclados, mouses, monitores y accesorios." },
-  { id: "3", code: "CAT-03", name: "Almacenamiento", description: "Discos rígidos, SSDs y memorias USB." },
-  { id: "4", code: "CAT-04", name: "Redes", description: "Routers, switches y placas de red." },
-  { id: "5", code: "CAT-05", name: "Impresión", description: "Impresoras, tóner y consumibles." },
+  { id: "1", code: "CAT-01", name: "Computadoras", description: "Notebooks, PCs de escritorio y workstations.", active: true },
+  { id: "2", code: "CAT-02", name: "Periféricos", description: "Teclados, mouses, monitores y accesorios.", active: true },
+  { id: "3", code: "CAT-03", name: "Almacenamiento", description: "Discos rígidos, SSDs y memorias USB.", active: true },
+  { id: "4", code: "CAT-04", name: "Redes", description: "Routers, switches y placas de red.", active: true },
+  { id: "5", code: "CAT-05", name: "Impresión", description: "Impresoras, tóner y consumibles.", active: false },
 ];
 
 export const brands: Brand[] = [
-  { id: "1", code: "MAR-01", name: "Lenovo", description: "Equipos corporativos y consumo." },
-  { id: "2", code: "MAR-02", name: "HP", description: "Impresión, notebooks y servidores." },
-  { id: "3", code: "MAR-03", name: "Dell", description: "Workstations y desktops empresariales." },
-  { id: "4", code: "MAR-04", name: "Logitech", description: "Periféricos premium." },
-  { id: "5", code: "MAR-05", name: "Samsung", description: "Almacenamiento y monitores." },
+  { id: "1", code: "MAR-01", name: "Lenovo", description: "Equipos corporativos y consumo.", active: true },
+  { id: "2", code: "MAR-02", name: "HP", description: "Impresión, notebooks y servidores.", active: true },
+  { id: "3", code: "MAR-03", name: "Dell", description: "Workstations y desktops empresariales.", active: true },
+  { id: "4", code: "MAR-04", name: "Logitech", description: "Periféricos premium.", active: true },
+  { id: "5", code: "MAR-05", name: "Samsung", description: "Almacenamiento y monitores.", active: false },
 ];
 
 const lorem =
@@ -170,24 +174,28 @@ export const roles: Role[] = [
   {
     id: "1",
     name: "Administrador",
+    description: "Acceso total al sistema. Gestiona usuarios, roles y configuración.",
     createdAt: "01/05/2026",
     permissions: allPermissionIds,
   },
   {
     id: "2",
     name: "Vendedor",
+    description: "Acceso al módulo de ventas y consulta de inventario.",
     createdAt: "03/05/2026",
     permissions: ["inv.view", "sales.view", "sales.create"],
   },
   {
     id: "3",
     name: "Encargado de stock",
+    description: "Gestiona el inventario, depósitos y movimientos internos.",
     createdAt: "10/05/2026",
     permissions: ["inv.view", "inv.create", "inv.edit", "warehouse.manage"],
   },
   {
     id: "4",
     name: "Auditor",
+    description: "Consulta de reportes y trazabilidad de operaciones (solo lectura).",
     createdAt: "15/05/2026",
     permissions: ["inv.view", "sales.view", "buy.view", "reports.view", "reports.export"],
   },
@@ -203,84 +211,12 @@ const userImgs = [
 ];
 
 export const users: User[] = [
-  {
-    id: "1",
-    firstName: "Olivia",
-    lastName: "Rhye",
-    dni: "35.123.456",
-    email: "olivia@inventia.com",
-    phone: "+54 9 11 5555-0101",
-    image: userImgs[0],
-    createdAt: "12/07/2026",
-    active: true,
-    roles: ["Administrador"],
-    description: "Fundadora y administradora general del sistema.",
-  },
-  {
-    id: "2",
-    firstName: "Mateo",
-    lastName: "González",
-    dni: "40.987.654",
-    email: "mateo@inventia.com",
-    phone: "+54 9 11 5555-0102",
-    image: userImgs[1],
-    createdAt: "14/07/2026",
-    active: true,
-    roles: ["Vendedor"],
-    description: "Vendedor del local centro.",
-  },
-  {
-    id: "3",
-    firstName: "Lucía",
-    lastName: "Fernández",
-    dni: "38.456.123",
-    email: "lucia@inventia.com",
-    phone: "+54 9 11 5555-0103",
-    image: userImgs[2],
-    createdAt: "20/07/2026",
-    active: false,
-    roles: ["Encargado de stock"],
-    description: "Encargada del depósito principal.",
-  },
-  {
-    id: "4",
-    firstName: "Tomás",
-    lastName: "Pérez",
-    dni: "42.111.222",
-    email: "tomas@inventia.com",
-    phone: "+54 9 11 5555-0104",
-    image: userImgs[3],
-    createdAt: "01/08/2026",
-    active: true,
-    roles: ["Vendedor", "Auditor"],
-    description: "Doble función comercial y auditoría.",
-  },
-  {
-    id: "5",
-    firstName: "Camila",
-    lastName: "Suárez",
-    dni: "39.333.444",
-    email: "camila@inventia.com",
-    phone: "+54 9 11 5555-0105",
-    image: userImgs[4],
-    createdAt: "05/08/2026",
-    active: true,
-    roles: ["Auditor"],
-    description: "Auditora de movimientos y stock.",
-  },
-  {
-    id: "6",
-    firstName: "Bruno",
-    lastName: "Martínez",
-    dni: "41.555.666",
-    email: "bruno@inventia.com",
-    phone: "+54 9 11 5555-0106",
-    image: userImgs[5],
-    createdAt: "10/08/2026",
-    active: false,
-    roles: ["Vendedor"],
-    description: "Vendedor sucursal norte.",
-  },
+  { id: "1", username: "olivia.rhye", firstName: "Olivia", lastName: "Rhye", dni: "35.123.456", email: "olivia@inventia.com", phone: "+54 9 11 5555-0101", image: userImgs[0], createdAt: "12/07/2026", active: true, roles: ["Administrador"], description: "Fundadora y administradora general del sistema." },
+  { id: "2", username: "mateo.gonzalez", firstName: "Mateo", lastName: "González", dni: "40.987.654", email: "mateo@inventia.com", phone: "+54 9 11 5555-0102", image: userImgs[1], createdAt: "14/07/2026", active: true, roles: ["Vendedor"], description: "Vendedor del local centro." },
+  { id: "3", username: "lucia.f", firstName: "Lucía", lastName: "Fernández", dni: "38.456.123", email: "lucia@inventia.com", phone: "+54 9 11 5555-0103", image: userImgs[2], createdAt: "20/07/2026", active: false, roles: ["Encargado de stock"], description: "Encargada del depósito principal." },
+  { id: "4", username: "tomas.perez", firstName: "Tomás", lastName: "Pérez", dni: "42.111.222", email: "tomas@inventia.com", phone: "+54 9 11 5555-0104", image: userImgs[3], createdAt: "01/08/2026", active: true, roles: ["Vendedor", "Auditor"], description: "Doble función comercial y auditoría." },
+  { id: "5", username: "camila.s", firstName: "Camila", lastName: "Suárez", dni: "39.333.444", email: "camila@inventia.com", phone: "+54 9 11 5555-0105", image: userImgs[4], createdAt: "05/08/2026", active: true, roles: ["Auditor"], description: "Auditora de movimientos y stock." },
+  { id: "6", username: "bruno.m", firstName: "Bruno", lastName: "Martínez", dni: "41.555.666", email: "bruno@inventia.com", phone: "+54 9 11 5555-0106", image: userImgs[5], createdAt: "10/08/2026", active: false, roles: ["Vendedor"], description: "Vendedor sucursal norte." },
 ];
 
 export const currentUser: User = users[0];
@@ -291,6 +227,8 @@ export type DiscountType = "category" | "combo";
 
 export type ComboItem = {
   articleId: string;
+  variantId?: string;
+  variantName?: string;
   minQuantity: number;
 };
 
