@@ -1,24 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Filter, Plus } from "lucide-react";
+import { Filter, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { articles } from "@/lib/mock-data";
 import { ArticlesTable } from "@/components/articles/articles-table";
 import { ArticleFormModal } from "@/components/modals/article-form-modal";
-import { SimplePagination } from "@/components/ui/simple-pagination";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/inventario/articulos")({
   component: ArticlesPage,
   head: () => ({ meta: [{ title: "Artículos — Inventia" }] }),
 });
 
-const PAGE_SIZE = 12;
-
 function ArticlesPage() {
   const [open, setOpen] = useState(false);
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(articles.length / PAGE_SIZE));
-  const slice = articles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="space-y-5">
@@ -38,11 +33,40 @@ function ArticlesPage() {
         </div>
       </div>
 
-      <ArticlesTable articles={slice} />
+      <ArticlesTable articles={articles} />
 
-      <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <Pagination />
 
       <ArticleFormModal open={open} onOpenChange={setOpen} />
+    </div>
+  );
+}
+
+function Pagination() {
+  const [page, setPage] = useState(4);
+  const pages = [1, 2, 3, 4, 15];
+  return (
+    <div className="flex items-center justify-center gap-1 pt-2">
+      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setPage((p) => Math.max(1, p - 1))}>
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      {pages.map((p, i) => (
+        <button
+          key={i}
+          onClick={() => setPage(p)}
+          className={cn(
+            "grid h-8 w-8 place-items-center rounded-full text-sm font-medium transition",
+            page === p
+              ? "bg-brand text-brand-foreground"
+              : "text-muted-foreground hover:bg-muted",
+          )}
+        >
+          {p}
+        </button>
+      ))}
+      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setPage((p) => p + 1)}>
+        <ChevronRight className="h-4 w-4" />
+      </Button>
     </div>
   );
 }
