@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { Eye, Pencil, Trash2, Link2Off, ChevronDown, ChevronUp, Layers } from "lucide-react";
+import { Eye, Pencil, Trash2, Link2Off, ChevronDown, ChevronRight, Layers, Minus } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,9 @@ type Props = {
 
 const truncate = (s: string, n = 32) => (s.length > n ? s.slice(0, n).trimEnd() + "…" : s);
 
+const totalVariantStock = (a: Article) =>
+  (a.variantStocks ?? []).reduce((sum, v) => sum + (v.stock || 0), 0);
+
 export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular", hideDelete }: Props) {
   const [zoom, setZoom] = useState<Article | null>(null);
   const [details, setDetails] = useState<Article | null>(null);
@@ -34,6 +37,7 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="w-10 text-navy"></TableHead>
               <TableHead className="text-navy">Código</TableHead>
               <TableHead className="text-navy">Nombre</TableHead>
               <TableHead className="text-navy">Marca</TableHead>
@@ -50,11 +54,36 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
           <TableBody>
             {articles.map((a) => {
               const hasVariants = (a.variants?.length ?? 0) > 0;
+              const stockVal = hasVariants ? totalVariantStock(a) : a.stock;
               const low = !hasVariants && a.stock < a.safetyStock;
               const isOpen = !!expanded[a.id];
               return (
                 <Fragment key={a.id}>
                   <TableRow className="hover:bg-muted/30">
+                    <TableCell className="w-10">
+                      {hasVariants ? (
+                        <button
+                          onClick={() => toggle(a.id)}
+                          title={`${a.variants!.length} variantes`}
+                          className={cn(
+                            "grid h-7 w-7 place-items-center rounded-md transition",
+                            isOpen
+                              ? "bg-brand text-brand-foreground"
+                              : "bg-navy/10 text-navy hover:bg-navy/15",
+                          )}
+                        >
+                          {isOpen ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <Layers className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                      ) : (
+                        <span className="grid h-7 w-7 place-items-center text-muted-foreground/40">
+                          <ChevronRight className="h-3.5 w-3.5 opacity-40" />
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{a.code}</TableCell>
                     <TableCell className="font-medium text-navy">{a.name}</TableCell>
                     <TableCell>{a.brand}</TableCell>
@@ -85,26 +114,25 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
                       </button>
                     </TableCell>
 
-                    {hasVariants ? (
-                      <TableCell colSpan={2}>
-                        <button
-                          onClick={() => toggle(a.id)}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition",
-                            isOpen ? "bg-brand text-brand-foreground" : "bg-navy/10 text-navy hover:bg-navy/15",
-                          )}
-                        >
-                          <Layers className="h-3.5 w-3.5" />
-                          {a.variants!.length} variantes
-                          {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                        </button>
-                      </TableCell>
-                    ) : (
-                      <>
-                        <TableCell className={cn("font-semibold", low && "text-destructive")}>{a.stock}</TableCell>
-                        <TableCell>{a.safetyStock || <span className="text-muted-foreground">—</span>}</TableCell>
-                      </>
-                    )}
+                    <TableCell className={cn("font-semibold", low && "text-destructive")}>
+                      {hasVariants ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 text-brand">
+                          {stockVal}
+                          <span className="text-[10px] font-normal text-brand/70">total</span>
+                        </span>
+                      ) : (
+                        stockVal
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {hasVariants ? (
+                        <Minus className="h-4 w-4 text-muted-foreground" />
+                      ) : a.safetyStock ? (
+                        a.safetyStock
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
 
                     <TableCell>{a.category}</TableCell>
                     <TableCell>
@@ -137,18 +165,16 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
 
                   {hasVariants && isOpen && (
                     <TableRow key={`${a.id}-vs`} className="bg-muted/20 hover:bg-muted/20">
-                      <TableCell colSpan={11} className="py-3">
+                      <TableCell colSpan={12} className="py-3">
                         <div className="rounded-lg border bg-card p-3">
                           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand">
-                            Stock por variante — {a.name}
+                            Variantes — {a.name}
                           </div>
                           <Table>
                             <TableHeader>
                               <TableRow className="bg-muted/40 hover:bg-muted/40">
                                 <TableHead className="h-8 text-navy">Código</TableHead>
-                                <TableHead className="h-8 text-navy">Variante</TableHead>
-                                <TableHead className="h-8 text-navy">Descripción</TableHead>
-                                <TableHead className="h-8 text-right text-navy">Stock actual</TableHead>
+                                <TableHead className="h-8 text-right text-navy">Stock</TableHead>
                                 <TableHead className="h-8 text-right text-navy">Stock seguridad</TableHead>
                               </TableRow>
                             </TableHeader>
@@ -159,8 +185,6 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
                                 return (
                                   <TableRow key={v.id}>
                                     <TableCell className="font-mono text-xs">{v.code}</TableCell>
-                                    <TableCell className="font-medium text-navy">{v.name}</TableCell>
-                                    <TableCell className="text-sm text-muted-foreground">{v.description}</TableCell>
                                     <TableCell className={cn("text-right font-semibold", vlow && "text-destructive")}>
                                       {vs?.stock ?? 0}
                                     </TableCell>
@@ -181,7 +205,7 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
             })}
             {articles.length === 0 && (
               <TableRow>
-                <TableCell colSpan={11} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={12} className="py-10 text-center text-muted-foreground">
                   No hay artículos para mostrar.
                 </TableCell>
               </TableRow>
