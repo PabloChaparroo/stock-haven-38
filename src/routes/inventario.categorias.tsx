@@ -107,7 +107,7 @@ function CategoriesPage() {
               <Plus className="h-4 w-4" /> Agregar artículo
             </Button>
           </div>
-          <ArticlesTable articles={artSlice} onUnlink={setUnlink} unlinkTitle="Desvincular de la categoría" hideDelete />
+          <ArticlesTable articles={artSlice} onUnlink={setUnlink} unlinkTitle="Desvincular de la categoría" />
           <SimplePagination page={artPage} totalPages={artTotal} onPageChange={setArtPage} />
         </section>
       )}

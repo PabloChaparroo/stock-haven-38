@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Plus, Trash2, ImagePlus, Search, X } from "lucide-react";
+import { useState } from "react";
+import { Plus, Trash2, ImagePlus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,12 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import {
-  categories as allCategories,
-  brands as allBrands,
-  suppliers as allSuppliers,
-  type Article,
-} from "@/lib/mock-data";
+import { categories as allCategories, brands as allBrands, type Article } from "@/lib/mock-data";
 import { SimpleEntityModal } from "./simple-entity-modal";
 
 type Props = {
@@ -37,59 +32,22 @@ type Props = {
   defaultBrand?: string;
 };
 
-type LocalVariant = {
-  id: string;
-  code: string;
-  name: string;
-  description: string;
-  stock: number;
-  safetyStock: number | "";
-};
+type LocalVariant = { id: string; code: string; name: string; description: string };
 
-export function ArticleFormModal({
-  open,
-  onOpenChange,
-  mode = "create",
-  article,
-  defaultCategory,
-  defaultBrand,
-}: Props) {
-  const initialVariants: LocalVariant[] = (article?.variants ?? []).map((v) => {
-    const vs = article?.variantStocks?.find((x) => x.variantId === v.id);
-    return { ...v, stock: vs?.stock ?? 0, safetyStock: vs?.safetyStock ?? "" };
-  });
-
+export function ArticleFormModal({ open, onOpenChange, mode = "create", article, defaultCategory, defaultBrand }: Props) {
   const [hasVariants, setHasVariants] = useState((article?.variants?.length ?? 0) > 0);
-  const [variants, setVariants] = useState<LocalVariant[]>(initialVariants);
+  const [variants, setVariants] = useState<LocalVariant[]>(article?.variants ?? []);
   const [description, setDescription] = useState(article?.description ?? "");
   const [openCat, setOpenCat] = useState(false);
   const [openBrand, setOpenBrand] = useState(false);
 
-  const isEdit = mode === "edit";
-  // In edit mode, stock fields are locked UNLESS the user is adding NEW variants
-  const hadVariantsAtOpen = (article?.variants?.length ?? 0) > 0;
-  const stockLocked = isEdit && (hasVariants === hadVariantsAtOpen) && variants.length === initialVariants.length;
-
-  // Supplier
-  const [withSupplier, setWithSupplier] = useState<boolean>(!!article?.supplier);
-  const [supplier, setSupplier] = useState<string | undefined>(article?.supplier);
-  const [supplierSearch, setSupplierSearch] = useState("");
-  const supplierResults = useMemo(() => {
-    const s = supplierSearch.trim().toLowerCase();
-    if (!s) return allSuppliers.slice(0, 8);
-    return allSuppliers.filter((sp) => sp.name.toLowerCase().includes(s) || sp.code.toLowerCase().includes(s));
-  }, [supplierSearch]);
-
   const addVariant = () =>
     setVariants((v) => [
       ...v,
-      { id: crypto.randomUUID(), code: "", name: "", description: "", stock: 0, safetyStock: "" },
+      { id: crypto.randomUUID(), code: "", name: "", description: "" },
     ]);
 
   const removeVariant = (id: string) => setVariants((v) => v.filter((x) => x.id !== id));
-
-  const updateVariant = (id: string, patch: Partial<LocalVariant>) =>
-    setVariants((v) => v.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
   return (
     <>
@@ -209,63 +167,6 @@ export function ArticleFormModal({
 
             <Separator />
 
-            {/* Supplier section */}
-            <section className="space-y-3">
-              <label className="flex cursor-pointer items-center gap-3 rounded-lg border bg-muted/30 p-3">
-                <Checkbox checked={withSupplier} onCheckedChange={(c) => setWithSupplier(Boolean(c))} />
-                <div>
-                  <div className="font-medium text-navy">Asociar un proveedor</div>
-                  <div className="text-xs text-muted-foreground">
-                    Buscá y vinculá un proveedor existente para este artículo.
-                  </div>
-                </div>
-              </label>
-
-              {withSupplier && (
-                <div className="rounded-xl border bg-card p-4">
-                  {supplier ? (
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="text-sm font-semibold text-navy">{supplier}</div>
-                        <div className="text-xs text-muted-foreground">Proveedor seleccionado</div>
-                      </div>
-                      <Button type="button" size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setSupplier(undefined)}>
-                        <X className="mr-1 h-4 w-4" /> Quitar
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="relative">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          value={supplierSearch}
-                          onChange={(e) => setSupplierSearch(e.target.value)}
-                          className="pl-9"
-                          placeholder="Buscar proveedor..."
-                        />
-                      </div>
-                      <ul className="max-h-44 divide-y overflow-y-auto rounded-md border">
-                        {supplierResults.map((sp) => (
-                          <li key={sp.id}>
-                            <button
-                              type="button"
-                              onClick={() => setSupplier(sp.name)}
-                              className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-muted"
-                            >
-                              <span className="text-sm font-medium text-navy">{sp.name}</span>
-                              <span className="font-mono text-xs text-muted-foreground">{sp.code}</span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-            </section>
-
-            <Separator />
-
             <section className="space-y-4">
               <label className="flex cursor-pointer items-center gap-3 rounded-lg border bg-muted/30 p-3">
                 <Checkbox
@@ -279,15 +180,15 @@ export function ArticleFormModal({
                 <div>
                   <div className="font-medium text-navy">Este artículo tiene variantes</div>
                   <div className="text-xs text-muted-foreground">
-                    Ej: distintas configuraciones, tallas o colores. Cada variante tiene su propio stock.
+                    Ej: distintas configuraciones, tallas o colores.
                   </div>
                 </div>
               </label>
 
-              {hasVariants ? (
+              {hasVariants && (
                 <div className="space-y-3 rounded-xl border bg-card p-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-navy">Variantes y stock</h4>
+                    <h4 className="font-semibold text-navy">Variantes</h4>
                     <Button
                       type="button"
                       size="sm"
@@ -304,89 +205,30 @@ export function ArticleFormModal({
                   )}
 
                   <div className="space-y-3">
-                    {variants.map((v, i) => {
-                      const isNew = !initialVariants.some((iv) => iv.id === v.id);
-                      const lock = stockLocked && !isNew;
-                      return (
-                        <div
-                          key={v.id}
-                          className="grid gap-2 rounded-lg border border-border/70 bg-muted/30 p-3 md:grid-cols-[90px_1fr_1fr_90px_100px_auto]"
+                    {variants.map((v, i) => (
+                      <div
+                        key={v.id}
+                        className="grid gap-2 rounded-lg border border-border/70 bg-muted/30 p-3 md:grid-cols-[110px_1fr_1fr_auto]"
+                      >
+                        <Input
+                          placeholder="Cód."
+                          defaultValue={v.code}
+                          aria-label={`Código variante ${i + 1}`}
+                        />
+                        <Input placeholder="Nombre variante" defaultValue={v.name} />
+                        <Input placeholder="Descripción" defaultValue={v.description} />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeVariant(v.id)}
+                          className="text-destructive hover:bg-destructive/10"
                         >
-                          <Input
-                            placeholder="Cód."
-                            value={v.code}
-                            onChange={(e) => updateVariant(v.id, { code: e.target.value })}
-                            aria-label={`Código variante ${i + 1}`}
-                          />
-                          <Input
-                            placeholder="Nombre variante"
-                            value={v.name}
-                            onChange={(e) => updateVariant(v.id, { name: e.target.value })}
-                          />
-                          <Input
-                            placeholder="Descripción"
-                            value={v.description}
-                            onChange={(e) => updateVariant(v.id, { description: e.target.value })}
-                          />
-                          <Input
-                            type="number"
-                            placeholder="Stock"
-                            value={v.stock}
-                            disabled={lock}
-                            onChange={(e) => updateVariant(v.id, { stock: parseInt(e.target.value) || 0 })}
-                            title="Stock actual"
-                          />
-                          <Input
-                            type="number"
-                            placeholder="Stock mín."
-                            value={v.safetyStock}
-                            disabled={lock}
-                            onChange={(e) =>
-                              updateVariant(v.id, {
-                                safetyStock: e.target.value === "" ? "" : parseInt(e.target.value) || 0,
-                              })
-                            }
-                            title="Stock de seguridad"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeVariant(v.id)}
-                            className="text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      );
-                    })}
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              ) : (
-                <div className="grid gap-4 rounded-xl border bg-card p-4 md:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>Stock actual</Label>
-                    <Input
-                      type="number"
-                      defaultValue={article?.stock ?? 0}
-                      placeholder="0"
-                      disabled={stockLocked}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Stock de seguridad (mínimo)</Label>
-                    <Input
-                      type="number"
-                      defaultValue={article?.safetyStock ?? ""}
-                      placeholder="Opcional"
-                      disabled={stockLocked}
-                    />
-                  </div>
-                  {stockLocked && (
-                    <p className="md:col-span-2 text-xs text-muted-foreground">
-                      Solo se puede modificar el stock al agregar una variante nueva.
-                    </p>
-                  )}
                 </div>
               )}
             </section>
