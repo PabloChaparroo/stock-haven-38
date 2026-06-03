@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
+import { ProfileModal } from "@/components/modals/profile-modal";
 import {
   Home,
   Package,
@@ -53,6 +55,9 @@ const groups: Group[] = [
     icon: Package,
     items: [
       { title: "Artículos", url: "/inventario/articulos", icon: Boxes },
+      { title: "Ajuste de Stock", url: "/inventario/ajuste-stock", icon: Activity },
+      { title: "Salida de Stock", url: "/inventario/salida-stock", icon: TrendingUp },
+      { title: "Actualización de precios", url: "/inventario/precios", icon: DollarSign },
       { title: "Categoría", url: "/inventario/categorias", icon: LayoutGrid },
       { title: "Marcas", url: "/inventario/marcas", icon: Tags },
       { title: "Descuento", url: "/inventario/descuentos", icon: Percent },
@@ -102,18 +107,25 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [profileOpen, setProfileOpen] = useState(false);
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="border-b border-sidebar-border">
-        <Link to="/" className="flex items-center gap-2 px-1 py-2">
+        <button
+          type="button"
+          onClick={() => setProfileOpen(true)}
+          aria-label="Abrir perfil"
+          className="flex w-full items-center gap-2 rounded-md px-1 py-2 text-left transition hover:bg-sidebar-accent/50"
+        >
           <img src={logo} alt="Inventia" className="h-9 w-9 shrink-0" />
           {!collapsed && (
             <span className="text-2xl font-bold tracking-tight text-navy">
               INVENT<span className="text-brand">IA</span>
             </span>
           )}
-        </Link>
+        </button>
+        <ProfileModal open={profileOpen} onOpenChange={setProfileOpen} />
       </SidebarHeader>
 
       <SidebarContent className="gap-1 px-2 py-3">
@@ -149,10 +161,10 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           tooltip={group.title}
                           className={cn(
-                            "h-10 bg-sidebar-accent/60 font-semibold text-sidebar-foreground hover:bg-sidebar-accent",
+                            "h-10 bg-brand/15 font-semibold text-navy hover:bg-brand/25",
                           )}
                         >
-                          <group.icon className="h-5 w-5" />
+                          <group.icon className="h-5 w-5 text-brand" />
                           <span>{group.title}</span>
                           <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=closed]/coll:-rotate-90" />
                         </SidebarMenuButton>
