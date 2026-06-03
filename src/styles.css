@@ -85,13 +85,13 @@
   --input: oklch(0.92 0.015 95);
   --ring: oklch(0.72 0.18 148);
 
-  --sidebar: oklch(1 0 0);
+  --sidebar: oklch(0.97 0.025 85);
   --sidebar-foreground: oklch(0.27 0.08 260);
   --sidebar-primary: oklch(0.27 0.08 260);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.94 0.08 148 / 0.55);
+  --sidebar-accent: oklch(0.92 0.06 85);
   --sidebar-accent-foreground: oklch(0.27 0.08 260);
-  --sidebar-border: oklch(0.92 0.02 148);
+  --sidebar-border: oklch(0.88 0.03 85);
   --sidebar-ring: oklch(0.72 0.18 148);
 }
 

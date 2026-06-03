@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Trash2, Percent, Search, Calendar, Link2Off } from "lucide-react";
+import { Plus, Pencil, Trash2, Percent, Search, Calendar, Trash } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Input as NumInput } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -22,8 +23,6 @@ import {
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { DiscountFormModal } from "@/components/modals/discount-form-modal";
 import { DeleteConfirmModal } from "@/components/modals/delete-confirm-modal";
-import { LinkArticlesModal } from "@/components/modals/link-articles-modal";
-import { EditQuantityModal } from "@/components/modals/edit-quantity-modal";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/inventario/descuentos")({
@@ -184,29 +183,24 @@ function DiscountsPage() {
   );
 }
 
-type ItemRow = (typeof articles)[number] & { _minQty?: number };
-
 function DetailPanel({ discount }: { discount: Discount }) {
   const [artPage, setArtPage] = useState(1);
   const [addOpen, setAddOpen] = useState(false);
-  const [unlink, setUnlink] = useState<ItemRow | null>(null);
-  const [editQty, setEditQty] = useState<ItemRow | null>(null);
 
-  const items: ItemRow[] = useMemo(() => {
+  const items = useMemo(() => {
     if (discount.type === "category") {
-      return articles.filter((a) => a.category === discount.categoryName) as ItemRow[];
+      return articles.filter((a) => a.category === discount.categoryName);
     }
-    const out: ItemRow[] = [];
-    for (const c of discount.comboItems ?? []) {
-      const art = articles.find((a) => a.id === c.articleId);
-      if (art) out.push({ ...art, _minQty: c.minQuantity });
-    }
-    return out;
+    return (discount.comboItems ?? [])
+      .map((c) => {
+        const art = articles.find((a) => a.id === c.articleId);
+        return art ? { ...art, _minQty: c.minQuantity } : null;
+      })
+      .filter((x): x is NonNullable<typeof x> => Boolean(x));
   }, [discount]);
 
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
   const slice = items.slice((artPage - 1) * PAGE_SIZE, artPage * PAGE_SIZE);
-  const isCombo = discount.type === "combo";
 
   return (
     <section className="space-y-3 pt-2">
@@ -217,9 +211,11 @@ function DetailPanel({ discount }: { discount: Discount }) {
             {discount.name}
           </span>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
-          <Plus className="h-4 w-4" /> Agregar artículo
-        </Button>
+        {discount.type === "combo" && (
+          <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
+            <Plus className="h-4 w-4" /> Agregar artículo al combo
+          </Button>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-xl border bg-card">
@@ -228,18 +224,17 @@ function DetailPanel({ discount }: { discount: Discount }) {
             <TableRow className="bg-muted/40 hover:bg-muted/40">
               <TableHead className="text-navy">Código</TableHead>
               <TableHead className="text-navy">Nombre</TableHead>
-              {isCombo ? (
-                <>
-                  <TableHead className="text-navy">Precio Base</TableHead>
-                  <TableHead className="text-navy">Cant. Mín. Requerida</TableHead>
-                  <TableHead className="text-right text-navy">Acciones</TableHead>
-                </>
-              ) : (
+              {discount.type === "category" ? (
                 <>
                   <TableHead className="text-navy">Marca</TableHead>
                   <TableHead className="text-navy">Precio Base</TableHead>
                   <TableHead className="text-navy">Precio c/Desc.</TableHead>
                   <TableHead className="text-navy">Categoría</TableHead>
+                </>
+              ) : (
+                <>
+                  <TableHead className="text-navy">Precio Base</TableHead>
+                  <TableHead className="text-navy">Cant. Mín. Requerida</TableHead>
                   <TableHead className="text-right text-navy">Acciones</TableHead>
                 </>
               )}
@@ -252,62 +247,28 @@ function DetailPanel({ discount }: { discount: Discount }) {
                 <TableRow key={a.id} className="hover:bg-muted/30">
                   <TableCell className="font-mono text-xs">{a.code}</TableCell>
                   <TableCell className="font-medium text-navy">{a.name}</TableCell>
-                  {isCombo ? (
-                    <>
-                      <TableCell>{formatCurrency(a.price)}</TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center rounded-full bg-brand/15 px-3 py-0.5 text-sm font-semibold text-brand">
-                          {a._minQty ?? 1}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Editar cantidad"
-                            onClick={() => setEditQty(a)}
-                            className="h-8 w-8 text-brand hover:bg-brand/10"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Desvincular del combo"
-                            onClick={() => setUnlink(a)}
-                            className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
-                          >
-                            <Link2Off className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Eliminar"
-                            onClick={() => setUnlink(a)}
-                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </>
-                  ) : (
+                  {discount.type === "category" ? (
                     <>
                       <TableCell>{a.brand}</TableCell>
                       <TableCell>{formatCurrency(a.price)}</TableCell>
                       <TableCell className="font-semibold text-brand">{formatCurrency(discounted)}</TableCell>
                       <TableCell>{a.category}</TableCell>
+                    </>
+                  ) : (
+                    <>
+                      <TableCell>{formatCurrency(a.price)}</TableCell>
+                      <TableCell>
+                        <NumInput
+                          type="number"
+                          defaultValue={(a as { _minQty?: number })._minQty ?? 1}
+                          min={1}
+                          className="h-8 w-20"
+                        />
+                      </TableCell>
                       <TableCell>
                         <div className="flex justify-end">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Desvincular del descuento"
-                            onClick={() => setUnlink(a)}
-                            className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
-                          >
-                            <Link2Off className="h-4 w-4" />
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:bg-destructive/10">
+                            <Trash className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -318,7 +279,7 @@ function DetailPanel({ discount }: { discount: Discount }) {
             })}
             {slice.length === 0 && (
               <TableRow>
-                <TableCell colSpan={isCombo ? 5 : 7} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                   Sin artículos para mostrar.
                 </TableCell>
               </TableRow>
@@ -329,26 +290,8 @@ function DetailPanel({ discount }: { discount: Discount }) {
 
       <SimplePagination page={artPage} totalPages={totalPages} onPageChange={setArtPage} />
 
-      <LinkArticlesModal
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        targetLabel={`al descuento "${discount.name}"`}
-        excludeIds={items.map((i) => i.id)}
-        withQuantity={isCombo}
-      />
-      <EditQuantityModal
-        open={!!editQty}
-        onOpenChange={(v) => !v && setEditQty(null)}
-        articleName={editQty?.name}
-        initialQuantity={editQty?._minQty ?? 1}
-        onConfirm={() => setEditQty(null)}
-      />
-      <DeleteConfirmModal
-        open={!!unlink}
-        onOpenChange={(v) => !v && setUnlink(null)}
-        itemName={`el artículo "${unlink?.name}" de este descuento`}
-        onConfirm={() => setUnlink(null)}
-      />
+      {/* Reuse the discount edit modal in combo mode for quick add */}
+      <DiscountFormModal open={addOpen} onOpenChange={setAddOpen} mode="edit" discount={discount} />
     </section>
   );
 }

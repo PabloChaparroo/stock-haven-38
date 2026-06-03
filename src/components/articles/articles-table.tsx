@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, Pencil, Trash2, Link2Off } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,11 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   articles: Article[];
-  onUnlink?: (article: Article) => void;
-  unlinkTitle?: string;
 };
 
 const truncate = (s: string, n = 32) => (s.length > n ? s.slice(0, n).trimEnd() + "…" : s);
 
-export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular" }: Props) {
+export function ArticlesTable({ articles }: Props) {
   const [zoom, setZoom] = useState<Article | null>(null);
   const [details, setDetails] = useState<Article | null>(null);
   const [edit, setEdit] = useState<Article | null>(null);
@@ -91,17 +89,6 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular" 
                       <Button size="icon" variant="ghost" onClick={() => setDel(a)} className="h-8 w-8 text-destructive hover:bg-destructive/10">
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                      {onUnlink && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          title={unlinkTitle}
-                          onClick={() => onUnlink(a)}
-                          className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
-                        >
-                          <Link2Off className="h-4 w-4" />
-                        </Button>
-                      )}
                     </div>
                   </TableCell>
                 </TableRow>

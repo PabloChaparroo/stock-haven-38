@@ -7,10 +7,9 @@ import { articles, categories as initialCategories, type Category } from "@/lib/
 import { ArticlesTable } from "@/components/articles/articles-table";
 import { SimpleEntityModal } from "@/components/modals/simple-entity-modal";
 import { DeleteConfirmModal } from "@/components/modals/delete-confirm-modal";
-import { LinkArticlesModal } from "@/components/modals/link-articles-modal";
+import { ArticleFormModal } from "@/components/modals/article-form-modal";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { cn } from "@/lib/utils";
-import type { Article } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/inventario/categorias")({
   component: CategoriesPage,
@@ -27,7 +26,6 @@ function CategoriesPage() {
   const [catPage, setCatPage] = useState(1);
   const [artPage, setArtPage] = useState(1);
   const [addArticle, setAddArticle] = useState(false);
-  const [unlink, setUnlink] = useState<Article | null>(null);
 
   const filtered = useMemo(
     () => (selected ? articles.filter((a) => a.category === selected.name) : []),
@@ -107,7 +105,7 @@ function CategoriesPage() {
               <Plus className="h-4 w-4" /> Agregar artículo
             </Button>
           </div>
-          <ArticlesTable articles={artSlice} onUnlink={setUnlink} unlinkTitle="Desvincular de la categoría" />
+          <ArticlesTable articles={artSlice} />
           <SimplePagination page={artPage} totalPages={artTotal} onPageChange={setArtPage} />
         </section>
       )}
@@ -115,18 +113,7 @@ function CategoriesPage() {
       <SimpleEntityModal open={create} onOpenChange={setCreate} entity="Categoría" />
       <SimpleEntityModal open={!!edit} onOpenChange={(v) => !v && setEdit(null)} entity="Categoría" mode="edit" initial={edit ?? undefined} />
       <DeleteConfirmModal open={!!del} onOpenChange={(v) => !v && setDel(null)} itemName={`la categoría "${del?.name}"`} onConfirm={() => setDel(null)} />
-      <LinkArticlesModal
-        open={addArticle}
-        onOpenChange={setAddArticle}
-        targetLabel={selected ? `a la categoría "${selected.name}"` : undefined}
-        excludeIds={filtered.map((a) => a.id)}
-      />
-      <DeleteConfirmModal
-        open={!!unlink}
-        onOpenChange={(v) => !v && setUnlink(null)}
-        itemName={`el artículo "${unlink?.name}" de esta categoría`}
-        onConfirm={() => setUnlink(null)}
-      />
+      <ArticleFormModal open={addArticle} onOpenChange={setAddArticle} defaultCategory={selected?.name} />
     </div>
   );
 }
