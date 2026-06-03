@@ -196,7 +196,7 @@ function AjusteStockPage() {
 
                   {hasVariants && isOpen && (
                     <TableRow className="bg-muted/20 hover:bg-muted/20">
-                      <TableCell colSpan={8} className="py-3">
+                      <TableCell colSpan={9} className="py-3">
                         <div className="rounded-lg border bg-card p-3">
                           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand">
                             Variantes — {a.name}
