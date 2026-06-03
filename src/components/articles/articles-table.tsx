@@ -15,11 +15,12 @@ type Props = {
   onUnlink?: (article: Article) => void;
   unlinkTitle?: string;
   hideDelete?: boolean;
+  hideEdit?: boolean;
 };
 
 const truncate = (s: string, n = 32) => (s.length > n ? s.slice(0, n).trimEnd() + "…" : s);
 
-export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular", hideDelete }: Props) {
+export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular", hideDelete, hideEdit }: Props) {
   const [zoom, setZoom] = useState<Article | null>(null);
   const [details, setDetails] = useState<Article | null>(null);
   const [edit, setEdit] = useState<Article | null>(null);
@@ -112,9 +113,11 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
                         <Button size="icon" variant="ghost" onClick={() => setDetails(a)} className="h-8 w-8 text-navy hover:bg-navy/10">
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => setEdit(a)} className="h-8 w-8 text-brand hover:bg-brand/10">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
+                        {!hideEdit && (
+                          <Button size="icon" variant="ghost" onClick={() => setEdit(a)} className="h-8 w-8 text-brand hover:bg-brand/10">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
                         {!hideDelete && (
                           <Button size="icon" variant="ghost" onClick={() => setDel(a)} className="h-8 w-8 text-destructive hover:bg-destructive/10">
                             <Trash2 className="h-4 w-4" />
