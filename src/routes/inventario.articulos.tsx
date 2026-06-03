@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { articles, categories, type Article } from "@/lib/mock-data";
+import { articles, type Article } from "@/lib/mock-data";
 import { ArticlesTable } from "@/components/articles/articles-table";
 import { ArticleFormModal } from "@/components/modals/article-form-modal";
 import { SimplePagination } from "@/components/ui/simple-pagination";
