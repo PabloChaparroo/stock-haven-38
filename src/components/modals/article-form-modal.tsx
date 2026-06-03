@@ -65,6 +65,7 @@ export function ArticleFormModal({
   const [description, setDescription] = useState(article?.description ?? "");
   const [openCat, setOpenCat] = useState(false);
   const [openBrand, setOpenBrand] = useState(false);
+  const [openSupplierCreate, setOpenSupplierCreate] = useState(false);
 
   const isEdit = mode === "edit";
   // In edit mode, stock fields are locked UNLESS the user is adding NEW variants
