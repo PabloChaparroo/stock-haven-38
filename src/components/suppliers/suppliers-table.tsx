@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Eye, Pencil, Trash2, Check, Minus, Star, Mail } from "lucide-react";
+import { Eye, Pencil, Trash2, Check, Minus, Star, Mail, MapPin } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import type { Supplier } from "@/lib/mock-data";
 import { DeleteConfirmModal } from "@/components/modals/delete-confirm-modal";
@@ -26,6 +27,7 @@ function YesNo({ value }: { value: boolean }) {
 }
 
 function Rating({ value }: { value: number }) {
+  if (!value) return <span className="text-xs text-muted-foreground">Sin calificar</span>;
   return (
     <div className="flex gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
@@ -45,6 +47,8 @@ export function SuppliersTable({ suppliers }: Props) {
   const [view, setView] = useState<Supplier | null>(null);
   const [edit, setEdit] = useState<Supplier | null>(null);
   const [del, setDel] = useState<Supplier | null>(null);
+  const [details, setDetails] = useState<Supplier | null>(null);
+  const [addressOf, setAddressOf] = useState<Supplier | null>(null);
 
   return (
     <>
@@ -53,12 +57,10 @@ export function SuppliersTable({ suppliers }: Props) {
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
               <TableHead className="text-navy">Código</TableHead>
-              <TableHead className="text-navy">Nombre</TableHead>
-              <TableHead className="text-navy">Descripción</TableHead>
-              <TableHead className="text-navy">Teléfono</TableHead>
+              <TableHead className="text-navy">Proveedor</TableHead>
               <TableHead className="text-navy">Relación</TableHead>
               <TableHead className="text-navy">Dirección</TableHead>
-              <TableHead className="text-navy">Mail</TableHead>
+              <TableHead className="text-navy">Contacto</TableHead>
               <TableHead className="text-navy">CUIT</TableHead>
               <TableHead className="text-navy">Creación</TableHead>
               <TableHead className="text-navy">Cond. IVA</TableHead>

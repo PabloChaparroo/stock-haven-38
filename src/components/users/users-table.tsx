@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, ShieldCheck, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { Pencil, ShieldCheck, Trash2, CheckCircle2, XCircle, Mail } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -27,9 +27,9 @@ export function UsersTable({ users }: Props) {
             <TableRow className="bg-muted/40 hover:bg-muted/40">
               <TableHead className="text-navy">ID</TableHead>
               <TableHead className="text-navy">Nombre y apellido</TableHead>
+              <TableHead className="text-navy">Usuario</TableHead>
               <TableHead className="text-navy">DNI</TableHead>
-              <TableHead className="text-navy">Email</TableHead>
-              <TableHead className="text-navy">Teléfono</TableHead>
+              <TableHead className="text-navy">Contacto</TableHead>
               <TableHead className="text-navy">Creación</TableHead>
               <TableHead className="text-navy">Imagen</TableHead>
               <TableHead className="text-navy">Roles</TableHead>
@@ -54,9 +54,14 @@ export function UsersTable({ users }: Props) {
                     </button>
                   )}
                 </TableCell>
+                <TableCell className="font-mono text-xs text-navy">{u.username}</TableCell>
                 <TableCell className="font-mono text-xs">{u.dni}</TableCell>
-                <TableCell className="text-sm">{u.email}</TableCell>
-                <TableCell className="whitespace-nowrap text-sm">{u.phone}</TableCell>
+                <TableCell>
+                  <div className="text-sm">{u.phone}</div>
+                  <a href={`mailto:${u.email}`} className="inline-flex items-center gap-1 text-xs text-brand hover:underline">
+                    <Mail className="h-3 w-3" /> {u.email}
+                  </a>
+                </TableCell>
                 <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{u.createdAt}</TableCell>
                 <TableCell>
                   <button
@@ -108,20 +113,10 @@ export function UsersTable({ users }: Props) {
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => setEdit(u)}
-                      className="h-8 w-8 text-brand hover:bg-brand/10"
-                    >
+                    <Button size="icon" variant="ghost" onClick={() => setEdit(u)} className="h-8 w-8 text-brand hover:bg-brand/10">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => setDel(u)}
-                      className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                    >
+                    <Button size="icon" variant="ghost" onClick={() => setDel(u)} className="h-8 w-8 text-destructive hover:bg-destructive/10">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -139,12 +134,7 @@ export function UsersTable({ users }: Props) {
         </Table>
       </div>
 
-      <ImageZoomModal
-        open={!!zoom}
-        onOpenChange={(v) => !v && setZoom(null)}
-        src={zoom?.image}
-        alt={zoom?.firstName}
-      />
+      <ImageZoomModal open={!!zoom} onOpenChange={(v) => !v && setZoom(null)} src={zoom?.image} alt={zoom?.firstName} />
 
       <Dialog open={!!details} onOpenChange={(v) => !v && setDetails(null)}>
         <DialogContent className="max-w-md">

@@ -51,11 +51,10 @@ export function UserFormModal({ open, onOpenChange, mode = "create", user }: Pro
         >
           <Field label="Nombre" defaultValue={user?.firstName} placeholder="Nombre" />
           <Field label="Apellido" defaultValue={user?.lastName} placeholder="Apellido" />
+          <Field label="Usuario" defaultValue={user?.username} placeholder="usuario.login" />
           <Field label="DNI" defaultValue={user?.dni} placeholder="00.000.000" />
           <Field label="Teléfono" defaultValue={user?.phone} placeholder="+54 9 11 ..." />
-          <div className="sm:col-span-2">
-            <Field label="Email" type="email" defaultValue={user?.email} placeholder="usuario@inventia.com" />
-          </div>
+          <Field label="Email" type="email" defaultValue={user?.email} placeholder="usuario@inventia.com" />
 
           <div className="space-y-1.5 sm:col-span-2">
             <Label>Roles</Label>
