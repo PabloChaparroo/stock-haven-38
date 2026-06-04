@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { Eye, Pencil, Trash2, Link2Off, ChevronDown, ChevronUp, Layers } from "lucide-react";
+import { Eye, Pencil, Trash2, Link2Off, ChevronDown, ChevronUp } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -35,16 +35,17 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="w-10" />
               <TableHead className="text-navy">Código</TableHead>
               <TableHead className="text-navy">Nombre</TableHead>
               <TableHead className="text-navy">Marca</TableHead>
+              <TableHead className="text-navy">Categoría</TableHead>
               <TableHead className="text-navy">Precio</TableHead>
               <TableHead className="text-navy">Descripción</TableHead>
               <TableHead className="text-navy">Creación</TableHead>
               <TableHead className="text-navy">Imagen</TableHead>
               <TableHead className="text-navy">Stock</TableHead>
               <TableHead className="text-navy">Stock Seg.</TableHead>
-              <TableHead className="text-navy">Categoría</TableHead>
               <TableHead className="text-right text-navy">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -56,9 +57,25 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
               return (
                 <Fragment key={a.id}>
                   <TableRow className="hover:bg-muted/30">
+                    <TableCell>
+                      {hasVariants && (
+                        <button
+                          onClick={() => toggle(a.id)}
+                          className="grid h-7 w-7 place-items-center rounded-md text-navy hover:bg-navy/10"
+                          aria-label="Ver variantes"
+                        >
+                          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </button>
+                      )}
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{a.code}</TableCell>
                     <TableCell className="font-medium text-navy">{a.name}</TableCell>
                     <TableCell>{a.brand}</TableCell>
+                    <TableCell>
+                      <span className="inline-flex rounded-full bg-navy/10 px-2 py-0.5 text-xs font-medium text-navy">
+                        {a.category}
+                      </span>
+                    </TableCell>
                     <TableCell>{formatCurrency(a.price)}</TableCell>
                     <TableCell>
                       <Popover>
@@ -85,29 +102,26 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
                         <img src={a.image} alt={a.name} className="max-h-full max-w-full object-contain" />
                       </button>
                     </TableCell>
-
                     {hasVariants ? (
-                      <TableCell colSpan={2}>
-                        <button
-                          onClick={() => toggle(a.id)}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition",
-                            isOpen ? "bg-brand text-brand-foreground" : "bg-navy/10 text-navy hover:bg-navy/15",
-                          )}
-                        >
-                          <Layers className="h-3.5 w-3.5" />
-                          {a.variants!.length} variantes
-                          {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                        </button>
-                      </TableCell>
+                      <>
+                        <TableCell className="text-sm text-muted-foreground italic">Ver variantes</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">—</TableCell>
+                      </>
                     ) : (
                       <>
-                        <TableCell className={cn("font-semibold", low && "text-destructive")}>{a.stock}</TableCell>
+                        <TableCell>
+                          <span
+                            className={cn(
+                              "inline-flex rounded-full px-2.5 py-0.5 text-sm font-semibold",
+                              low ? "bg-destructive/10 text-destructive" : "bg-brand/10 text-navy",
+                            )}
+                          >
+                            {a.stock}
+                          </span>
+                        </TableCell>
                         <TableCell>{a.safetyStock || <span className="text-muted-foreground">—</span>}</TableCell>
                       </>
                     )}
-
-                    <TableCell>{a.category}</TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
                         <Button size="icon" variant="ghost" onClick={() => setDetails(a)} className="h-8 w-8 text-navy hover:bg-navy/10">
@@ -140,10 +154,10 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
 
                   {hasVariants && isOpen && (
                     <TableRow key={`${a.id}-vs`} className="bg-muted/20 hover:bg-muted/20">
-                      <TableCell colSpan={11} className="py-3">
+                      <TableCell colSpan={12} className="py-3">
                         <div className="rounded-lg border bg-card p-3">
                           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand">
-                            Stock por variante — {a.name}
+                            Variantes — {a.name}
                           </div>
                           <Table>
                             <TableHeader>
@@ -184,7 +198,7 @@ export function ArticlesTable({ articles, onUnlink, unlinkTitle = "Desvincular",
             })}
             {articles.length === 0 && (
               <TableRow>
-                <TableCell colSpan={11} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={12} className="py-10 text-center text-muted-foreground">
                   No hay artículos para mostrar.
                 </TableCell>
               </TableRow>
