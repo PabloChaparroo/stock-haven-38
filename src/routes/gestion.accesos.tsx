@@ -96,7 +96,10 @@ function AccesosPage() {
                 </div>
               </div>
               <h3 className="text-lg font-semibold text-navy">{r.name}</h3>
-              <div className="mt-1 text-xs text-muted-foreground">Creado: {r.createdAt}</div>
+              {r.description && (
+                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{r.description}</p>
+              )}
+              <div className="mt-2 text-xs text-muted-foreground">Creado: {r.createdAt}</div>
               <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-medium text-brand">
                 {r.permissions.length} permisos
               </div>
@@ -206,7 +209,7 @@ function RoleFormModal({
             {mode === "create" ? "Nuevo rol" : "Editar rol"}
           </DialogTitle>
           <DialogDescription>
-            Definí el nombre del rol. Los permisos se asignan desde la lista de abajo.
+            Definí el nombre y la descripción del rol. Los permisos se asignan desde la lista de abajo.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -217,8 +220,17 @@ function RoleFormModal({
           }}
         >
           <div className="space-y-1.5">
-            <Label>Nombre del rol</Label>
+            <Label>Nombre del rol *</Label>
             <Input defaultValue={role?.name} placeholder="Ej.: Supervisor" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Descripción</Label>
+            <textarea
+              defaultValue={role?.description}
+              placeholder="Breve descripción del propósito del rol"
+              rows={3}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+            />
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
