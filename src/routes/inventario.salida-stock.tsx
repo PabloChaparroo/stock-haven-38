@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Search, Save, X } from "lucide-react";
+import { Fragment, useMemo, useState } from "react";
+import { Search, Save, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,7 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { articles, type Article } from "@/lib/mock-data";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { articles } from "@/lib/mock-data";
+import { SimplePagination } from "@/components/ui/simple-pagination";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/inventario/salida-stock")({
@@ -21,51 +31,79 @@ export const Route = createFileRoute("/inventario/salida-stock")({
 
 const MOTIVOS = ["DAÑADO", "EXTRAVÍO", "PÉRDIDA", "RETIRO", "ROBO"] as const;
 type Motivo = (typeof MOTIVOS)[number];
+const PAGE_SIZE = 12;
 
 type Row = { motivo: Motivo | ""; cantidad: string };
+type RowsMap = Record<string, Row>; // key = articleId or `${articleId}:${variantId}`
 
 function SalidaStockPage() {
   const [q, setQ] = useState("");
-  const [selected, setSelected] = useState<Article | null>(null);
-  const [rows, setRows] = useState<Record<string, Row>>({});
+  const [page, setPage] = useState(1);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [rows, setRows] = useState<RowsMap>({});
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const suggestions = useMemo(() => {
+  const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s || selected) return [];
-    return articles
-      .filter((a) => a.name.toLowerCase().includes(s) || a.code.includes(s))
-      .slice(0, 6);
-  }, [q, selected]);
+    if (!s) return articles;
+    return articles.filter((a) =>
+      [a.code, a.name, a.brand, a.category].join(" ").toLowerCase().includes(s),
+    );
+  }, [q]);
 
-  const variants = selected?.variants?.length
-    ? selected.variants
-    : selected
-      ? [{ id: "__single", code: selected.code, name: "Único", description: "Sin variantes" }]
-      : [];
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const hasValidQty = Object.values(rows).some((r) => Number(r.cantidad) > 0);
-
-  const setRow = (id: string, patch: Partial<Row>) =>
+  const setRow = (key: string, patch: Partial<Row>) =>
     setRows((p) => {
-      const base: Row = p[id] ?? { motivo: "", cantidad: "" };
-      return { ...p, [id]: { ...base, ...patch } };
+      const base: Row = p[key] ?? { motivo: "", cantidad: "" };
+      return { ...p, [key]: { ...base, ...patch } };
     });
 
-  const selectArticle = (a: Article) => {
-    setSelected(a);
-    setQ("");
-    setRows({});
-  };
+  const toggle = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
-  const clear = () => {
-    setSelected(null);
-    setRows({});
-    setQ("");
-  };
+  // collect pending registers (qty > 0 with motivo)
+  const pending = useMemo(() => {
+    const out: Array<{
+      key: string;
+      article: (typeof articles)[number];
+      variantId?: string;
+      variantName?: string;
+      stock: number;
+      cantidad: number;
+      motivo: Motivo | "";
+    }> = [];
+    for (const [key, row] of Object.entries(rows)) {
+      const qty = Number(row.cantidad);
+      if (!Number.isFinite(qty) || qty <= 0) continue;
+      const [aid, vid] = key.split(":");
+      const article = articles.find((a) => a.id === aid);
+      if (!article) continue;
+      if (vid) {
+        const v = article.variants?.find((x) => x.id === vid);
+        const vs = article.variantStocks?.find((x) => x.variantId === vid);
+        out.push({
+          key,
+          article,
+          variantId: vid,
+          variantName: v?.name ?? vid,
+          stock: vs?.stock ?? 0,
+          cantidad: qty,
+          motivo: row.motivo,
+        });
+      } else {
+        out.push({ key, article, stock: article.stock, cantidad: qty, motivo: row.motivo });
+      }
+    }
+    return out;
+  }, [rows]);
 
-  const handleSave = () => {
-    toast.success("Salida de stock registrada correctamente.");
-    clear();
+  const canSave = pending.length > 0 && pending.every((p) => p.motivo && p.cantidad <= p.stock);
+
+  const handleConfirm = () => {
+    toast.success(`Se registraron ${pending.length} salida(s) de stock.`);
+    setRows({});
+    setConfirmOpen(false);
   };
 
   return (
@@ -73,117 +111,242 @@ function SalidaStockPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="h-7 w-1.5 rounded-full bg-brand" />
-          <h1 className="text-2xl font-bold text-navy">Registrar Salida de Stock</h1>
+          <h1 className="text-2xl font-bold text-navy">Salida de Stock</h1>
         </div>
         <Button
-          disabled={!hasValidQty}
-          onClick={handleSave}
+          disabled={!canSave}
+          onClick={() => setConfirmOpen(true)}
           className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" /> Guardar Salida
         </Button>
       </div>
 
-      <div className="relative mx-auto max-w-2xl">
-        <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar artículo por código o nombre para registrar salida..."
-          className="h-14 rounded-full pl-12 text-base shadow-sm focus-visible:ring-brand"
-        />
-        {suggestions.length > 0 && (
-          <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border bg-card shadow-lg">
-            {suggestions.map((a) => (
-              <button
-                key={a.id}
-                onClick={() => selectArticle(a)}
-                className="flex w-full items-center gap-3 border-b px-4 py-2.5 text-left last:border-b-0 hover:bg-brand/10"
-              >
-                <img src={a.image} alt="" className="h-9 w-9 rounded border bg-muted/40 object-contain p-1" />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-navy">{a.name}</div>
-                  <div className="text-xs text-muted-foreground font-mono">{a.code} · {a.brand}</div>
-                </div>
-              </button>
-            ))}
-          </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(1);
+            }}
+            placeholder="Buscar por código, nombre, marca o categoría"
+            className="h-10 rounded-full pl-10"
+          />
+        </div>
+        {pending.length > 0 && (
+          <span className="rounded-full bg-brand/15 px-3 py-1 text-xs font-semibold text-brand">
+            {pending.length} ítem(s) a retirar
+          </span>
         )}
       </div>
 
-      {selected && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-xl border bg-card p-4">
-            <div className="flex items-center gap-4">
-              <img src={selected.image} alt={selected.name} className="h-16 w-16 rounded-lg border bg-muted/40 object-contain p-1" />
-              <div>
-                <div className="text-lg font-bold text-navy">{selected.name}</div>
-                <div className="text-sm text-muted-foreground font-mono">{selected.code} · {selected.brand}</div>
-              </div>
-            </div>
-            <Button variant="ghost" size="icon" onClick={clear} className="text-navy hover:bg-navy/10">
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+      <div className="overflow-hidden rounded-xl border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="w-10" />
+              <TableHead className="text-navy">Código</TableHead>
+              <TableHead className="text-navy">Nombre</TableHead>
+              <TableHead className="text-navy">Marca</TableHead>
+              <TableHead className="text-navy">Categoría</TableHead>
+              <TableHead className="text-navy">Stock Actual</TableHead>
+              <TableHead className="text-navy">Motivo</TableHead>
+              <TableHead className="text-navy">Cantidad a Retirar</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {slice.map((a) => {
+              const hasVariants = (a.variants?.length ?? 0) > 0;
+              const isOpen = !!expanded[a.id];
+              const row = rows[a.id] ?? { motivo: "", cantidad: "" };
+              const qty = Number(row.cantidad);
+              const over = !hasVariants && qty > a.stock;
+              return (
+                <Fragment key={a.id}>
+                  <TableRow className="hover:bg-muted/30">
+                    <TableCell>
+                      {hasVariants && (
+                        <button
+                          onClick={() => toggle(a.id)}
+                          className="grid h-7 w-7 place-items-center rounded-md text-navy hover:bg-navy/10"
+                        >
+                          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </button>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">{a.code}</TableCell>
+                    <TableCell className="font-medium text-navy">{a.name}</TableCell>
+                    <TableCell>{a.brand}</TableCell>
+                    <TableCell>
+                      <span className="inline-flex rounded-full bg-navy/10 px-2 py-0.5 text-xs font-medium text-navy">
+                        {a.category}
+                      </span>
+                    </TableCell>
+                    {hasVariants ? (
+                      <>
+                        <TableCell className="text-sm italic text-muted-foreground">Ver variantes</TableCell>
+                        <TableCell className="text-sm italic text-muted-foreground">Por variante</TableCell>
+                        <TableCell className="text-sm italic text-muted-foreground">Por variante</TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell className="font-semibold">{a.stock}</TableCell>
+                        <TableCell>
+                          <select
+                            value={row.motivo}
+                            onChange={(e) => setRow(a.id, { motivo: e.target.value as Motivo })}
+                            className="h-9 w-40 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                          >
+                            <option value="">Seleccionar...</option>
+                            {MOTIVOS.map((m) => (
+                              <option key={m} value={m}>{m}</option>
+                            ))}
+                          </select>
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={a.stock}
+                            value={row.cantidad}
+                            onChange={(e) => setRow(a.id, { cantidad: e.target.value })}
+                            placeholder="0"
+                            className={cn("h-9 w-24 focus-visible:ring-brand", over && "border-destructive")}
+                          />
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
 
-          <div className="overflow-hidden rounded-xl border bg-card">
+                  {hasVariants && isOpen && (
+                    <TableRow className="bg-muted/20 hover:bg-muted/20">
+                      <TableCell colSpan={8} className="py-3">
+                        <div className="rounded-lg border bg-card p-3">
+                          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand">
+                            Variantes — {a.name}
+                          </div>
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-muted/40 hover:bg-muted/40">
+                                <TableHead className="h-8 text-navy">Variante</TableHead>
+                                <TableHead className="h-8 text-navy">Stock Actual</TableHead>
+                                <TableHead className="h-8 text-navy">Motivo</TableHead>
+                                <TableHead className="h-8 text-navy">Cantidad</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {a.variants!.map((v) => {
+                                const vs = a.variantStocks?.find((s) => s.variantId === v.id);
+                                const stock = vs?.stock ?? 0;
+                                const key = `${a.id}:${v.id}`;
+                                const vrow = rows[key] ?? { motivo: "", cantidad: "" };
+                                const vqty = Number(vrow.cantidad);
+                                const vover = vqty > stock;
+                                return (
+                                  <TableRow key={v.id}>
+                                    <TableCell className="font-medium text-navy">{v.name}</TableCell>
+                                    <TableCell className="font-semibold">{stock}</TableCell>
+                                    <TableCell>
+                                      <select
+                                        value={vrow.motivo}
+                                        onChange={(e) => setRow(key, { motivo: e.target.value as Motivo })}
+                                        className="h-9 w-40 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                                      >
+                                        <option value="">Seleccionar...</option>
+                                        {MOTIVOS.map((m) => (
+                                          <option key={m} value={m}>{m}</option>
+                                        ))}
+                                      </select>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        max={stock}
+                                        value={vrow.cantidad}
+                                        onChange={(e) => setRow(key, { cantidad: e.target.value })}
+                                        placeholder="0"
+                                        className={cn("h-9 w-24 focus-visible:ring-brand", vover && "border-destructive")}
+                                      />
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl text-navy">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              ¿Estás seguro que querés guardar la salida?
+            </DialogTitle>
+            <DialogDescription>
+              Se aplicarán los siguientes movimientos. Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-[50vh] overflow-y-auto rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/40 hover:bg-muted/40">
-                  <TableHead className="text-navy">Variante</TableHead>
-                  <TableHead className="text-navy">Stock Actual</TableHead>
-                  <TableHead className="text-navy">Motivo de Salida</TableHead>
-                  <TableHead className="text-navy">Cantidad a Retirar</TableHead>
+                  <TableHead className="text-navy">Artículo / Variante</TableHead>
+                  <TableHead className="text-navy">Motivo</TableHead>
+                  <TableHead className="text-right text-navy">A retirar</TableHead>
+                  <TableHead className="text-right text-navy">Stock resultante</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {variants.map((v) => {
-                  const isSingle = v.id === "__single";
-                  const stock = isSingle
-                    ? selected.stock
-                    : selected.variantStocks?.find((s) => s.variantId === v.id)?.stock ?? 0;
-                  const row = rows[v.id] ?? { motivo: "", cantidad: "" };
+                {pending.map((p) => {
+                  const resulting = p.stock - p.cantidad;
                   return (
-                    <TableRow key={v.id}>
-                      <TableCell className="font-medium text-navy">{v.name}</TableCell>
-                      <TableCell className="font-semibold">{stock}</TableCell>
+                    <TableRow key={p.key}>
                       <TableCell>
-                        <select
-                          value={row.motivo}
-                          onChange={(e) => setRow(v.id, { motivo: e.target.value as Motivo })}
-                          className="h-9 w-44 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-                        >
-                          <option value="">Seleccionar motivo...</option>
-                          {MOTIVOS.map((m) => (
-                            <option key={m} value={m}>{m}</option>
-                          ))}
-                        </select>
+                        <div className="font-medium text-navy">{p.article.name}</div>
+                        {p.variantName && (
+                          <div className="text-xs text-muted-foreground">Variante: {p.variantName}</div>
+                        )}
+                        <div className="text-xs font-mono text-muted-foreground">{p.article.code}</div>
                       </TableCell>
                       <TableCell>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={stock}
-                          value={row.cantidad}
-                          onChange={(e) => setRow(v.id, { cantidad: e.target.value })}
-                          placeholder="0"
-                          className="h-9 w-28 focus-visible:ring-brand"
-                        />
+                        <span className="rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-600">
+                          {p.motivo || "—"}
+                        </span>
                       </TableCell>
+                      <TableCell className="text-right font-semibold text-destructive">−{p.cantidad}</TableCell>
+                      <TableCell className="text-right font-semibold">{resulting}</TableCell>
                     </TableRow>
                   );
                 })}
               </TableBody>
             </Table>
           </div>
-        </div>
-      )}
 
-      {!selected && (
-        <div className="rounded-xl border border-dashed bg-muted/20 py-16 text-center text-muted-foreground">
-          Buscá y seleccioná un artículo para registrar su salida.
-        </div>
-      )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirm} className="bg-navy text-navy-foreground hover:bg-navy/90">
+              Confirmar Salida
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
