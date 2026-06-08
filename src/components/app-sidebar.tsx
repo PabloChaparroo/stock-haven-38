@@ -67,7 +67,8 @@ const groups: Group[] = [
     title: "Ventas",
     icon: DollarSign,
     items: [
-      { title: "Ventas", url: "/ventas", icon: DollarSign },
+      { title: "Punto de Venta", url: "/ventas", icon: DollarSign },
+      { title: "Historial de Ventas", url: "/ventas/historial", icon: ClipboardList },
       { title: "Facturación", url: "/ventas/facturacion", icon: Receipt },
       { title: "Clientes", url: "/ventas/clientes", icon: Users },
       { title: "Caja", url: "/ventas/caja", icon: Wallet },

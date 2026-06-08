@@ -408,3 +408,184 @@ export const clients: Client[] = Array.from({ length: 14 }).map((_, i) => ({
   createdAt: `${String((i % 28) + 1).padStart(2, "0")}/${String((i % 12) + 1).padStart(2, "0")}/2026`,
   active: i % 5 !== 0,
 }));
+
+// ============== Ventas / Pedidos / Facturas ==============
+
+export type PaymentMethod = "Efectivo" | "Tarjeta" | "QR/MercadoPago" | "Transferencia";
+
+export type SalePayment = {
+  method: PaymentMethod;
+  amount: number;
+  date: string;
+};
+
+export type SaleItem = {
+  articleId: string;
+  name: string;
+  category: string;
+  price: number;
+  quantity: number;
+  delivered: number;
+};
+
+export type SaleStatus = "Pagado" | "Parcial" | "Pendiente" | "Anulado";
+
+export type SaleDelivery = {
+  id: string;
+  date: string;
+  items: { articleId: string; name: string; quantity: number }[];
+};
+
+export type Sale = {
+  id: string;
+  number: string;
+  date: string;
+  clientId?: string;
+  clientName: string;
+  clientDoc?: string;
+  items: SaleItem[];
+  subtotal: number;
+  total: number;
+  paid: number;
+  status: SaleStatus;
+  payments: SalePayment[];
+  invoiceNumber?: string;
+  deliveries: SaleDelivery[];
+};
+
+const sampleArticles = articles.slice(0, 6);
+
+export const sales: Sale[] = Array.from({ length: 14 }).map((_, i) => {
+  const items: SaleItem[] = [sampleArticles[i % sampleArticles.length], sampleArticles[(i + 2) % sampleArticles.length]].map((a, idx) => ({
+    articleId: a.id,
+    name: a.name,
+    category: a.category,
+    price: a.price / 100,
+    quantity: ((i + idx) % 4) + 1,
+    delivered: (((i + idx) % 4) + 1) - (i % 3 === 0 ? 1 : 0),
+  }));
+  const total = items.reduce((s, it) => s + it.price * it.quantity, 0);
+  const statusCycle: SaleStatus[] = ["Pagado", "Parcial", "Pendiente", "Pagado", "Anulado"];
+  const status = statusCycle[i % statusCycle.length];
+  const paid = status === "Pagado" ? total : status === "Parcial" ? Math.round(total * 0.6) : status === "Anulado" ? total : 0;
+  const clientList = clients.slice(0, 6);
+  const c = i % 3 === 0 ? undefined : clientList[i % clientList.length];
+  return {
+    id: `s${i + 1}`,
+    number: `VTA-${String(45 - i).padStart(5, "0")}`,
+    date: `${String(((i % 6) + 1)).padStart(2, "0")}/06/2026`,
+    clientId: c?.id,
+    clientName: c ? `${c.firstName} ${c.lastName}` : "Consumidor Final",
+    clientDoc: c?.dni,
+    items,
+    subtotal: total,
+    total,
+    paid,
+    status,
+    payments:
+      paid > 0
+        ? [{ method: (["Efectivo", "Tarjeta", "QR/MercadoPago", "Transferencia"] as PaymentMethod[])[i % 4], amount: paid, date: `${String(((i % 6) + 1)).padStart(2, "0")}/06/2026` }]
+        : [],
+    invoiceNumber: i % 2 === 0 ? `0001-${String(45 - i).padStart(5, "0")}` : undefined,
+    deliveries:
+      i % 3 === 0
+        ? [
+            {
+              id: `del-${i}`,
+              date: `${String(((i % 6) + 1)).padStart(2, "0")}/06/2026`,
+              items: items.map((it) => ({ articleId: it.articleId, name: it.name, quantity: Math.max(0, it.delivered) })),
+            },
+          ]
+        : [],
+  };
+});
+
+// ============== Pedidos pendientes ==============
+
+export type PendingOrder = {
+  id: string;
+  number: string;
+  date: string;
+  clientName: string;
+  items: SaleItem[];
+  total: number;
+};
+
+export const pendingOrders: PendingOrder[] = Array.from({ length: 8 }).map((_, i) => {
+  const items: SaleItem[] = [sampleArticles[i % sampleArticles.length]].map((a) => ({
+    articleId: a.id,
+    name: a.name,
+    category: a.category,
+    price: a.price / 100,
+    quantity: (i % 3) + 1,
+    delivered: 0,
+  }));
+  const total = items.reduce((s, it) => s + it.price * it.quantity, 0);
+  return {
+    id: `o${i + 1}`,
+    number: `PED-${String(100 + i).padStart(4, "0")}`,
+    date: `${String((i % 28) + 1).padStart(2, "0")}/06/2026`,
+    clientName: i % 2 === 0 ? "Consumidor Final" : `${clients[i % clients.length].firstName} ${clients[i % clients.length].lastName}`,
+    items,
+    total,
+  };
+});
+
+// ============== Facturas AFIP ==============
+
+export type InvoiceType = "A" | "B" | "C";
+export type InvoiceStatus = "Emitida" | "Con NC" | "Anulada";
+
+export type Invoice = {
+  id: string;
+  type: InvoiceType;
+  pointOfSale: string;
+  number: string;
+  saleNumber: string;
+  clientName: string;
+  date: string;
+  total: number;
+  cae: string;
+  caeDue: string;
+  status: InvoiceStatus;
+};
+
+export const invoices: Invoice[] = sales
+  .filter((s) => s.invoiceNumber)
+  .map((s, i) => ({
+    id: `inv-${i + 1}`,
+    type: (["A", "B", "C"] as InvoiceType[])[i % 3],
+    pointOfSale: "0001",
+    number: s.invoiceNumber!.split("-")[1],
+    saleNumber: s.number,
+    clientName: s.clientName,
+    date: s.date,
+    total: s.total,
+    cae: `7412${String(1000 + i)}3219`,
+    caeDue: `${String((i % 28) + 1).padStart(2, "0")}/07/2026`,
+    status: i % 4 === 0 ? "Con NC" : i % 5 === 0 ? "Anulada" : "Emitida",
+  }));
+
+export const pendingInvoiceSales = sales.filter((s) => !s.invoiceNumber && s.status !== "Anulado");
+
+export type CreditNote = {
+  id: string;
+  number: string;
+  invoiceNumber: string;
+  clientName: string;
+  date: string;
+  total: number;
+  reason: string;
+};
+
+export const creditNotes: CreditNote[] = invoices
+  .filter((i) => i.status === "Con NC")
+  .map((iv, i) => ({
+    id: `nc-${i + 1}`,
+    number: `NC-0001-${String(1 + i).padStart(5, "0")}`,
+    invoiceNumber: `${iv.pointOfSale}-${iv.number}`,
+    clientName: iv.clientName,
+    date: iv.date,
+    total: Math.round(iv.total * 0.3),
+    reason: "Devolución parcial",
+  }));
