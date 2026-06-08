@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VentasIndexRouteImport } from './routes/ventas.index'
+import { Route as VentasHistorialRouteImport } from './routes/ventas.historial'
+import { Route as VentasHistorialRouteImport } from './routes/ventas.historial'
 import { Route as VentasFacturacionRouteImport } from './routes/ventas.facturacion'
 import { Route as VentasClientesRouteImport } from './routes/ventas.clientes'
 import { Route as VentasCajaRouteImport } from './routes/ventas.caja'
@@ -40,6 +42,16 @@ const IndexRoute = IndexRouteImport.update({
 const VentasIndexRoute = VentasIndexRouteImport.update({
   id: '/ventas/',
   path: '/ventas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VentasHistorialRoute = VentasHistorialRouteImport.update({
+  id: '/ventas/historial',
+  path: '/ventas/historial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VentasHistorialRoute = VentasHistorialRouteImport.update({
+  id: '/ventas/historial',
+  path: '/ventas/historial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VentasFacturacionRoute = VentasFacturacionRouteImport.update({
@@ -165,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/ventas/caja': typeof VentasCajaRoute
   '/ventas/clientes': typeof VentasClientesRoute
   '/ventas/facturacion': typeof VentasFacturacionRoute
+  '/ventas/historial': typeof VentasHistorialRoute
   '/ventas/': typeof VentasIndexRoute
 }
 export interface FileRoutesByTo {
@@ -189,6 +202,7 @@ export interface FileRoutesByTo {
   '/ventas/caja': typeof VentasCajaRoute
   '/ventas/clientes': typeof VentasClientesRoute
   '/ventas/facturacion': typeof VentasFacturacionRoute
+  '/ventas/historial': typeof VentasHistorialRoute
   '/ventas': typeof VentasIndexRoute
 }
 export interface FileRoutesById {
@@ -214,6 +228,7 @@ export interface FileRoutesById {
   '/ventas/caja': typeof VentasCajaRoute
   '/ventas/clientes': typeof VentasClientesRoute
   '/ventas/facturacion': typeof VentasFacturacionRoute
+  '/ventas/historial': typeof VentasHistorialRoute
   '/ventas/': typeof VentasIndexRoute
 }
 export interface FileRouteTypes {
@@ -240,6 +255,7 @@ export interface FileRouteTypes {
     | '/ventas/caja'
     | '/ventas/clientes'
     | '/ventas/facturacion'
+    | '/ventas/historial'
     | '/ventas/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -264,6 +280,7 @@ export interface FileRouteTypes {
     | '/ventas/caja'
     | '/ventas/clientes'
     | '/ventas/facturacion'
+    | '/ventas/historial'
     | '/ventas'
   id:
     | '__root__'
@@ -288,6 +305,7 @@ export interface FileRouteTypes {
     | '/ventas/caja'
     | '/ventas/clientes'
     | '/ventas/facturacion'
+    | '/ventas/historial'
     | '/ventas/'
   fileRoutesById: FileRoutesById
 }
@@ -313,6 +331,7 @@ export interface RootRouteChildren {
   VentasCajaRoute: typeof VentasCajaRoute
   VentasClientesRoute: typeof VentasClientesRoute
   VentasFacturacionRoute: typeof VentasFacturacionRoute
+  VentasHistorialRoute: typeof VentasHistorialRoute
   VentasIndexRoute: typeof VentasIndexRoute
 }
 
@@ -330,6 +349,13 @@ declare module '@tanstack/react-router' {
       path: '/ventas'
       fullPath: '/ventas/'
       preLoaderRoute: typeof VentasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ventas/historial': {
+      id: '/ventas/historial'
+      path: '/ventas/historial'
+      fullPath: '/ventas/historial'
+      preLoaderRoute: typeof VentasHistorialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ventas/facturacion': {
@@ -497,6 +523,7 @@ const rootRouteChildren: RootRouteChildren = {
   VentasCajaRoute: VentasCajaRoute,
   VentasClientesRoute: VentasClientesRoute,
   VentasFacturacionRoute: VentasFacturacionRoute,
+  VentasHistorialRoute: VentasHistorialRoute,
   VentasIndexRoute: VentasIndexRoute,
 }
 export const routeTree = rootRouteImport
