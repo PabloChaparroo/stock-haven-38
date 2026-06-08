@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VentasIndexRouteImport } from './routes/ventas.index'
 import { Route as VentasHistorialRouteImport } from './routes/ventas.historial'
-import { Route as VentasHistorialRouteImport } from './routes/ventas.historial'
 import { Route as VentasFacturacionRouteImport } from './routes/ventas.facturacion'
 import { Route as VentasClientesRouteImport } from './routes/ventas.clientes'
 import { Route as VentasCajaRouteImport } from './routes/ventas.caja'
@@ -42,11 +41,6 @@ const IndexRoute = IndexRouteImport.update({
 const VentasIndexRoute = VentasIndexRouteImport.update({
   id: '/ventas/',
   path: '/ventas/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VentasHistorialRoute = VentasHistorialRouteImport.update({
-  id: '/ventas/historial',
-  path: '/ventas/historial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VentasHistorialRoute = VentasHistorialRouteImport.update({
