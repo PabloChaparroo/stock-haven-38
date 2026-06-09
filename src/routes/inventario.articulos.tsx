@@ -57,9 +57,56 @@ function ArticlesPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="gap-2 border-border/70">
-            <Filter className="h-4 w-4" /> Filtrar
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn("gap-2 border-border/70", stockSort && "border-brand text-brand")}
+              >
+                <Filter className="h-4 w-4" />
+                Filtrar
+                {stockSort && <span className="ml-1 inline-block h-2 w-2 rounded-full bg-brand" />}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuLabel>Ordenar por stock</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setStockSort("high");
+                  setPage(1);
+                }}
+                className={cn(stockSort === "high" && "bg-brand/10 text-navy")}
+              >
+                <ArrowUpDown className="mr-2 h-4 w-4" />
+                Mayor stock
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setStockSort("low");
+                  setPage(1);
+                }}
+                className={cn(stockSort === "low" && "bg-brand/10 text-navy")}
+              >
+                <ArrowDownUp className="mr-2 h-4 w-4" />
+                Menor stock
+              </DropdownMenuItem>
+              {stockSort && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setStockSort(null);
+                      setPage(1);
+                    }}
+                  >
+                    Limpiar filtro
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button onClick={() => setOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
             <Plus className="h-4 w-4" /> Agregar Artículo
           </Button>
