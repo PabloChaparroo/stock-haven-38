@@ -17,7 +17,10 @@ import { ArticleFormModal } from "@/components/modals/article-form-modal";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { cn } from "@/lib/utils";
 
+import { requirePermissions, PERMISSIONS } from "@/core/auth";
+
 export const Route = createFileRoute("/inventario/articulos")({
+  beforeLoad: requirePermissions([PERMISSIONS.INVENTARIO_VIEW]),
   component: ArticlesPage,
   head: () => ({ meta: [{ title: "Artículos — Inventia" }] }),
 });

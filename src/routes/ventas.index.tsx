@@ -10,7 +10,10 @@ import { LoadOrderModal } from "@/components/pos/load-order-modal";
 import { FinalizeSaleModal } from "@/components/pos/finalize-sale-modal";
 import { SuccessModal } from "@/components/pos/success-modal";
 
+import { requirePermissions, PERMISSIONS } from "@/core/auth";
+
 export const Route = createFileRoute("/ventas/")({
+  beforeLoad: requirePermissions([PERMISSIONS.VENTA_CREATE]),
   component: POSPage,
   head: () => ({ meta: [{ title: "Punto de Venta — Inventia" }] }),
 });
