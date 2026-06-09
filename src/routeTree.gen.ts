@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as R403RouteImport } from './routes/403'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VentasIndexRouteImport } from './routes/ventas.index'
 import { Route as VentasHistorialRouteImport } from './routes/ventas.historial'
@@ -33,6 +35,16 @@ import { Route as ComprasProveedoresRouteImport } from './routes/compras.proveed
 import { Route as ComprasOrdenesRouteImport } from './routes/compras.ordenes'
 import { Route as ComprasFacturacionRouteImport } from './routes/compras.facturacion'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R403Route = R403RouteImport.update({
+  id: '/403',
+  path: '/403',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -151,6 +163,8 @@ const ComprasFacturacionRoute = ComprasFacturacionRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/403': typeof R403Route
+  '/auth': typeof AuthRoute
   '/compras/facturacion': typeof ComprasFacturacionRoute
   '/compras/ordenes': typeof ComprasOrdenesRoute
   '/compras/proveedores': typeof ComprasProveedoresRoute
@@ -176,6 +190,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/403': typeof R403Route
+  '/auth': typeof AuthRoute
   '/compras/facturacion': typeof ComprasFacturacionRoute
   '/compras/ordenes': typeof ComprasOrdenesRoute
   '/compras/proveedores': typeof ComprasProveedoresRoute
@@ -202,6 +218,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/403': typeof R403Route
+  '/auth': typeof AuthRoute
   '/compras/facturacion': typeof ComprasFacturacionRoute
   '/compras/ordenes': typeof ComprasOrdenesRoute
   '/compras/proveedores': typeof ComprasProveedoresRoute
@@ -229,6 +247,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/403'
+    | '/auth'
     | '/compras/facturacion'
     | '/compras/ordenes'
     | '/compras/proveedores'
@@ -254,6 +274,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/403'
+    | '/auth'
     | '/compras/facturacion'
     | '/compras/ordenes'
     | '/compras/proveedores'
@@ -279,6 +301,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/403'
+    | '/auth'
     | '/compras/facturacion'
     | '/compras/ordenes'
     | '/compras/proveedores'
@@ -305,6 +329,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R403Route: typeof R403Route
+  AuthRoute: typeof AuthRoute
   ComprasFacturacionRoute: typeof ComprasFacturacionRoute
   ComprasOrdenesRoute: typeof ComprasOrdenesRoute
   ComprasProveedoresRoute: typeof ComprasProveedoresRoute
@@ -331,6 +357,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/403': {
+      id: '/403'
+      path: '/403'
+      fullPath: '/403'
+      preLoaderRoute: typeof R403RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -497,6 +537,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R403Route: R403Route,
+  AuthRoute: AuthRoute,
   ComprasFacturacionRoute: ComprasFacturacionRoute,
   ComprasOrdenesRoute: ComprasOrdenesRoute,
   ComprasProveedoresRoute: ComprasProveedoresRoute,
