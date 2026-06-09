@@ -28,14 +28,22 @@ function ArticlesPage() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
+  const [stockSort, setStockSort] = useState<"high" | "low" | null>(null);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return articles;
-    return articles.filter((a) =>
-      [a.code, a.name, a.brand, a.category, a.description].join(" ").toLowerCase().includes(s),
-    );
-  }, [q]);
+    let result = s
+      ? articles.filter((a) =>
+          [a.code, a.name, a.brand, a.category, a.description].join(" ").toLowerCase().includes(s),
+        )
+      : [...articles];
+
+    if (stockSort) {
+      result.sort((a, b) => (stockSort === "high" ? b.stock - a.stock : a.stock - b.stock));
+    }
+
+    return result;
+  }, [q, stockSort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
