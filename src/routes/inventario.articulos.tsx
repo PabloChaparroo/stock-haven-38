@@ -1,12 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Filter, Plus, Search } from "lucide-react";
+import { ArrowDownUp, ArrowUpDown, Filter, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { articles } from "@/lib/mock-data";
 import { ArticlesTable } from "@/components/articles/articles-table";
 import { ArticleFormModal } from "@/components/modals/article-form-modal";
 import { SimplePagination } from "@/components/ui/simple-pagination";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/inventario/articulos")({
   component: ArticlesPage,
