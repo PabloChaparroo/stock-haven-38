@@ -30,7 +30,7 @@ export function POSPage() {
 
   const [finalizeOpen, setFinalizeOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
-  const [successData, setSuccessData] = useState<{ total: number; invoice?: string; cae?: string; email?: string } | null>(null);
+  const [successData, setSuccessData] = useState<{ total: number; invoice?: string; cae?: string; remito?: string; email?: string } | null>(null);
 
   const [detailArticle, setDetailArticle] = useState<Article | undefined>();
   const [zoomImg, setZoomImg] = useState<{ src: string; alt: string } | null>(null);
