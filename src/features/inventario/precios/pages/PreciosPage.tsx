@@ -84,7 +84,9 @@ export function PreciosPage() {
     if (!newName.trim()) return;
     const l: SavedList = {
       id: `l${Date.now()}`,
+      code: `LST-${String(lists.length + 1).padStart(3, "0")}`,
       name: newName.trim(),
+      active: true,
       articleIds: [...newSelected],
     };
     setLists((p) => [...p, l]);
