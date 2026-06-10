@@ -24,22 +24,16 @@ const STATUS_STYLES: Record<PurchaseOrderStatus, string> = {
   Cancelada: "bg-destructive/15 text-destructive",
 };
 
-function toISO(d: string) {
-  const [dd, mm, yyyy] = d.split("/");
-  return `${yyyy}-${mm}-${dd}`;
-}
-function inRange(d: string, from: string, to: string) {
-  const iso = toISO(d);
-  if (from && iso < from) return false;
-  if (to && iso > to) return false;
-  return true;
-}
+const parseDate = (s: string) => {
+  const [d, m, y] = s.split("/").map(Number);
+  return new Date(y, m - 1, d);
+};
 
 export function OrdenesPage() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"all" | PurchaseOrderStatus>("all");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [fromDate, setFromDate] = useState<Date | undefined>();
+  const [toDate, setToDate] = useState<Date | undefined>();
   const [page, setPage] = useState(1);
 
   const [createOpen, setCreateOpen] = useState(false);
