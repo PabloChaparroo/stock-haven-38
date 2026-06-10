@@ -30,7 +30,7 @@ export function POSPage() {
 
   const [finalizeOpen, setFinalizeOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
-  const [successData, setSuccessData] = useState<{ total: number; invoice?: string; cae?: string; email?: string } | null>(null);
+  const [successData, setSuccessData] = useState<{ total: number; invoice?: string; cae?: string; remito?: string; email?: string } | null>(null);
 
   const [detailArticle, setDetailArticle] = useState<Article | undefined>();
   const [zoomImg, setZoomImg] = useState<{ src: string; alt: string } | null>(null);
@@ -88,9 +88,9 @@ export function POSPage() {
 
   const removeLine = (id: string) => setCart((prev) => prev.filter((l) => l.articleId !== id));
 
-  const handleConfirmed = (r: { paid: number; clientName: string; clientEmail?: string; afip: boolean; invoice?: { number: string; cae: string } }) => {
+  const handleConfirmed = (r: { paid: number; clientName: string; clientEmail?: string; afip: boolean; invoice?: { number: string; cae: string }; remito?: { number: string; kind: "Total" | "Parcial" } }) => {
     setFinalizeOpen(false);
-    setSuccessData({ total: subtotal, invoice: r.invoice?.number, cae: r.invoice?.cae, email: r.clientEmail });
+    setSuccessData({ total: subtotal, invoice: r.invoice?.number, cae: r.invoice?.cae, remito: r.remito?.number, email: r.clientEmail });
     setSuccessOpen(true);
   };
 
@@ -309,6 +309,7 @@ export function POSPage() {
           total={successData.total}
           invoiceNumber={successData.invoice}
           cae={successData.cae}
+          remitoNumber={successData.remito}
           email={successData.email}
           onNewSale={() => setCart([])}
         />
