@@ -326,6 +326,7 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
         article={articleForSuppliers}
         onClose={() => setArticleForSuppliers(null)}
         onSelectSupplier={(sup) => {
+          setPreselectedArticleId(articleForSuppliers?.id ?? null);
           setArticleForSuppliers(null);
           setSupplierCatalog(sup);
         }}
@@ -335,10 +336,12 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
       <SupplierCatalogModal
         supplier={supplierCatalog}
         existing={items}
-        onClose={() => setSupplierCatalog(null)}
+        preselectedArticleId={preselectedArticleId}
+        onClose={() => { setSupplierCatalog(null); setPreselectedArticleId(null); }}
         onSave={(sup, ids) => {
           addFromCatalog(sup, ids);
           setSupplierCatalog(null);
+          setPreselectedArticleId(null);
           toast.success(`${ids.length} artículo(s) agregados desde ${sup.name}`);
         }}
       />
