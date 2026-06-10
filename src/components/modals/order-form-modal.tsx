@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SimplePagination } from "@/components/ui/simple-pagination";
 import { ShoppingCart, Search, Trash2, Star, Eye, Pencil, Package, Truck, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -39,7 +40,7 @@ function suppliersForArticle(articleId: string): Supplier[] {
 }
 function articlesForSupplier(supplierId: string): Article[] {
   const n = Number(supplierId);
-  return allArticles.filter((_, i) => (i + n) % 3 !== 0).slice(0, 14);
+  return allArticles.filter((_, i) => (i + n) % 3 !== 0);
 }
 function pricingFor(articleId: string, supplierId: string) {
   const aN = Number(articleId);
@@ -58,6 +59,7 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
   // sub-modals
   const [articleForSuppliers, setArticleForSuppliers] = useState<Article | null>(null);
   const [supplierCatalog, setSupplierCatalog] = useState<Supplier | null>(null);
+  const [preselectedArticleId, setPreselectedArticleId] = useState<string | null>(null);
 
   const articleResults = useMemo(() => {
     const s = search.trim().toLowerCase();
@@ -325,6 +327,7 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
         article={articleForSuppliers}
         onClose={() => setArticleForSuppliers(null)}
         onSelectSupplier={(sup) => {
+          setPreselectedArticleId(articleForSuppliers?.id ?? null);
           setArticleForSuppliers(null);
           setSupplierCatalog(sup);
         }}
@@ -334,10 +337,12 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
       <SupplierCatalogModal
         supplier={supplierCatalog}
         existing={items}
-        onClose={() => setSupplierCatalog(null)}
+        preselectedArticleId={preselectedArticleId}
+        onClose={() => { setSupplierCatalog(null); setPreselectedArticleId(null); }}
         onSave={(sup, ids) => {
           addFromCatalog(sup, ids);
           setSupplierCatalog(null);
+          setPreselectedArticleId(null);
           toast.success(`${ids.length} artículo(s) agregados desde ${sup.name}`);
         }}
       />
@@ -422,31 +427,45 @@ function ArticleSuppliersModal({
 function SupplierCatalogModal({
   supplier,
   existing,
+  preselectedArticleId,
   onClose,
   onSave,
 }: {
   supplier: Supplier | null;
   existing: DraftItem[];
+  preselectedArticleId?: string | null;
   onClose: () => void;
   onSave: (s: Supplier, ids: string[]) => void;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 8;
 
-  // reset on open
+  // reset on open + preselect article
   const openKey = supplier?.id ?? "";
-  // simple reset via useMemo trick
   useMemo(() => {
-    setSelected(new Set());
+    const next = new Set<string>();
+    if (preselectedArticleId) next.add(preselectedArticleId);
+    setSelected(next);
     setQ("");
-  }, [openKey]);
+    setPage(1);
+  }, [openKey, preselectedArticleId]);
 
   if (!supplier) return null;
-  const catalog = articlesForSupplier(supplier.id);
+  let catalog = articlesForSupplier(supplier.id);
+  // ensure preselected article appears in catalog
+  if (preselectedArticleId && !catalog.find((a) => a.id === preselectedArticleId)) {
+    const extra = allArticles.find((a) => a.id === preselectedArticleId);
+    if (extra) catalog = [extra, ...catalog];
+  }
   const filtered = catalog.filter((a) => {
     const s = q.trim().toLowerCase();
     return !s || a.name.toLowerCase().includes(s) || a.code.includes(s);
   });
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const toggle = (id: string) => {
     const next = new Set(selected);
@@ -464,7 +483,7 @@ function SupplierCatalogModal({
 
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar en catálogo..." className="h-9 pl-9" />
+          <Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder="Buscar en catálogo..." className="h-9 pl-9" />
         </div>
 
         <div className="overflow-hidden rounded-xl border">
@@ -478,11 +497,12 @@ function SupplierCatalogModal({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((a) => {
+              {paged.map((a) => {
                 const { unitPrice, deliveryDays } = pricingFor(a.id, supplier.id);
                 const already = existing.some((it) => it.articleId === a.id && it.supplierId === supplier.id);
+                const isPreselected = a.id === preselectedArticleId;
                 return (
-                  <TableRow key={a.id} className={already ? "opacity-60" : ""}>
+                  <TableRow key={a.id} className={cn(already ? "opacity-60" : "", isPreselected ? "bg-brand/5" : "")}>
                     <TableCell>
                       <Checkbox
                         checked={selected.has(a.id) || already}
@@ -491,7 +511,10 @@ function SupplierCatalogModal({
                       />
                     </TableCell>
                     <TableCell>
-                      <div className="font-medium text-navy">{a.name}</div>
+                      <div className="font-medium text-navy">
+                        {a.name}
+                        {isPreselected && <span className="ml-2 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand">Seleccionado</span>}
+                      </div>
                       <div className="font-mono text-[11px] text-muted-foreground">{a.code}{already ? " · ya agregado" : ""}</div>
                     </TableCell>
                     <TableCell>
@@ -506,6 +529,8 @@ function SupplierCatalogModal({
             </TableBody>
           </Table>
         </div>
+
+        <SimplePagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
 
         <div className="flex items-center justify-between pt-2">
           <span className="text-xs text-muted-foreground">{selected.size} artículo(s) seleccionado(s)</span>
