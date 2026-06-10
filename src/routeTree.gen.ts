@@ -32,9 +32,11 @@ import { Route as GestionUsuariosRouteImport } from './routes/gestion.usuarios'
 import { Route as GestionMovimientosRouteImport } from './routes/gestion.movimientos'
 import { Route as GestionAlmacenRouteImport } from './routes/gestion.almacen'
 import { Route as GestionAccesosRouteImport } from './routes/gestion.accesos'
+import { Route as ComprasRecepcionesRouteImport } from './routes/compras.recepciones'
 import { Route as ComprasProveedoresRouteImport } from './routes/compras.proveedores'
 import { Route as ComprasOrdenesRouteImport } from './routes/compras.ordenes'
 import { Route as ComprasFacturacionRouteImport } from './routes/compras.facturacion'
+import { Route as ComprasCuentasPorPagarRouteImport } from './routes/compras.cuentas-por-pagar'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -151,6 +153,11 @@ const GestionAccesosRoute = GestionAccesosRouteImport.update({
   path: '/gestion/accesos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComprasRecepcionesRoute = ComprasRecepcionesRouteImport.update({
+  id: '/compras/recepciones',
+  path: '/compras/recepciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComprasProveedoresRoute = ComprasProveedoresRouteImport.update({
   id: '/compras/proveedores',
   path: '/compras/proveedores',
@@ -166,14 +173,21 @@ const ComprasFacturacionRoute = ComprasFacturacionRouteImport.update({
   path: '/compras/facturacion',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComprasCuentasPorPagarRoute = ComprasCuentasPorPagarRouteImport.update({
+  id: '/compras/cuentas-por-pagar',
+  path: '/compras/cuentas-por-pagar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/403': typeof R403Route
   '/auth': typeof AuthRoute
+  '/compras/cuentas-por-pagar': typeof ComprasCuentasPorPagarRoute
   '/compras/facturacion': typeof ComprasFacturacionRoute
   '/compras/ordenes': typeof ComprasOrdenesRoute
   '/compras/proveedores': typeof ComprasProveedoresRoute
+  '/compras/recepciones': typeof ComprasRecepcionesRoute
   '/gestion/accesos': typeof GestionAccesosRoute
   '/gestion/almacen': typeof GestionAlmacenRoute
   '/gestion/movimientos': typeof GestionMovimientosRoute
@@ -199,9 +213,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/403': typeof R403Route
   '/auth': typeof AuthRoute
+  '/compras/cuentas-por-pagar': typeof ComprasCuentasPorPagarRoute
   '/compras/facturacion': typeof ComprasFacturacionRoute
   '/compras/ordenes': typeof ComprasOrdenesRoute
   '/compras/proveedores': typeof ComprasProveedoresRoute
+  '/compras/recepciones': typeof ComprasRecepcionesRoute
   '/gestion/accesos': typeof GestionAccesosRoute
   '/gestion/almacen': typeof GestionAlmacenRoute
   '/gestion/movimientos': typeof GestionMovimientosRoute
@@ -228,9 +244,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/403': typeof R403Route
   '/auth': typeof AuthRoute
+  '/compras/cuentas-por-pagar': typeof ComprasCuentasPorPagarRoute
   '/compras/facturacion': typeof ComprasFacturacionRoute
   '/compras/ordenes': typeof ComprasOrdenesRoute
   '/compras/proveedores': typeof ComprasProveedoresRoute
+  '/compras/recepciones': typeof ComprasRecepcionesRoute
   '/gestion/accesos': typeof GestionAccesosRoute
   '/gestion/almacen': typeof GestionAlmacenRoute
   '/gestion/movimientos': typeof GestionMovimientosRoute
@@ -258,9 +276,11 @@ export interface FileRouteTypes {
     | '/'
     | '/403'
     | '/auth'
+    | '/compras/cuentas-por-pagar'
     | '/compras/facturacion'
     | '/compras/ordenes'
     | '/compras/proveedores'
+    | '/compras/recepciones'
     | '/gestion/accesos'
     | '/gestion/almacen'
     | '/gestion/movimientos'
@@ -286,9 +306,11 @@ export interface FileRouteTypes {
     | '/'
     | '/403'
     | '/auth'
+    | '/compras/cuentas-por-pagar'
     | '/compras/facturacion'
     | '/compras/ordenes'
     | '/compras/proveedores'
+    | '/compras/recepciones'
     | '/gestion/accesos'
     | '/gestion/almacen'
     | '/gestion/movimientos'
@@ -314,9 +336,11 @@ export interface FileRouteTypes {
     | '/'
     | '/403'
     | '/auth'
+    | '/compras/cuentas-por-pagar'
     | '/compras/facturacion'
     | '/compras/ordenes'
     | '/compras/proveedores'
+    | '/compras/recepciones'
     | '/gestion/accesos'
     | '/gestion/almacen'
     | '/gestion/movimientos'
@@ -343,9 +367,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R403Route: typeof R403Route
   AuthRoute: typeof AuthRoute
+  ComprasCuentasPorPagarRoute: typeof ComprasCuentasPorPagarRoute
   ComprasFacturacionRoute: typeof ComprasFacturacionRoute
   ComprasOrdenesRoute: typeof ComprasOrdenesRoute
   ComprasProveedoresRoute: typeof ComprasProveedoresRoute
+  ComprasRecepcionesRoute: typeof ComprasRecepcionesRoute
   GestionAccesosRoute: typeof GestionAccesosRoute
   GestionAlmacenRoute: typeof GestionAlmacenRoute
   GestionMovimientosRoute: typeof GestionMovimientosRoute
@@ -531,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GestionAccesosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compras/recepciones': {
+      id: '/compras/recepciones'
+      path: '/compras/recepciones'
+      fullPath: '/compras/recepciones'
+      preLoaderRoute: typeof ComprasRecepcionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compras/proveedores': {
       id: '/compras/proveedores'
       path: '/compras/proveedores'
@@ -552,6 +585,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComprasFacturacionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compras/cuentas-por-pagar': {
+      id: '/compras/cuentas-por-pagar'
+      path: '/compras/cuentas-por-pagar'
+      fullPath: '/compras/cuentas-por-pagar'
+      preLoaderRoute: typeof ComprasCuentasPorPagarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -559,9 +599,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R403Route: R403Route,
   AuthRoute: AuthRoute,
+  ComprasCuentasPorPagarRoute: ComprasCuentasPorPagarRoute,
   ComprasFacturacionRoute: ComprasFacturacionRoute,
   ComprasOrdenesRoute: ComprasOrdenesRoute,
   ComprasProveedoresRoute: ComprasProveedoresRoute,
+  ComprasRecepcionesRoute: ComprasRecepcionesRoute,
   GestionAccesosRoute: GestionAccesosRoute,
   GestionAlmacenRoute: GestionAlmacenRoute,
   GestionMovimientosRoute: GestionMovimientosRoute,
@@ -586,3 +628,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
