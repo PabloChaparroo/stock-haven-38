@@ -27,8 +27,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { articles, formatCurrency, type Article } from "@/lib/mock-data";
+import { SimplePagination } from "@/components/ui/simple-pagination";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const PAGE_SIZE = 10;
 
 
 
