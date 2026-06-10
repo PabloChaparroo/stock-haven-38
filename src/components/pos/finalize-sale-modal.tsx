@@ -53,18 +53,21 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
   const [createClientOpen, setCreateClientOpen] = useState(false);
 
   const [payments, setPayments] = useState<Payment[]>([{ id: "p1", method: "Efectivo", amount: 0 }]);
+  const [activePayment, setActivePayment] = useState(0);
   const [afip, setAfip] = useState(false);
-  const [remito, setRemito] = useState(true);
+  const [remito, setRemito] = useState(false);
   const [remitoExpanded, setRemitoExpanded] = useState(false);
   const [delivery, setDelivery] = useState<Record<string, number>>({});
+  const [confirmZeroOpen, setConfirmZeroOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
       setPayments([{ id: "p1", method: "Efectivo", amount: 0 }]);
+      setActivePayment(0);
       setIdentified(false);
       setSelectedClient(null);
       setAfip(false);
-      setRemito(true);
+      setRemito(false);
       setRemitoExpanded(false);
       const base: Record<string, number> = {};
       items.forEach((it) => (base[it.articleId] = Math.max(0, it.quantity - it.delivered)));
@@ -74,7 +77,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
 
   const covered = payments.reduce((s, p) => s + (p.amount || 0), 0);
   const pending = Math.max(0, total - covered);
-  const canConfirm = covered > 0;
+  const maxPayments = methods.length;
 
   const remitoTotalQty = items.reduce((s, it) => s + Math.max(0, it.quantity - it.delivered), 0);
   const remitoTodayQty = items.reduce((s, it) => s + (delivery[it.articleId] || 0), 0);
