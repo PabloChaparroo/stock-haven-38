@@ -292,10 +292,7 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
                         <span className="font-mono text-sm font-bold text-brand">{formatCurrency(d.total)}</span>
                       </div>
                       <div className="mt-2 flex gap-1.5">
-                        <Button size="sm" variant="outline" className="h-7 flex-1 text-xs" onClick={() => {
-                          const sup = allSuppliers.find((s) => s.id === d.supplier.id)!;
-                          toast.info(`${d.items.length} artículo(s) en el borrador de ${sup.name}`);
-                        }}>
+                        <Button size="sm" variant="outline" className="h-7 flex-1 text-xs" onClick={() => setViewDraftSupplierId(d.supplier.id)}>
                           <Eye className="mr-1 h-3.5 w-3.5" /> Ver Artículos
                         </Button>
                         <Button size="sm" variant="outline" className="h-7 flex-1 text-xs" onClick={() => {
@@ -303,6 +300,9 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
                           setSupplierCatalog(sup);
                         }}>
                           <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveDraft(d.supplier.id)} title="Eliminar borrador">
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </div>
