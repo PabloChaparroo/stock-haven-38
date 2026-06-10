@@ -46,7 +46,7 @@ export function POSPage() {
       const w = el.clientWidth;
       const h = el.clientHeight;
       const cardW = 200;
-      const cardH = 220;
+      const cardH = 140;
       const cols = Math.max(2, Math.floor(w / cardW));
       const rows = Math.max(1, Math.floor(h / cardH));
       setPageSize(cols * rows);
@@ -59,9 +59,12 @@ export function POSPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return articles;
-    return articles.filter((a) => `${a.code} ${a.name} ${a.category} ${a.brand}`.toLowerCase().includes(s));
-  }, [q]);
+    return articles.filter((a) => {
+      if (categoryFilter !== "all" && a.category !== categoryFilter) return false;
+      if (!s) return true;
+      return `${a.code} ${a.name} ${a.category} ${a.brand}`.toLowerCase().includes(s);
+    });
+  }, [q, categoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages);
