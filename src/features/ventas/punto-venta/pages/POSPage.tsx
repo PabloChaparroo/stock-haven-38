@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Trash2, Eye, ArrowRight, ShoppingCart, ImageIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { articles, discounts, formatCurrency, type Article, type Discount, type SaleItem } from "@/lib/mock-data";
