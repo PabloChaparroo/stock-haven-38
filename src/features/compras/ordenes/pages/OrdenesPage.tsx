@@ -67,9 +67,6 @@ export function OrdenesPage() {
         <div className="flex items-center gap-3">
           <span className="h-7 w-1.5 rounded-full bg-brand" />
           <h1 className="text-2xl font-bold text-navy">Órdenes de Compra</h1>
-          <span className="rounded-full bg-brand/15 px-2.5 py-0.5 text-xs font-medium text-brand">
-            {filtered.length}
-          </span>
         </div>
         <Button onClick={() => setCreateOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
           <Plus className="h-4 w-4" /> Nueva Orden
