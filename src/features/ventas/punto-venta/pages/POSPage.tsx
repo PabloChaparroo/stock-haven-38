@@ -267,7 +267,7 @@ export function POSPage() {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
                 <span className="text-muted-foreground">Vigencia</span>
-                <span className="font-medium">{discountInfo.discount.startDate} → {discountInfo.discount.endDate}</span>
+                <span className="font-medium">{discountInfo.discount.fromDate}{discountInfo.discount.toDate ? ` → ${discountInfo.discount.toDate}` : ""}</span>
               </div>
               <div className="flex justify-between rounded-lg border border-border px-3 py-2">
                 <span className="text-muted-foreground">Precio original</span>
