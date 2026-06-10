@@ -60,6 +60,12 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
   const [articleForSuppliers, setArticleForSuppliers] = useState<Article | null>(null);
   const [supplierCatalog, setSupplierCatalog] = useState<Supplier | null>(null);
   const [preselectedArticleId, setPreselectedArticleId] = useState<string | null>(null);
+  const [viewDraftSupplierId, setViewDraftSupplierId] = useState<string | null>(null);
+
+  const handleRemoveDraft = (supplierId: string) => {
+    setItems((p) => p.filter((it) => it.supplierId !== supplierId));
+    toast.success("Borrador eliminado");
+  };
 
   const articleResults = useMemo(() => {
     const s = search.trim().toLowerCase();
@@ -286,10 +292,7 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
                         <span className="font-mono text-sm font-bold text-brand">{formatCurrency(d.total)}</span>
                       </div>
                       <div className="mt-2 flex gap-1.5">
-                        <Button size="sm" variant="outline" className="h-7 flex-1 text-xs" onClick={() => {
-                          const sup = allSuppliers.find((s) => s.id === d.supplier.id)!;
-                          toast.info(`${d.items.length} artículo(s) en el borrador de ${sup.name}`);
-                        }}>
+                        <Button size="sm" variant="outline" className="h-7 flex-1 text-xs" onClick={() => setViewDraftSupplierId(d.supplier.id)}>
                           <Eye className="mr-1 h-3.5 w-3.5" /> Ver Artículos
                         </Button>
                         <Button size="sm" variant="outline" className="h-7 flex-1 text-xs" onClick={() => {
@@ -297,6 +300,9 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
                           setSupplierCatalog(sup);
                         }}>
                           <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveDraft(d.supplier.id)} title="Eliminar borrador">
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </div>
@@ -345,6 +351,12 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
           setPreselectedArticleId(null);
           toast.success(`${ids.length} artículo(s) agregados desde ${sup.name}`);
         }}
+      />
+
+      {/* MODAL C — view draft items */}
+      <DraftItemsModal
+        draft={viewDraftSupplierId ? draftsBySupplier.find((d) => d.supplier.id === viewDraftSupplierId) ?? null : null}
+        onClose={() => setViewDraftSupplierId(null)}
       />
     </>
   );
@@ -544,6 +556,62 @@ function SupplierCatalogModal({
               Guardar Selección
             </Button>
           </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ===================== MODAL C — View Draft Items =====================
+function DraftItemsModal({
+  draft,
+  onClose,
+}: {
+  draft: { supplier: { id: string; name: string }; items: DraftItem[]; total: number } | null;
+  onClose: () => void;
+}) {
+  if (!draft) return null;
+  return (
+    <Dialog open={!!draft} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="text-navy">Artículos del borrador — {draft.supplier.name}</DialogTitle>
+          <DialogDescription>{draft.items.length} artículo(s) en este borrador.</DialogDescription>
+        </DialogHeader>
+
+        <div className="overflow-hidden rounded-xl border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/40">
+                <TableHead>Artículo</TableHead>
+                <TableHead className="text-center">Cant.</TableHead>
+                <TableHead className="text-right">P. Unit.</TableHead>
+                <TableHead className="text-right">Subtotal</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {draft.items.map((it) => (
+                <TableRow key={`${it.articleId}-${it.supplierId}`}>
+                  <TableCell>
+                    <div className="font-medium text-navy">{it.name}</div>
+                    <div className="font-mono text-[11px] text-muted-foreground">{it.code}</div>
+                  </TableCell>
+                  <TableCell className="text-center font-mono text-sm">{it.quantity}</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatCurrency(it.unitPrice)}</TableCell>
+                  <TableCell className="text-right font-mono text-sm font-semibold">{formatCurrency(it.unitPrice * it.quantity)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl border bg-muted/30 p-3">
+          <span className="text-sm text-muted-foreground">Total</span>
+          <span className="font-mono text-xl font-bold text-navy">{formatCurrency(draft.total)}</span>
+        </div>
+
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={onClose}>Cerrar</Button>
         </div>
       </DialogContent>
     </Dialog>
