@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ComingSoon } from "@/components/coming-soon";
+import { MovimientosPage } from "@/features/gestion/movimientos/pages/MovimientosPage";
 
 export const Route = createFileRoute("/gestion/movimientos")({
-  component: () => <ComingSoon title="Movimientos" />,
+  component: MovimientosPage,
   head: () => ({ meta: [{ title: "Movimientos — Inventia" }] }),
 });
