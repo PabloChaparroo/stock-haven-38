@@ -3,9 +3,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Boxes, History, MapPin, Package, ScanBarcode } from "lucide-react";
-import { formatCurrency, type Article } from "@/lib/mock-data";
+import { Boxes, History, MapPin, Package, Percent, ScanBarcode } from "lucide-react";
+import { discounts, formatCurrency, type Article, type Discount } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+
+function discountForArticle(a: Article): Discount | undefined {
+  const active = discounts.filter((d) => d.active);
+  const byCat = active.find((d) => d.type === "category" && d.categoryName === a.category);
+  if (byCat) return byCat;
+  return active.find((d) => d.type === "combo" && d.comboItems?.some((c) => c.articleId === a.id));
+}
 
 type Props = {
   open: boolean;
