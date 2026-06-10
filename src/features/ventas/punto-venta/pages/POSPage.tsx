@@ -309,6 +309,7 @@ export function POSPage() {
           total={successData.total}
           invoiceNumber={successData.invoice}
           cae={successData.cae}
+          remitoNumber={successData.remito}
           email={successData.email}
           onNewSale={() => setCart([])}
         />
