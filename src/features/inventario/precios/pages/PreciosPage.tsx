@@ -40,6 +40,7 @@ type Unit = "percent" | "money";
 export function PreciosPage() {
   const [lists, setLists] = useState<SavedList[]>(priceLists);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [items, setItems] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
   const [upVal, setUpVal] = useState("");
@@ -59,13 +60,18 @@ export function PreciosPage() {
   const [impactOpen, setImpactOpen] = useState(false);
 
   const active = lists.find((l) => l.id === activeId) ?? null;
+  const isCategoryMode = !!activeCategory;
+  const sourceTitle = active?.name ?? (activeCategory ? `Categoría: ${activeCategory}` : "");
 
   const articlesInList = useMemo<Article[]>(() => {
+    if (activeCategory) {
+      return articles.filter((a) => a.category === activeCategory);
+    }
     if (!active) return [];
     return active.articleIds
       .map((id) => articles.find((a) => a.id === id))
       .filter((a): a is Article => !!a);
-  }, [active]);
+  }, [active, activeCategory]);
 
   const loadList = (id: string) => {
     const l = lists.find((x) => x.id === id);
