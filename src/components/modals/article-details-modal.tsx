@@ -72,8 +72,37 @@ export function ArticleDetailsModal({ open, onOpenChange, article }: Props) {
               </div>
             </div>
             <Field label="Stock de seguridad" value={String(article.safetyStock)} />
+
+            {discount && (
+              <div className="col-span-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="grid h-7 w-7 place-items-center rounded-full bg-destructive/15 text-destructive">
+                      <Percent className="h-3.5 w-3.5" />
+                    </span>
+                    <div>
+                      <div className="text-sm font-semibold text-navy">{discount.name}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {discount.type === "category" ? "Por categoría" : "Por combo"} · Vigencia: {discount.fromDate} → {discount.toDate ?? "sin límite"}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="font-mono text-xl font-bold text-destructive">-{discount.percentage}%</span>
+                </div>
+                <div className="flex items-baseline justify-between border-t border-destructive/20 pt-2">
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">Precio final con descuento</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-mono text-xs text-muted-foreground line-through">{formatCurrency(article.price)}</span>
+                    <span className="font-mono text-lg font-bold text-brand">
+                      {formatCurrency(article.price * (1 - discount.percentage / 100))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
 
         <Separator />
 
