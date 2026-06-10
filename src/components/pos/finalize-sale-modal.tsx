@@ -245,7 +245,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
               </div>
               {remito && remitoExpanded && (
                 <div className="border-t border-border px-3 py-2">
-                  <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-2 px-1 text-[10px] font-semibold uppercase text-muted-foreground">
+                  <div className="grid grid-cols-[1fr_3rem_3rem_3rem_4.5rem] gap-2 px-1 text-[10px] font-semibold uppercase text-muted-foreground">
                     <span>Artículo</span>
                     <span className="text-center">Comp.</span>
                     <span className="text-center">Entr.</span>
@@ -256,11 +256,11 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
                     {items.map((it) => {
                       const pend = Math.max(0, it.quantity - it.delivered);
                       return (
-                        <div key={it.articleId} className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-2 rounded-md px-1 py-1 text-xs">
+                        <div key={it.articleId} className="grid grid-cols-[1fr_3rem_3rem_3rem_4.5rem] items-center gap-2 rounded-md px-1 py-1 text-xs">
                           <span className="truncate font-medium">{it.name}</span>
-                          <span className="w-10 text-center text-muted-foreground">{it.quantity}</span>
-                          <span className="w-10 text-center text-muted-foreground">{it.delivered}</span>
-                          <span className="w-10 text-center text-amber-600">{pend}</span>
+                          <span className="text-center text-muted-foreground">{it.quantity}</span>
+                          <span className="text-center text-muted-foreground">{it.delivered}</span>
+                          <span className="text-center text-amber-600">{pend}</span>
                           <Input
                             type="number"
                             min={0}
@@ -272,7 +272,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
                                 [it.articleId]: Math.min(pend, Math.max(0, Number(e.target.value) || 0)),
                               }))
                             }
-                            className="h-7 w-16 text-center font-mono text-xs"
+                            className="h-7 w-full text-center font-mono text-xs"
                           />
                         </div>
                       );
@@ -282,6 +282,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
               )}
             </div>
           </div>
+
 
           {/* ============ COLUMNA DERECHA ============ */}
           <div className="space-y-4">
