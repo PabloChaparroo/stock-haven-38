@@ -26,7 +26,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { articles, priceLists, formatCurrency, type Article, type PriceList } from "@/lib/mock-data";
+import { articles, priceLists, categories, formatCurrency, type Article, type PriceList } from "@/lib/mock-data";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,7 @@ type Unit = "percent" | "money";
 export function PreciosPage() {
   const [lists, setLists] = useState<SavedList[]>(priceLists);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [items, setItems] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
   const [upVal, setUpVal] = useState("");
@@ -59,24 +60,41 @@ export function PreciosPage() {
   const [impactOpen, setImpactOpen] = useState(false);
 
   const active = lists.find((l) => l.id === activeId) ?? null;
+  const isCategoryMode = !!activeCategory;
+  const sourceTitle = active?.name ?? (activeCategory ? `Categoría: ${activeCategory}` : "");
 
   const articlesInList = useMemo<Article[]>(() => {
+    if (activeCategory) {
+      return articles.filter((a) => a.category === activeCategory);
+    }
     if (!active) return [];
     return active.articleIds
       .map((id) => articles.find((a) => a.id === id))
       .filter((a): a is Article => !!a);
-  }, [active]);
+  }, [active, activeCategory]);
 
   const loadList = (id: string) => {
     const l = lists.find((x) => x.id === id);
     if (!l) return;
     setActiveId(id);
+    setActiveCategory(null);
     setPage(1);
     const map: Record<string, string> = {};
     l.articleIds.forEach((aid) => {
       const a = articles.find((x) => x.id === aid);
       if (a) map[aid] = String(a.price);
     });
+    setItems(map);
+  };
+
+  const loadCategory = (name: string) => {
+    setActiveCategory(name);
+    setActiveId(null);
+    setPage(1);
+    const map: Record<string, string> = {};
+    articles
+      .filter((a) => a.category === name)
+      .forEach((a) => { map[a.id] = String(a.price); });
     setItems(map);
   };
 
@@ -196,11 +214,11 @@ export function PreciosPage() {
     <div className="space-y-5 pb-32">
       <div className="flex items-center gap-3">
         <span className="h-7 w-1.5 rounded-full bg-brand" />
-        <h1 className="text-2xl font-bold text-navy">Actualización por Listas de Precios</h1>
+        <h1 className="text-2xl font-bold text-navy">Actualización de Precios</h1>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card p-4">
-        <div className="flex flex-1 items-center gap-2 min-w-[280px]">
+      <div className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4">
+        <div className="flex flex-1 items-center gap-2 min-w-[260px]">
           <Label className="text-navy font-semibold whitespace-nowrap">Cargar Lista Guardada</Label>
           <Select value={activeId ?? ""} onValueChange={loadList}>
             <SelectTrigger className="h-11 max-w-md border-brand/40 focus:ring-brand">
@@ -215,6 +233,21 @@ export function PreciosPage() {
             </SelectContent>
           </Select>
         </div>
+        <div className="flex flex-1 items-center gap-2 min-w-[260px]">
+          <Label className="text-navy font-semibold whitespace-nowrap">Cargar Categoría</Label>
+          <Select value={activeCategory ?? ""} onValueChange={loadCategory}>
+            <SelectTrigger className="h-11 max-w-md border-brand/40 focus:ring-brand">
+              <SelectValue placeholder="Seleccionar categoría..." />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.name}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button
           variant="outline"
           onClick={() => setCreateOpen(true)}
@@ -224,27 +257,29 @@ export function PreciosPage() {
         </Button>
         <Button
           variant="outline"
-          disabled={!active}
+          disabled={!active && !isCategoryMode}
           onClick={saveListChanges}
           className="gap-2 border-border/70"
         >
-          <Save className="h-4 w-4" /> Guardar cambios en la lista
+          <Save className="h-4 w-4" /> Guardar cambios
         </Button>
       </div>
 
-      {active ? (
+      {active || isCategoryMode ? (
         <div className="overflow-hidden rounded-xl border bg-card">
           <div className="flex items-center justify-between gap-2 border-b bg-muted/30 px-4 py-2.5">
             <div className="text-sm font-semibold text-navy">
-              {active.name} — {articlesInList.length} Artículo{articlesInList.length !== 1 && "s"}
+              {sourceTitle} — {articlesInList.length} Artículo{articlesInList.length !== 1 && "s"}
             </div>
-            <Button
-              size="sm"
-              onClick={() => setAddOpen(true)}
-              className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90"
-            >
-              <Plus className="h-4 w-4" /> Agregar Artículo
-            </Button>
+            {!isCategoryMode && (
+              <Button
+                size="sm"
+                onClick={() => setAddOpen(true)}
+                className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90"
+              >
+                <Plus className="h-4 w-4" /> Agregar Artículo
+              </Button>
+            )}
           </div>
           <Table>
             <TableHeader>
@@ -277,14 +312,16 @@ export function PreciosPage() {
                         />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => removeArticle(a.id)}
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {!isCategoryMode && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => removeArticle(a.id)}
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
@@ -292,7 +329,9 @@ export function PreciosPage() {
               {articlesInList.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
-                    Aún no hay artículos. Agregá artículos con el botón superior.
+                    {isCategoryMode
+                      ? "No hay artículos en esta categoría."
+                      : "Aún no hay artículos. Agregá artículos con el botón superior."}
                   </TableCell>
                 </TableRow>
               )}
@@ -310,12 +349,12 @@ export function PreciosPage() {
         </div>
       ) : (
         <div className="rounded-xl border border-dashed bg-muted/20 py-16 text-center text-muted-foreground">
-          Seleccioná o creá una lista para comenzar.
+          Seleccioná una lista o categoría para comenzar.
         </div>
       )}
 
       {/* Sticky footer */}
-      {active && (
+      {(active || isCategoryMode) && (
         <div className="fixed bottom-0 left-0 right-0 z-20 border-t bg-muted/50 backdrop-blur md:left-[var(--sidebar-width,16rem)]">
           <div className="flex flex-wrap items-end gap-4 px-6 py-3">
             <AdjustBlock
