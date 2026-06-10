@@ -94,7 +94,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
   const setPay = (i: number, patch: Partial<Payment>) =>
     setPayments((prev) => prev.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
 
-  const handleConfirm = () => {
+  const doConfirm = () => {
     const clientName = identified && selectedClient ? `${selectedClient.firstName} ${selectedClient.lastName}` : "Consumidor Final";
     const primary = payments[0]?.method ?? "Efectivo";
     onConfirm({
@@ -107,6 +107,11 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
         ? { number: `0001-${String(Math.floor(Math.random() * 90000) + 10000)}`, cae: String(Math.floor(Math.random() * 9e13) + 1e13) }
         : undefined,
     });
+  };
+
+  const handleConfirm = () => {
+    if (covered <= 0) { setConfirmZeroOpen(true); return; }
+    doConfirm();
   };
 
   return (
