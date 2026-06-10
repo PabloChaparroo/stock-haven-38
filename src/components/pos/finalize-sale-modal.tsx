@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,18 +54,21 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
   const [createClientOpen, setCreateClientOpen] = useState(false);
 
   const [payments, setPayments] = useState<Payment[]>([{ id: "p1", method: "Efectivo", amount: 0 }]);
+  const [activePayment, setActivePayment] = useState(0);
   const [afip, setAfip] = useState(false);
-  const [remito, setRemito] = useState(true);
+  const [remito, setRemito] = useState(false);
   const [remitoExpanded, setRemitoExpanded] = useState(false);
   const [delivery, setDelivery] = useState<Record<string, number>>({});
+  const [confirmZeroOpen, setConfirmZeroOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
       setPayments([{ id: "p1", method: "Efectivo", amount: 0 }]);
+      setActivePayment(0);
       setIdentified(false);
       setSelectedClient(null);
       setAfip(false);
-      setRemito(true);
+      setRemito(false);
       setRemitoExpanded(false);
       const base: Record<string, number> = {};
       items.forEach((it) => (base[it.articleId] = Math.max(0, it.quantity - it.delivered)));
@@ -74,7 +78,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
 
   const covered = payments.reduce((s, p) => s + (p.amount || 0), 0);
   const pending = Math.max(0, total - covered);
-  const canConfirm = covered > 0;
+  const maxPayments = methods.length;
 
   const remitoTotalQty = items.reduce((s, it) => s + Math.max(0, it.quantity - it.delivered), 0);
   const remitoTodayQty = items.reduce((s, it) => s + (delivery[it.articleId] || 0), 0);
@@ -91,7 +95,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
   const setPay = (i: number, patch: Partial<Payment>) =>
     setPayments((prev) => prev.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
 
-  const handleConfirm = () => {
+  const doConfirm = () => {
     const clientName = identified && selectedClient ? `${selectedClient.firstName} ${selectedClient.lastName}` : "Consumidor Final";
     const primary = payments[0]?.method ?? "Efectivo";
     onConfirm({
@@ -104,6 +108,11 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
         ? { number: `0001-${String(Math.floor(Math.random() * 90000) + 10000)}`, cae: String(Math.floor(Math.random() * 9e13) + 1e13) }
         : undefined,
     });
+  };
+
+  const handleConfirm = () => {
+    if (covered <= 0) { setConfirmZeroOpen(true); return; }
+    doConfirm();
   };
 
   return (
@@ -237,7 +246,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
               </div>
               {remito && remitoExpanded && (
                 <div className="border-t border-border px-3 py-2">
-                  <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-2 px-1 text-[10px] font-semibold uppercase text-muted-foreground">
+                  <div className="grid grid-cols-[1fr_3rem_3rem_3rem_4.5rem] gap-2 px-1 text-[10px] font-semibold uppercase text-muted-foreground">
                     <span>Artículo</span>
                     <span className="text-center">Comp.</span>
                     <span className="text-center">Entr.</span>
@@ -248,11 +257,11 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
                     {items.map((it) => {
                       const pend = Math.max(0, it.quantity - it.delivered);
                       return (
-                        <div key={it.articleId} className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-2 rounded-md px-1 py-1 text-xs">
+                        <div key={it.articleId} className="grid grid-cols-[1fr_3rem_3rem_3rem_4.5rem] items-center gap-2 rounded-md px-1 py-1 text-xs">
                           <span className="truncate font-medium">{it.name}</span>
-                          <span className="w-10 text-center text-muted-foreground">{it.quantity}</span>
-                          <span className="w-10 text-center text-muted-foreground">{it.delivered}</span>
-                          <span className="w-10 text-center text-amber-600">{pend}</span>
+                          <span className="text-center text-muted-foreground">{it.quantity}</span>
+                          <span className="text-center text-muted-foreground">{it.delivered}</span>
+                          <span className="text-center text-amber-600">{pend}</span>
                           <Input
                             type="number"
                             min={0}
@@ -264,7 +273,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
                                 [it.articleId]: Math.min(pend, Math.max(0, Number(e.target.value) || 0)),
                               }))
                             }
-                            className="h-7 w-16 text-center font-mono text-xs"
+                            className="h-7 w-full text-center font-mono text-xs"
                           />
                         </div>
                       );
@@ -274,6 +283,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
               )}
             </div>
           </div>
+
 
           {/* ============ COLUMNA DERECHA ============ */}
           <div className="space-y-4">
@@ -293,34 +303,87 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
             {/* Métodos de pago */}
             <div>
               <Label className="mb-2 block text-xs uppercase text-muted-foreground">Métodos de pago</Label>
-              <div className="space-y-2">
-                {payments.map((p, i) => {
+              <div className="rounded-xl border border-border bg-card p-2">
+                {/* Tabs de pagos */}
+                <div className="flex items-center gap-1 border-b border-border pb-2">
+                  {payments.map((p, i) => {
+                    const m = methods.find((x) => x.id === p.method)!;
+                    const active = activePayment === i;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setActivePayment(i)}
+                        className={cn(
+                          "group flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition",
+                          active ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-muted",
+                        )}
+                      >
+                        <span className="text-[10px] opacity-60">#{i + 1}</span>
+                        <m.icon className="h-3.5 w-3.5" />
+                        <span className="font-mono">{p.amount > 0 ? formatCurrency(p.amount) : "—"}</span>
+                        {payments.length > 1 && (
+                          <span
+                            role="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPayments((prev) => prev.filter((_, idx) => idx !== i));
+                              setActivePayment((a) => Math.max(0, a >= i ? a - 1 : a));
+                            }}
+                            className="ml-0.5 rounded p-0.5 opacity-60 hover:bg-destructive/10 hover:text-destructive hover:opacity-100"
+                          >
+                            <X className="h-3 w-3" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                  {payments.length < maxPayments && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const used = new Set(payments.map((p) => p.method));
+                        const next = methods.find((m) => !used.has(m.id))?.id ?? "Efectivo";
+                        setPayments((prev) => [...prev, { id: `p${Date.now()}`, method: next, amount: 0 }]);
+                        setActivePayment(payments.length);
+                      }}
+                      className="ml-auto flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-brand"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Agregar
+                    </button>
+                  )}
+                </div>
+
+                {/* Cuerpo del pago activo */}
+                {(() => {
+                  const i = Math.min(activePayment, payments.length - 1);
+                  const p = payments[i];
+                  if (!p) return null;
                   const others = payments.reduce((s, q, idx) => s + (idx === i ? 0 : q.amount || 0), 0);
                   const fillAmount = Math.max(0, total - others);
                   return (
-                    <div key={p.id} className="rounded-xl border border-border bg-card p-2">
-                      <div className="flex items-center gap-1">
-                        <span className="px-2 text-xs text-muted-foreground">#{i + 1}</span>
-                        {methods.map((m) => (
-                          <button
-                            key={m.id}
-                            type="button"
-                            onClick={() => setPay(i, { method: m.id })}
-                            className={cn(
-                              "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition",
-                              p.method === m.id ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-muted",
-                            )}
-                          >
-                            <m.icon className="h-3.5 w-3.5" /> {m.label}
-                          </button>
-                        ))}
-                        {payments.length > 1 && (
-                          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setPayments((prev) => prev.filter((_, idx) => idx !== i))}>
-                            <X className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
+                    <div className="space-y-2 p-2">
+                      <div className="grid grid-cols-4 gap-1">
+                        {methods.map((m) => {
+                          const usedByOther = payments.some((q, idx) => idx !== i && q.method === m.id);
+                          return (
+                            <button
+                              key={m.id}
+                              type="button"
+                              disabled={usedByOther}
+                              onClick={() => setPay(i, { method: m.id })}
+                              className={cn(
+                                "flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-medium transition",
+                                p.method === m.id ? "bg-brand/15 text-brand" : "text-muted-foreground hover:bg-muted",
+                                usedByOther && "cursor-not-allowed opacity-30 hover:bg-transparent",
+                              )}
+                            >
+                              <m.icon className="h-3.5 w-3.5" /> {m.label}
+                            </button>
+                          );
+                        })}
                       </div>
-                      <div className="mt-2 flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <Banknote className="h-4 w-4 text-muted-foreground" />
                         <Input
                           type="number"
@@ -341,29 +404,43 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
                       </div>
                     </div>
                   );
-                })}
-                <button
-                  type="button"
-                  onClick={() => setPayments((prev) => [...prev, { id: `p${Date.now()}`, method: "Efectivo", amount: 0 }])}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border py-2.5 text-sm text-muted-foreground transition hover:border-brand hover:text-brand"
-                >
-                  <Plus className="h-4 w-4" /> Agregar otro método de pago
-                </button>
+                })()}
               </div>
             </div>
 
             <Button
-              disabled={!canConfirm}
               className="h-12 w-full bg-brand text-base font-semibold text-brand-foreground hover:bg-brand/90"
               onClick={handleConfirm}
             >
-              {pending > 0 ? `Confirmar Pago Parcial (${formatCurrency(covered)})` : "Confirmar Pago Completo"} →
+              {covered <= 0
+                ? "Confirmar sin pago"
+                : pending > 0
+                  ? `Confirmar Pago Parcial (${formatCurrency(covered)})`
+                  : "Confirmar Pago Completo"} →
             </Button>
           </div>
+
         </div>
 
         <CreateClientInline open={createClientOpen} onOpenChange={setCreateClientOpen} onCreated={(c) => setSelectedClient(c as never)} />
       </DialogContent>
+
+      <AlertDialog open={confirmZeroOpen} onOpenChange={setConfirmZeroOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar venta sin pago</AlertDialogTitle>
+            <AlertDialogDescription>
+              No se ha registrado ningún monto. La venta quedará con un pendiente de {formatCurrency(total)}. ¿Deseás continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmZeroOpen(false); doConfirm(); }}>
+              Continuar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
