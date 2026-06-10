@@ -225,14 +225,18 @@ export const currentUser: User = users[0];
 
 export type PriceList = {
   id: string;
+  code: string;
   name: string;
+  description?: string;
+  active: boolean;
   articleIds: string[];
 };
 
 export const priceLists: PriceList[] = [
-  { id: "l1", name: "Campaña Escolar", articleIds: ["1", "2", "3", "4", "5"] },
-  { id: "l2", name: "Temporada Verano", articleIds: ["6", "7", "8"] },
-  { id: "l3", name: "Hardware Importado", articleIds: ["10", "12", "14", "16"] },
+  { id: "l1", code: "LST-001", name: "Campaña Escolar", description: "Artículos para la temporada escolar.", active: true, articleIds: ["1", "2", "3", "4", "5"] },
+  { id: "l2", code: "LST-002", name: "Temporada Verano", description: "Stock de temporada de verano.", active: true, articleIds: ["6", "7", "8"] },
+  { id: "l3", code: "LST-003", name: "Hardware Importado", description: "Productos de hardware importado.", active: true, articleIds: ["10", "12", "14", "16"] },
+  { id: "l4", code: "LST-004", name: "Liquidación 2025", description: "Artículos en liquidación del año anterior.", active: false, articleIds: ["9", "11"] },
 ];
 
 // ============== Descuentos ==============
