@@ -23,6 +23,7 @@ import { Route as ReportesAbcRouteImport } from './routes/reportes.abc'
 import { Route as InventarioSalidaStockRouteImport } from './routes/inventario.salida-stock'
 import { Route as InventarioPreciosRouteImport } from './routes/inventario.precios'
 import { Route as InventarioMarcasRouteImport } from './routes/inventario.marcas'
+import { Route as InventarioListasRouteImport } from './routes/inventario.listas'
 import { Route as InventarioDescuentosRouteImport } from './routes/inventario.descuentos'
 import { Route as InventarioCategoriasRouteImport } from './routes/inventario.categorias'
 import { Route as InventarioArticulosRouteImport } from './routes/inventario.articulos'
@@ -105,6 +106,11 @@ const InventarioMarcasRoute = InventarioMarcasRouteImport.update({
   path: '/inventario/marcas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InventarioListasRoute = InventarioListasRouteImport.update({
+  id: '/inventario/listas',
+  path: '/inventario/listas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InventarioDescuentosRoute = InventarioDescuentosRouteImport.update({
   id: '/inventario/descuentos',
   path: '/inventario/descuentos',
@@ -176,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/inventario/articulos': typeof InventarioArticulosRoute
   '/inventario/categorias': typeof InventarioCategoriasRoute
   '/inventario/descuentos': typeof InventarioDescuentosRoute
+  '/inventario/listas': typeof InventarioListasRoute
   '/inventario/marcas': typeof InventarioMarcasRoute
   '/inventario/precios': typeof InventarioPreciosRoute
   '/inventario/salida-stock': typeof InventarioSalidaStockRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/inventario/articulos': typeof InventarioArticulosRoute
   '/inventario/categorias': typeof InventarioCategoriasRoute
   '/inventario/descuentos': typeof InventarioDescuentosRoute
+  '/inventario/listas': typeof InventarioListasRoute
   '/inventario/marcas': typeof InventarioMarcasRoute
   '/inventario/precios': typeof InventarioPreciosRoute
   '/inventario/salida-stock': typeof InventarioSalidaStockRoute
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/inventario/articulos': typeof InventarioArticulosRoute
   '/inventario/categorias': typeof InventarioCategoriasRoute
   '/inventario/descuentos': typeof InventarioDescuentosRoute
+  '/inventario/listas': typeof InventarioListasRoute
   '/inventario/marcas': typeof InventarioMarcasRoute
   '/inventario/precios': typeof InventarioPreciosRoute
   '/inventario/salida-stock': typeof InventarioSalidaStockRoute
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/inventario/articulos'
     | '/inventario/categorias'
     | '/inventario/descuentos'
+    | '/inventario/listas'
     | '/inventario/marcas'
     | '/inventario/precios'
     | '/inventario/salida-stock'
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/inventario/articulos'
     | '/inventario/categorias'
     | '/inventario/descuentos'
+    | '/inventario/listas'
     | '/inventario/marcas'
     | '/inventario/precios'
     | '/inventario/salida-stock'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/inventario/articulos'
     | '/inventario/categorias'
     | '/inventario/descuentos'
+    | '/inventario/listas'
     | '/inventario/marcas'
     | '/inventario/precios'
     | '/inventario/salida-stock'
@@ -342,6 +354,7 @@ export interface RootRouteChildren {
   InventarioArticulosRoute: typeof InventarioArticulosRoute
   InventarioCategoriasRoute: typeof InventarioCategoriasRoute
   InventarioDescuentosRoute: typeof InventarioDescuentosRoute
+  InventarioListasRoute: typeof InventarioListasRoute
   InventarioMarcasRoute: typeof InventarioMarcasRoute
   InventarioPreciosRoute: typeof InventarioPreciosRoute
   InventarioSalidaStockRoute: typeof InventarioSalidaStockRoute
@@ -455,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventarioMarcasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inventario/listas': {
+      id: '/inventario/listas'
+      path: '/inventario/listas'
+      fullPath: '/inventario/listas'
+      preLoaderRoute: typeof InventarioListasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inventario/descuentos': {
       id: '/inventario/descuentos'
       path: '/inventario/descuentos'
@@ -550,6 +570,7 @@ const rootRouteChildren: RootRouteChildren = {
   InventarioArticulosRoute: InventarioArticulosRoute,
   InventarioCategoriasRoute: InventarioCategoriasRoute,
   InventarioDescuentosRoute: InventarioDescuentosRoute,
+  InventarioListasRoute: InventarioListasRoute,
   InventarioMarcasRoute: InventarioMarcasRoute,
   InventarioPreciosRoute: InventarioPreciosRoute,
   InventarioSalidaStockRoute: InventarioSalidaStockRoute,
@@ -565,3 +586,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
