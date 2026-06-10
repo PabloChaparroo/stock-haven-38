@@ -201,9 +201,21 @@ export function POSPage() {
               <span className="text-muted-foreground">Artículos en carrito</span>
               <span className="font-semibold text-navy">{totalUnits} unid.</span>
             </div>
-            <div className="mb-5 flex items-center justify-between">
-              <span className="text-base font-bold uppercase tracking-wide text-navy">Total</span>
-              <span className="font-mono text-4xl font-black text-brand">{formatCurrency(subtotal)}</span>
+            <div className="mb-5 flex items-end justify-between gap-3">
+              <span className="text-lg font-bold uppercase tracking-wide text-navy">Total</span>
+              <div className="flex flex-col items-end leading-none">
+                {hasDiscount && (
+                  <span className="mb-1 font-mono text-base text-muted-foreground line-through">
+                    {formatCurrency(baseSubtotal)}
+                  </span>
+                )}
+                <span className="font-mono text-5xl font-black text-brand">{formatCurrency(subtotal)}</span>
+                {hasDiscount && (
+                  <span className="mt-1 rounded-full bg-brand/15 px-2 py-0.5 text-[11px] font-semibold text-brand">
+                    Ahorro {formatCurrency(baseSubtotal - subtotal)}
+                  </span>
+                )}
+              </div>
             </div>
             <Button
               disabled={cart.length === 0}
