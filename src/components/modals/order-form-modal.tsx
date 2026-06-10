@@ -60,6 +60,12 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
   const [articleForSuppliers, setArticleForSuppliers] = useState<Article | null>(null);
   const [supplierCatalog, setSupplierCatalog] = useState<Supplier | null>(null);
   const [preselectedArticleId, setPreselectedArticleId] = useState<string | null>(null);
+  const [viewDraftSupplierId, setViewDraftSupplierId] = useState<string | null>(null);
+
+  const handleRemoveDraft = (supplierId: string) => {
+    setItems((p) => p.filter((it) => it.supplierId !== supplierId));
+    toast.success("Borrador eliminado");
+  };
 
   const articleResults = useMemo(() => {
     const s = search.trim().toLowerCase();
