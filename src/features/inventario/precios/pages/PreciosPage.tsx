@@ -26,31 +26,19 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { articles, formatCurrency, type Article } from "@/lib/mock-data";
+import { articles, priceLists, formatCurrency, type Article, type PriceList } from "@/lib/mock-data";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 10;
 
-
-
-type SavedList = {
-  id: string;
-  name: string;
-  articleIds: string[];
-};
-
-const MOCK_LISTS: SavedList[] = [
-  { id: "l1", name: "Campaña Escolar", articleIds: ["1", "2", "3", "4", "5"] },
-  { id: "l2", name: "Temporada Verano", articleIds: ["6", "7", "8"] },
-  { id: "l3", name: "Hardware Importado", articleIds: ["10", "12", "14", "16"] },
-];
+type SavedList = PriceList;
 
 type Unit = "percent" | "money";
 
 export function PreciosPage() {
-  const [lists, setLists] = useState<SavedList[]>(MOCK_LISTS);
+  const [lists, setLists] = useState<SavedList[]>(priceLists);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [items, setItems] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
