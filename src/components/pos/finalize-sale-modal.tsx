@@ -423,6 +423,23 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
 
         <CreateClientInline open={createClientOpen} onOpenChange={setCreateClientOpen} onCreated={(c) => setSelectedClient(c as never)} />
       </DialogContent>
+
+      <AlertDialog open={confirmZeroOpen} onOpenChange={setConfirmZeroOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar venta sin pago</AlertDialogTitle>
+            <AlertDialogDescription>
+              No se ha registrado ningún monto. La venta quedará con un pendiente de {formatCurrency(total)}. ¿Deseás continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmZeroOpen(false); doConfirm(); }}>
+              Continuar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
