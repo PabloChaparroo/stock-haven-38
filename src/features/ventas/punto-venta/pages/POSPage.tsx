@@ -31,6 +31,7 @@ export function POSPage() {
 
   const [detailArticle, setDetailArticle] = useState<Article | undefined>();
   const [zoomImg, setZoomImg] = useState<{ src: string; alt: string } | null>(null);
+  const [discountInfo, setDiscountInfo] = useState<{ article: Article; discount: Discount } | null>(null);
 
   const catalogRef = useRef<HTMLDivElement>(null);
   const [pageSize, setPageSize] = useState(12);
