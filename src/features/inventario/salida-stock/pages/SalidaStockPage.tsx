@@ -1,7 +1,11 @@
 import { Fragment, useMemo, useState } from "react";
-import { Search, Save, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, AlertTriangle, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -18,16 +22,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { articles } from "@/lib/mock-data";
+import { articles, type Article } from "@/lib/mock-data";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-
-
 const MOTIVOS = ["DAÑADO", "EXTRAVÍO", "PÉRDIDA", "RETIRO", "ROBO"] as const;
 type Motivo = (typeof MOTIVOS)[number];
 const PAGE_SIZE = 12;
+
+type StockState = "todos" | "normal" | "critico" | "agotado";
+type SystemState = "activos" | "inactivos";
+const DEFAULT_FILTERS = { stock: "todos" as StockState, system: "activos" as SystemState };
+
+function totalStock(a: Article) {
+  if (a.variants && a.variants.length > 0) {
+    return (a.variantStocks ?? []).reduce((s, v) => s + (v.stock ?? 0), 0);
+  }
+  return a.stock;
+}
+function stockStateOf(a: Article): Exclude<StockState, "todos"> {
+  const s = totalStock(a);
+  if (s === 0) return "agotado";
+  if (s <= a.safetyStock) return "critico";
+  return "normal";
+}
 
 type Row = { motivo: Motivo | ""; cantidad: string };
 type RowsMap = Record<string, Row>; // key = articleId or `${articleId}:${variantId}`
