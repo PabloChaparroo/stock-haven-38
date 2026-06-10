@@ -95,17 +95,31 @@ export function POSPage() {
   return (
     <div className="flex h-[calc(100vh-9rem)] flex-col gap-5 overflow-hidden">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
-        <Input
-          autoFocus
-          placeholder="Escanear código o buscar producto..."
-          value={q}
-          onChange={(e) => { setQ(e.target.value); setPage(1); }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && filtered.length > 0) { addToCart(filtered[0]); setQ(""); }
-          }}
-          className="h-14 rounded-2xl border-2 border-brand/20 bg-card pl-12 text-base text-navy shadow-sm transition-all placeholder:text-muted-foreground focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-brand/10"
-        />
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
+          <Input
+            autoFocus
+            placeholder="Escanear código o buscar producto..."
+            value={q}
+            onChange={(e) => { setQ(e.target.value); setPage(1); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && filtered.length > 0) { addToCart(filtered[0]); setQ(""); }
+            }}
+            className="h-14 rounded-2xl border-2 border-brand/20 bg-card pl-12 text-base text-navy shadow-sm transition-all placeholder:text-muted-foreground focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-brand/10"
+          />
+        </div>
+        <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}>
+          <SelectTrigger className="h-14 w-56 rounded-2xl border-2 border-brand/20 bg-card text-navy shadow-sm focus:border-brand focus:ring-4 focus:ring-brand/10">
+            <SelectValue placeholder="Categoría" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            {categories.map((c) => (
+              <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-2">
