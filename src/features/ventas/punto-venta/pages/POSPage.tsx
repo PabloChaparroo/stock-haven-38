@@ -25,6 +25,7 @@ export function discountForArticle(a: Article): Discount | undefined {
 export function POSPage() {
   const [cart, setCart] = useState<CartLine[]>([]);
   const [q, setQ] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
 
   const [finalizeOpen, setFinalizeOpen] = useState(false);
