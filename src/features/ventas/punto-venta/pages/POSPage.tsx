@@ -143,10 +143,25 @@ export function POSPage() {
                 <p className="text-sm font-medium text-muted-foreground">Escaneá o agregá artículos del catálogo</p>
               </div>
             ) : (
-              cart.map((l) => (
+              cart.map((l) => {
+                const art = articles.find((a) => a.id === l.articleId);
+                const disc = art ? discountForArticle(art) : undefined;
+                return (
                 <div key={l.articleId} className="grid grid-cols-[1fr_70px_110px_120px_40px] items-center gap-2 border-b border-border/60 px-6 py-3 transition-colors hover:bg-muted/30">
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-navy">{l.name}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-semibold text-navy">{l.name}</span>
+                      {disc && (
+                        <button
+                          type="button"
+                          onClick={() => art && setDiscountInfo({ article: art, discount: disc })}
+                          className="shrink-0 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive hover:bg-destructive/20"
+                          title="Ver descuento"
+                        >
+                          -{disc.percentage}%
+                        </button>
+                      )}
+                    </div>
                     <div className="text-xs text-muted-foreground">{l.category}</div>
                   </div>
                   <div className="flex justify-center">
@@ -156,7 +171,12 @@ export function POSPage() {
                       className="h-8 w-14 rounded-lg border border-border text-center font-mono text-sm"
                     />
                   </div>
-                  <div className="text-right font-mono text-xs text-muted-foreground">{formatCurrency(l.price)}</div>
+                  <div className="text-right font-mono text-xs">
+                    {disc && art && (
+                      <div className="text-[10px] text-muted-foreground line-through">{formatCurrency(art.price / 100)}</div>
+                    )}
+                    <div className={cn(disc ? "font-semibold text-brand" : "text-muted-foreground")}>{formatCurrency(l.price)}</div>
+                  </div>
                   <div className="text-right font-mono text-sm font-bold text-navy">{formatCurrency(l.price * l.quantity)}</div>
                   <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => removeLine(l.articleId)}>
                     <Trash2 className="h-3.5 w-3.5" />
