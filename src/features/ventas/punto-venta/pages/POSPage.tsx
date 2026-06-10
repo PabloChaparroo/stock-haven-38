@@ -74,6 +74,12 @@ export function POSPage() {
   const slice = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const subtotal = cart.reduce((s, l) => s + l.price * l.quantity, 0);
+  const baseSubtotal = cart.reduce((s, l) => {
+    const a = articles.find((x) => x.id === l.articleId);
+    const basePrice = a ? a.price / 100 : l.price;
+    return s + basePrice * l.quantity;
+  }, 0);
+  const hasDiscount = baseSubtotal > subtotal + 0.001;
   const totalUnits = cart.reduce((s, l) => s + l.quantity, 0);
 
   const addToCart = (a: Article) => {
