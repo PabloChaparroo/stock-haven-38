@@ -38,6 +38,17 @@ export function DiscountFormModal({ open, onOpenChange, mode = "create", discoun
   const [pickQty, setPickQty] = useState<number>(1);
   const [search, setSearch] = useState("");
 
+  // Sync local state when opening with a different discount (edit mode)
+  // or when defaultType changes (create mode following the active tab).
+  useEffect(() => {
+    if (!open) return;
+    setType(discount?.type ?? defaultType ?? "category");
+    setCombo(discount?.comboItems ?? []);
+    setPickArticle("");
+    setPickQty(1);
+    setSearch("");
+  }, [open, discount, defaultType]);
+
   const filteredArticles = articles.filter(
     (a) => a.name.toLowerCase().includes(search.toLowerCase()) || a.code.includes(search),
   );
