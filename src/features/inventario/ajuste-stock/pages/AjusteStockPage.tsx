@@ -88,7 +88,16 @@ export function AjusteStockPage() {
 
   const hasChanges = Object.values(newStock).some((v) => v !== "" && v != null);
 
-  const setVal = (key: string, v: string) => setNewStock((p) => ({ ...p, [key]: v }));
+  const setVal = (key: string, v: string) => {
+    // Block negative stock values
+    if (v === "") {
+      setNewStock((p) => ({ ...p, [key]: "" }));
+      return;
+    }
+    const n = Number(v);
+    if (!Number.isFinite(n) || n < 0) return;
+    setNewStock((p) => ({ ...p, [key]: v }));
+  };
   const setReasonVal = (key: string, v: string) => setReason((p) => ({ ...p, [key]: v }));
   const setReasonNoteVal = (key: string, v: string) =>
     setReasonNote((p) => ({ ...p, [key]: v }));
