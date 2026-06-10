@@ -37,6 +37,7 @@ type Props = {
     clientEmail?: string;
     afip: boolean;
     invoice?: { number: string; cae: string };
+    remito?: { number: string; kind: "Total" | "Parcial" };
   }) => void;
 };
 
