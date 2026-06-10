@@ -99,6 +99,7 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
   const doConfirm = () => {
     const clientName = identified && selectedClient ? `${selectedClient.firstName} ${selectedClient.lastName}` : "Consumidor Final";
     const primary = payments[0]?.method ?? "Efectivo";
+    const remitoActive = remito && remitoTodayQty > 0;
     onConfirm({
       paid: covered,
       method: primary,
@@ -107,6 +108,9 @@ export function FinalizeSaleModal({ open, onOpenChange, total, items, onConfirm 
       afip,
       invoice: afip
         ? { number: `0001-${String(Math.floor(Math.random() * 90000) + 10000)}`, cae: String(Math.floor(Math.random() * 9e13) + 1e13) }
+        : undefined,
+      remito: remitoActive
+        ? { number: `R-0001-${String(Math.floor(Math.random() * 90000) + 10000)}`, kind: remitoKind === "Total" ? "Total" : "Parcial" }
         : undefined,
     });
   };
