@@ -391,6 +391,7 @@ export type Client = {
   address: string;
   createdAt: string;
   active: boolean;
+  debt?: number;
 };
 
 const cliFirst = ["Olivia", "Mateo", "Lucía", "Tomás", "Camila", "Bruno", "Sofía", "Lucas", "Valentina", "Joaquín", "Martina", "Diego", "Renata", "Nicolás", "Julieta"];
@@ -407,6 +408,7 @@ export const clients: Client[] = Array.from({ length: 14 }).map((_, i) => ({
   address: `Calle ${100 + i * 3}, Piso ${1 + (i % 9)}, CABA`,
   createdAt: `${String((i % 28) + 1).padStart(2, "0")}/${String((i % 12) + 1).padStart(2, "0")}/2026`,
   active: i % 5 !== 0,
+  debt: i % 4 === 0 ? Math.round(5000 + i * 1234.5) : 0,
 }));
 
 // ============== Ventas / Pedidos / Facturas ==============
