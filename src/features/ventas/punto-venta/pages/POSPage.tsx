@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { articles, categories, discounts, formatCurrency, type Article, type Discount, type SaleItem } from "@/lib/mock-data";
+import { articles, categories, discounts, priceLists, formatCurrency, type Article, type Discount, type SaleItem } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { ArticleDetailsModal } from "@/components/modals/article-details-modal";
 import { ImageZoomModal } from "@/components/modals/image-zoom-modal";
@@ -18,8 +18,11 @@ export function discountForArticle(a: Article): Discount | undefined {
   const active = discounts.filter((d) => d.active);
   const byCat = active.find((d) => d.type === "category" && d.categoryName === a.category);
   if (byCat) return byCat;
-  const byCombo = active.find((d) => d.type === "combo" && d.comboItems?.some((c) => c.articleId === a.id));
-  return byCombo;
+  return active.find((d) => {
+    if (d.type !== "list" || !d.listId) return false;
+    const list = priceLists.find((l) => l.id === d.listId);
+    return !!list && list.articleIds.includes(a.id);
+  });
 }
 
 export function POSPage() {
