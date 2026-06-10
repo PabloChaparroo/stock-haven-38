@@ -358,7 +358,7 @@ export function PreciosPage() {
         <div className="fixed bottom-0 left-0 right-0 z-20 border-t bg-muted/50 backdrop-blur md:left-[var(--sidebar-width,16rem)]">
           <div className="flex flex-wrap items-end gap-4 px-6 py-3">
             <AdjustBlock
-              label="Aplicar Aumento"
+              label="Aumentar Precio"
               value={upVal}
               setValue={setUpVal}
               unit={upUnit}
@@ -366,7 +366,7 @@ export function PreciosPage() {
               onApply={() => applyAdjustment(Number(upVal), upUnit, 1)}
             />
             <AdjustBlock
-              label="Aplicar Descuento"
+              label="Disminuir Precio"
               value={downVal}
               setValue={setDownVal}
               unit={downUnit}
