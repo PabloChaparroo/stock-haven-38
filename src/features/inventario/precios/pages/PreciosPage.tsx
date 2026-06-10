@@ -53,6 +53,7 @@ export function PreciosPage() {
   const [lists, setLists] = useState<SavedList[]>(MOCK_LISTS);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [items, setItems] = useState<Record<string, string>>({});
+  const [page, setPage] = useState(1);
   const [upVal, setUpVal] = useState("");
   const [upUnit, setUpUnit] = useState<Unit>("percent");
   const [downVal, setDownVal] = useState("");
