@@ -27,8 +27,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { articles, formatCurrency, type Article } from "@/lib/mock-data";
+import { SimplePagination } from "@/components/ui/simple-pagination";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const PAGE_SIZE = 10;
 
 
 
@@ -50,6 +53,7 @@ export function PreciosPage() {
   const [lists, setLists] = useState<SavedList[]>(MOCK_LISTS);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [items, setItems] = useState<Record<string, string>>({});
+  const [page, setPage] = useState(1);
   const [upVal, setUpVal] = useState("");
   const [upUnit, setUpUnit] = useState<Unit>("percent");
   const [downVal, setDownVal] = useState("");
@@ -79,6 +83,7 @@ export function PreciosPage() {
     const l = lists.find((x) => x.id === id);
     if (!l) return;
     setActiveId(id);
+    setPage(1);
     const map: Record<string, string> = {};
     l.articleIds.forEach((aid) => {
       const a = articles.find((x) => x.id === aid);
@@ -262,36 +267,38 @@ export function PreciosPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {articlesInList.map((a) => {
-                const v = items[a.id] ?? String(a.price);
-                const diff = Number(v) !== a.price;
-                return (
-                  <TableRow key={a.id} className="hover:bg-muted/30">
-                    <TableCell className="font-mono text-xs">{a.code}</TableCell>
-                    <TableCell className="font-medium text-navy">{a.name}</TableCell>
-                    <TableCell>{formatCurrency(a.price)}</TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={v}
-                        onChange={(e) => setItems((m) => ({ ...m, [a.id]: e.target.value }))}
-                        className={cn("h-9 w-32 focus-visible:ring-brand", diff && "border-brand font-semibold text-navy")}
-                      />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => removeArticle(a.id)}
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {articlesInList
+                .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+                .map((a) => {
+                  const v = items[a.id] ?? String(a.price);
+                  const diff = Number(v) !== a.price;
+                  return (
+                    <TableRow key={a.id} className="hover:bg-muted/30">
+                      <TableCell className="font-mono text-xs">{a.code}</TableCell>
+                      <TableCell className="font-medium text-navy">{a.name}</TableCell>
+                      <TableCell>{formatCurrency(a.price)}</TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={v}
+                          onChange={(e) => setItems((m) => ({ ...m, [a.id]: e.target.value }))}
+                          className={cn("h-9 w-32 focus-visible:ring-brand", diff && "border-brand font-semibold text-navy")}
+                        />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => removeArticle(a.id)}
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               {articlesInList.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
@@ -301,6 +308,15 @@ export function PreciosPage() {
               )}
             </TableBody>
           </Table>
+          {articlesInList.length > PAGE_SIZE && (
+            <div className="border-t bg-muted/20 px-4 py-3">
+              <SimplePagination
+                page={page}
+                totalPages={Math.max(1, Math.ceil(articlesInList.length / PAGE_SIZE))}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div className="rounded-xl border border-dashed bg-muted/20 py-16 text-center text-muted-foreground">

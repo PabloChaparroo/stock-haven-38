@@ -1,7 +1,11 @@
 import { Fragment, useMemo, useState } from "react";
-import { Search, Save, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, AlertTriangle, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -18,16 +22,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { articles } from "@/lib/mock-data";
+import { articles, type Article } from "@/lib/mock-data";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-
-
 const MOTIVOS = ["DAÑADO", "EXTRAVÍO", "PÉRDIDA", "RETIRO", "ROBO"] as const;
 type Motivo = (typeof MOTIVOS)[number];
 const PAGE_SIZE = 12;
+
+type StockState = "todos" | "normal" | "critico" | "agotado";
+type SystemState = "activos" | "inactivos";
+const DEFAULT_FILTERS = { stock: "todos" as StockState, system: "activos" as SystemState };
+
+function totalStock(a: Article) {
+  if (a.variants && a.variants.length > 0) {
+    return (a.variantStocks ?? []).reduce((s, v) => s + (v.stock ?? 0), 0);
+  }
+  return a.stock;
+}
+function stockStateOf(a: Article): Exclude<StockState, "todos"> {
+  const s = totalStock(a);
+  if (s === 0) return "agotado";
+  if (s <= a.safetyStock) return "critico";
+  return "normal";
+}
 
 type Row = { motivo: Motivo | ""; cantidad: string };
 type RowsMap = Record<string, Row>; // key = articleId or `${articleId}:${variantId}`
@@ -39,13 +58,21 @@ export function SalidaStockPage() {
   const [rows, setRows] = useState<RowsMap>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [draft, setDraft] = useState(DEFAULT_FILTERS);
+  const [applied, setApplied] = useState(DEFAULT_FILTERS);
+  const activeFilterCount =
+    (applied.stock !== "todos" ? 1 : 0) + (applied.system !== "activos" ? 1 : 0);
+
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return articles;
-    return articles.filter((a) =>
-      [a.code, a.name, a.brand, a.category].join(" ").toLowerCase().includes(s),
-    );
-  }, [q]);
+    return articles.filter((a) => {
+      if (s && ![a.code, a.name, a.brand, a.category].join(" ").toLowerCase().includes(s))
+        return false;
+      if (applied.stock !== "todos" && stockStateOf(a) !== applied.stock) return false;
+      return true;
+    });
+  }, [q, applied]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -109,13 +136,114 @@ export function SalidaStockPage() {
           <span className="h-7 w-1.5 rounded-full bg-brand" />
           <h1 className="text-2xl font-bold text-navy">Salida de Stock</h1>
         </div>
-        <Button
-          disabled={!canSave}
-          onClick={() => setConfirmOpen(true)}
-          className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90 disabled:opacity-50"
-        >
-          <Save className="h-4 w-4" /> Guardar Salida
-        </Button>
+        <div className="flex items-center gap-2">
+          <Popover
+            open={filtersOpen}
+            onOpenChange={(o) => {
+              setFiltersOpen(o);
+              if (o) setDraft(applied);
+            }}
+          >
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "gap-2 border-border/70",
+                  activeFilterCount > 0 && "border-brand text-brand",
+                )}
+              >
+                <Filter className="h-4 w-4" />
+                Filtrar
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1.5 text-xs font-semibold text-brand-foreground">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" sideOffset={8} className="w-80 p-0">
+              <div className="border-b px-4 py-3">
+                <div className="text-sm font-semibold text-navy">Filtros de Catálogo</div>
+              </div>
+              <div className="space-y-5 px-4 py-4">
+                <section>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Estado de Stock
+                  </div>
+                  <RadioGroup
+                    value={draft.stock}
+                    onValueChange={(v) => setDraft((d) => ({ ...d, stock: v as StockState }))}
+                    className="gap-2"
+                  >
+                    <FilterRadio value="todos" id="ss-todos" label="Todos" />
+                    <FilterRadio
+                      value="normal"
+                      id="ss-normal"
+                      label="Stock Normal"
+                      badge={<MiniBadge dot="bg-emerald-500" text="text-emerald-700" bg="bg-emerald-100">Normal</MiniBadge>}
+                    />
+                    <FilterRadio
+                      value="critico"
+                      id="ss-critico"
+                      label="Stock Crítico"
+                      badge={<MiniBadge dot="bg-amber-500" text="text-amber-700" bg="bg-amber-100">Crítico</MiniBadge>}
+                    />
+                    <FilterRadio
+                      value="agotado"
+                      id="ss-agotado"
+                      label="Agotado"
+                      badge={<MiniBadge dot="bg-red-500" text="text-red-700" bg="bg-red-100">Agotado</MiniBadge>}
+                    />
+                  </RadioGroup>
+                </section>
+                <Separator />
+                <section>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Estado en Sistema
+                  </div>
+                  <RadioGroup
+                    value={draft.system}
+                    onValueChange={(v) => setDraft((d) => ({ ...d, system: v as SystemState }))}
+                    className="gap-2"
+                  >
+                    <FilterRadio value="activos" id="ss-sys-act" label="Solo Activos" />
+                    <FilterRadio value="inactivos" id="ss-sys-inact" label="Mostrar Inactivos / Discontinuados" />
+                  </RadioGroup>
+                </section>
+              </div>
+              <div className="flex items-center justify-between border-t px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraft(DEFAULT_FILTERS);
+                    setApplied(DEFAULT_FILTERS);
+                    setPage(1);
+                  }}
+                  className="text-sm font-medium text-destructive hover:underline"
+                >
+                  Limpiar Filtros
+                </button>
+                <Button
+                  onClick={() => {
+                    setApplied(draft);
+                    setPage(1);
+                    setFiltersOpen(false);
+                  }}
+                  className="bg-navy text-navy-foreground hover:bg-navy/90"
+                >
+                  Aplicar Filtros
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button
+            disabled={!canSave}
+            onClick={() => setConfirmOpen(true)}
+            className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90 disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" /> Guardar Salida
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -344,5 +472,49 @@ export function SalidaStockPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function FilterRadio({
+  value,
+  id,
+  label,
+  badge,
+}: {
+  value: string;
+  id: string;
+  label: string;
+  badge?: React.ReactNode;
+}) {
+  return (
+    <Label
+      htmlFor={id}
+      className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm font-normal hover:bg-muted"
+    >
+      <span className="flex items-center gap-2.5">
+        <RadioGroupItem value={value} id={id} />
+        <span className="text-foreground">{label}</span>
+      </span>
+      {badge}
+    </Label>
+  );
+}
+
+function MiniBadge({
+  dot,
+  bg,
+  text,
+  children,
+}: {
+  dot: string;
+  bg: string;
+  text: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium", bg, text)}>
+      <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+      {children}
+    </span>
   );
 }
