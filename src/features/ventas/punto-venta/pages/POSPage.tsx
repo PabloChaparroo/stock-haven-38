@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search, Trash2, Eye, Percent, ArrowRight, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Trash2, Eye, ArrowRight, ShoppingCart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SimplePagination } from "@/components/ui/simple-pagination";
 import { articles, discounts, formatCurrency, type Article, type Discount, type SaleItem } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { ArticleDetailsModal } from "@/components/modals/article-details-modal";
+import { ImageZoomModal } from "@/components/modals/image-zoom-modal";
 import { FinalizeSaleModal } from "@/components/pos/finalize-sale-modal";
 import { SuccessModal } from "@/components/pos/success-modal";
 
