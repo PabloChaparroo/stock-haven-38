@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { SimplePagination } from "@/components/ui/simple-pagination";
-import { articles, discounts, formatCurrency, type Article, type Discount, type SaleItem } from "@/lib/mock-data";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { articles, categories, discounts, formatCurrency, type Article, type Discount, type SaleItem } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { ArticleDetailsModal } from "@/components/modals/article-details-modal";
 import { ImageZoomModal } from "@/components/modals/image-zoom-modal";
@@ -24,6 +25,7 @@ export function discountForArticle(a: Article): Discount | undefined {
 export function POSPage() {
   const [cart, setCart] = useState<CartLine[]>([]);
   const [q, setQ] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
 
   const [finalizeOpen, setFinalizeOpen] = useState(false);
@@ -44,7 +46,7 @@ export function POSPage() {
       const w = el.clientWidth;
       const h = el.clientHeight;
       const cardW = 200;
-      const cardH = 220;
+      const cardH = 140;
       const cols = Math.max(2, Math.floor(w / cardW));
       const rows = Math.max(1, Math.floor(h / cardH));
       setPageSize(cols * rows);
@@ -57,9 +59,12 @@ export function POSPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return articles;
-    return articles.filter((a) => `${a.code} ${a.name} ${a.category} ${a.brand}`.toLowerCase().includes(s));
-  }, [q]);
+    return articles.filter((a) => {
+      if (categoryFilter !== "all" && a.category !== categoryFilter) return false;
+      if (!s) return true;
+      return `${a.code} ${a.name} ${a.category} ${a.brand}`.toLowerCase().includes(s);
+    });
+  }, [q, categoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages);
@@ -69,10 +74,12 @@ export function POSPage() {
   const totalUnits = cart.reduce((s, l) => s + l.quantity, 0);
 
   const addToCart = (a: Article) => {
+    const disc = discountForArticle(a);
+    const unitPrice = disc ? (a.price / 100) * (1 - disc.percentage / 100) : a.price / 100;
     setCart((prev) => {
       const i = prev.findIndex((x) => x.articleId === a.id);
       if (i >= 0) return prev.map((x, idx) => (idx === i ? { ...x, quantity: x.quantity + 1 } : x));
-      return [...prev, { articleId: a.id, name: a.name, category: a.category, price: a.price / 100, quantity: 1, delivered: 0 }];
+      return [...prev, { articleId: a.id, name: a.name, category: a.category, price: unitPrice, quantity: 1, delivered: 0 }];
     });
   };
 
@@ -89,18 +96,31 @@ export function POSPage() {
 
   return (
     <div className="flex h-[calc(100vh-9rem)] flex-col gap-5 overflow-hidden">
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
-        <Input
-          autoFocus
-          placeholder="Escanear código o buscar producto..."
-          value={q}
-          onChange={(e) => { setQ(e.target.value); setPage(1); }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && filtered.length > 0) { addToCart(filtered[0]); setQ(""); }
-          }}
-          className="h-14 rounded-2xl border-2 border-brand/20 bg-card pl-12 text-base text-navy shadow-sm transition-all placeholder:text-muted-foreground focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-brand/10"
-        />
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
+          <Input
+            autoFocus
+            placeholder="Escanear código o buscar producto..."
+            value={q}
+            onChange={(e) => { setQ(e.target.value); setPage(1); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && filtered.length > 0) { addToCart(filtered[0]); setQ(""); }
+            }}
+            className="h-14 rounded-2xl border-2 border-brand/20 bg-card pl-12 text-base text-navy shadow-sm transition-all placeholder:text-muted-foreground focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-brand/10"
+          />
+        </div>
+        <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}>
+          <SelectTrigger className="h-14 w-56 rounded-2xl border-2 border-brand/20 bg-card text-navy shadow-sm focus:border-brand focus:ring-4 focus:ring-brand/10">
+            <SelectValue placeholder="Categoría" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            {categories.map((c) => (
+              <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-2">
@@ -123,10 +143,25 @@ export function POSPage() {
                 <p className="text-sm font-medium text-muted-foreground">Escaneá o agregá artículos del catálogo</p>
               </div>
             ) : (
-              cart.map((l) => (
+              cart.map((l) => {
+                const art = articles.find((a) => a.id === l.articleId);
+                const disc = art ? discountForArticle(art) : undefined;
+                return (
                 <div key={l.articleId} className="grid grid-cols-[1fr_70px_110px_120px_40px] items-center gap-2 border-b border-border/60 px-6 py-3 transition-colors hover:bg-muted/30">
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-navy">{l.name}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-semibold text-navy">{l.name}</span>
+                      {disc && (
+                        <button
+                          type="button"
+                          onClick={() => art && setDiscountInfo({ article: art, discount: disc })}
+                          className="shrink-0 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive hover:bg-destructive/20"
+                          title="Ver descuento"
+                        >
+                          -{disc.percentage}%
+                        </button>
+                      )}
+                    </div>
                     <div className="text-xs text-muted-foreground">{l.category}</div>
                   </div>
                   <div className="flex justify-center">
@@ -136,13 +171,19 @@ export function POSPage() {
                       className="h-8 w-14 rounded-lg border border-border text-center font-mono text-sm"
                     />
                   </div>
-                  <div className="text-right font-mono text-xs text-muted-foreground">{formatCurrency(l.price)}</div>
+                  <div className="text-right font-mono text-xs">
+                    {disc && art && (
+                      <div className="text-[10px] text-muted-foreground line-through">{formatCurrency(art.price / 100)}</div>
+                    )}
+                    <div className={cn(disc ? "font-semibold text-brand" : "text-muted-foreground")}>{formatCurrency(l.price)}</div>
+                  </div>
                   <div className="text-right font-mono text-sm font-bold text-navy">{formatCurrency(l.price * l.quantity)}</div>
                   <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => removeLine(l.articleId)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
 
@@ -197,50 +238,26 @@ export function POSPage() {
 
                     <h3 className="mb-2 line-clamp-2 text-sm font-semibold text-navy">{a.name}</h3>
 
-                    {(() => {
-                      const disc = discountForArticle(a);
-                      const finalPrice = disc ? a.price * (1 - disc.percentage / 100) : a.price;
-                      return (
-                        <div className="mt-auto flex items-end justify-between gap-2">
-                          <div className="flex min-w-0 flex-col">
-                            <div className="flex items-baseline gap-1.5">
-                              <span className="font-mono text-sm font-bold text-brand">{formatCurrency(finalPrice)}</span>
-                              {disc && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => { e.stopPropagation(); setDiscountInfo({ article: a, discount: disc }); }}
-                                  className="rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive hover:bg-destructive/20"
-                                  title="Ver descuento"
-                                >
-                                  -{disc.percentage}%
-                                </button>
-                              )}
-                            </div>
-                            {disc && (
-                              <span className="font-mono text-[10px] text-muted-foreground line-through">{formatCurrency(a.price)}</span>
-                            )}
-                            <span className={cn(
-                              "mt-1 text-[11px] font-semibold",
-                              stock <= 0 ? "text-destructive" : lowStock ? "text-amber-600" : "text-muted-foreground",
-                            )}>
-                              {stock <= 0 ? "Sin stock" : `${stock} unid.`}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); if (a.image) setZoomImg({ src: a.image, alt: a.name }); }}
-                            className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted/40 transition hover:border-brand"
-                            title="Ver imagen"
-                          >
-                            {a.image ? (
-                              <img src={a.image} alt={a.name} className="h-full w-full object-contain" />
-                            ) : (
-                              <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
-                            )}
-                          </button>
-                        </div>
-                      );
-                    })()}
+                    <div className="mt-auto flex items-end justify-between gap-2">
+                      <span className={cn(
+                        "text-[11px] font-semibold",
+                        stock <= 0 ? "text-destructive" : lowStock ? "text-amber-600" : "text-muted-foreground",
+                      )}>
+                        {stock <= 0 ? "Sin stock" : `${stock} unid.`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); if (a.image) setZoomImg({ src: a.image, alt: a.name }); }}
+                        className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted/40 transition hover:border-brand"
+                        title="Ver imagen"
+                      >
+                        {a.image ? (
+                          <img src={a.image} alt={a.name} className="h-full w-full object-contain" />
+                        ) : (
+                          <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 );
               })}
