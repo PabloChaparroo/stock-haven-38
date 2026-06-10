@@ -96,20 +96,13 @@ export function OrdenesPage() {
             <SelectItem value="Cancelada">Cancelada</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase tracking-wide text-muted-foreground">Desde</span>
-            <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); resetPage(); }} className="h-6 w-[130px] border-0 p-0 text-xs focus-visible:ring-0" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase tracking-wide text-muted-foreground">Hasta</span>
-            <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); resetPage(); }} className="h-6 w-[130px] border-0 p-0 text-xs focus-visible:ring-0" />
-          </div>
-          {(from || to) && (
-            <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setFrom(""); setTo(""); resetPage(); }}>Limpiar</Button>
-          )}
-        </div>
+        <DateField label="Desde" value={fromDate} onChange={(d) => { setFromDate(d); resetPage(); }} />
+        <DateField label="Hasta" value={toDate} onChange={(d) => { setToDate(d); resetPage(); }} />
+        {(fromDate || toDate) && (
+          <Button variant="ghost" size="sm" className="h-10 rounded-full" onClick={() => { setFromDate(undefined); setToDate(undefined); resetPage(); }}>
+            <X className="mr-1 h-3.5 w-3.5" /> Limpiar fechas
+          </Button>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border bg-card">
