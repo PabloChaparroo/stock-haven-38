@@ -74,10 +74,12 @@ export function POSPage() {
   const totalUnits = cart.reduce((s, l) => s + l.quantity, 0);
 
   const addToCart = (a: Article) => {
+    const disc = discountForArticle(a);
+    const unitPrice = disc ? (a.price / 100) * (1 - disc.percentage / 100) : a.price / 100;
     setCart((prev) => {
       const i = prev.findIndex((x) => x.articleId === a.id);
       if (i >= 0) return prev.map((x, idx) => (idx === i ? { ...x, quantity: x.quantity + 1 } : x));
-      return [...prev, { articleId: a.id, name: a.name, category: a.category, price: a.price / 100, quantity: 1, delivered: 0 }];
+      return [...prev, { articleId: a.id, name: a.name, category: a.category, price: unitPrice, quantity: 1, delivered: 0 }];
     });
   };
 
