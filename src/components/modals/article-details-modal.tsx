@@ -34,7 +34,7 @@ export function ArticleDetailsModal({ open, onOpenChange, article }: Props) {
     : 0;
   const globalStock = hasVariants ? variantStockTotal : article.stock;
   const lowStock = !hasVariants && article.stock < article.safetyStock;
-  const discount = discountForArticle(article);
+  const appliedDiscounts = discountsForArticle(article);
 
 
   // Mock data not present in the Article type — safe defaults for display.
