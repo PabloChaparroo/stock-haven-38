@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Trash2, Percent, Search, Calendar, Link2Off } from "lucide-react";
+import { Plus, Pencil, Trash2, Percent, Search, Calendar, Link2Off, Eye, List as ListIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   articles,
   discounts as initialDiscounts,
+  priceLists,
   formatCurrency,
+  type Article,
   type Discount,
   type DiscountType,
 } from "@/lib/mock-data";
@@ -15,10 +17,8 @@ import { SimplePagination } from "@/components/ui/simple-pagination";
 import { DiscountFormModal } from "@/components/modals/discount-form-modal";
 import { DeleteConfirmModal } from "@/components/modals/delete-confirm-modal";
 import { LinkArticlesModal } from "@/components/modals/link-articles-modal";
-import { EditQuantityModal } from "@/components/modals/edit-quantity-modal";
+import { ArticleDetailsModal } from "@/components/modals/article-details-modal";
 import { cn } from "@/lib/utils";
-
-
 
 const PAGE_SIZE = 12;
 
@@ -66,7 +66,7 @@ export function DiscountsPage() {
       <div className="inline-flex rounded-xl border bg-muted/40 p-1">
         {[
           { v: "category" as const, label: "Descuento por Categoría" },
-          { v: "combo" as const, label: "Descuento por Combo" },
+          { v: "list" as const, label: "Descuento por Lista" },
         ].map((t) => (
           <button
             key={t.v}
@@ -114,6 +114,7 @@ export function DiscountsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {slice.map((d) => {
           const active = selected?.id === d.id;
+          const list = d.type === "list" ? priceLists.find((l) => l.id === d.listId) : null;
           return (
             <Card
               key={d.id}
@@ -156,6 +157,11 @@ export function DiscountsPage() {
                   {d.categoryName}
                 </div>
               )}
+              {d.type === "list" && list && (
+                <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-navy/10 px-2 py-0.5 text-xs font-medium text-navy">
+                  <ListIcon className="h-3 w-3" /> {list.name} · {list.articleIds.length} art.
+                </div>
+              )}
             </Card>
           );
         })}
@@ -178,40 +184,43 @@ export function DiscountsPage() {
   );
 }
 
-type ItemRow = (typeof articles)[number] & { _minQty?: number };
-
 function DetailPanel({ discount }: { discount: Discount }) {
   const [artPage, setArtPage] = useState(1);
   const [addOpen, setAddOpen] = useState(false);
-  const [unlink, setUnlink] = useState<ItemRow | null>(null);
-  const [editQty, setEditQty] = useState<ItemRow | null>(null);
+  const [unlink, setUnlink] = useState<Article | null>(null);
+  const [viewArt, setViewArt] = useState<Article | undefined>();
 
-  const items: ItemRow[] = useMemo(() => {
+  const items: Article[] = useMemo(() => {
     if (discount.type === "category") {
-      return articles.filter((a) => a.category === discount.categoryName) as ItemRow[];
+      return articles.filter((a) => a.category === discount.categoryName);
     }
-    const out: ItemRow[] = [];
-    for (const c of discount.comboItems ?? []) {
-      const art = articles.find((a) => a.id === c.articleId);
-      if (art) out.push({ ...art, _minQty: c.minQuantity });
-    }
-    return out;
+    const list = priceLists.find((l) => l.id === discount.listId);
+    if (!list) return [];
+    return list.articleIds
+      .map((id) => articles.find((a) => a.id === id))
+      .filter((a): a is Article => !!a);
   }, [discount]);
 
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
   const slice = items.slice((artPage - 1) * PAGE_SIZE, artPage * PAGE_SIZE);
-  const isCombo = discount.type === "combo";
+  const isList = discount.type === "list";
+  const list = isList ? priceLists.find((l) => l.id === discount.listId) : null;
 
   return (
     <section className="space-y-3 pt-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-baseline gap-2 flex-wrap">
           <h2 className="text-lg font-semibold text-navy">Artículos en</h2>
           <span className="rounded-full bg-brand/15 px-3 py-0.5 text-sm font-medium text-brand">
             {discount.name}
           </span>
+          {isList && list && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-navy/10 px-3 py-0.5 text-xs font-medium text-navy">
+              <ListIcon className="h-3 w-3" /> Lista: {list.name}
+            </span>
+          )}
         </div>
-        {isCombo && (
+        {isList && (
           <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
             <Plus className="h-4 w-4" /> Agregar artículo
           </Button>
@@ -224,21 +233,10 @@ function DetailPanel({ discount }: { discount: Discount }) {
             <TableRow className="bg-muted/40 hover:bg-muted/40">
               <TableHead className="text-navy">Código</TableHead>
               <TableHead className="text-navy">Nombre</TableHead>
-              {isCombo ? (
-                <>
-                  <TableHead className="text-navy">Precio Base</TableHead>
-                  <TableHead className="text-navy">Cant. Mín. Requerida</TableHead>
-                  <TableHead className="text-right text-navy">Acciones</TableHead>
-                </>
-              ) : (
-                <>
-                  <TableHead className="text-navy">Marca</TableHead>
-                  <TableHead className="text-navy">Precio Base</TableHead>
-                  <TableHead className="text-navy">Precio c/Desc.</TableHead>
-                  <TableHead className="text-navy">Categoría</TableHead>
-                  <TableHead className="text-right text-navy">Acciones</TableHead>
-                </>
-              )}
+              <TableHead className="text-navy">Marca</TableHead>
+              <TableHead className="text-navy">Precio Base</TableHead>
+              <TableHead className="text-navy">Precio c/Desc.</TableHead>
+              <TableHead className="text-right text-navy">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -248,73 +246,37 @@ function DetailPanel({ discount }: { discount: Discount }) {
                 <TableRow key={a.id} className="hover:bg-muted/30">
                   <TableCell className="font-mono text-xs">{a.code}</TableCell>
                   <TableCell className="font-medium text-navy">{a.name}</TableCell>
-                  {isCombo ? (
-                    <>
-                      <TableCell>{formatCurrency(a.price)}</TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center rounded-full bg-brand/15 px-3 py-0.5 text-sm font-semibold text-brand">
-                          {a._minQty ?? 1}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Editar cantidad"
-                            onClick={() => setEditQty(a)}
-                            className="h-8 w-8 text-brand hover:bg-brand/10"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Desvincular del combo"
-                            onClick={() => setUnlink(a)}
-                            className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
-                          >
-                            <Link2Off className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Eliminar"
-                            onClick={() => setUnlink(a)}
-                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </>
-                  ) : (
-                    <>
-                      <TableCell>{a.brand}</TableCell>
-                      <TableCell>{formatCurrency(a.price)}</TableCell>
-                      <TableCell className="font-semibold text-brand">{formatCurrency(discounted)}</TableCell>
-                      <TableCell>{a.category}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title="Desvincular del descuento"
-                            onClick={() => setUnlink(a)}
-                            className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
-                          >
-                            <Link2Off className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </>
-                  )}
+                  <TableCell>{a.brand}</TableCell>
+                  <TableCell>{formatCurrency(a.price)}</TableCell>
+                  <TableCell className="font-semibold text-brand">{formatCurrency(discounted)}</TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title="Ver artículo"
+                        onClick={() => setViewArt(a)}
+                        className="h-8 w-8 text-navy hover:bg-navy/10"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title={isList ? "Desvincular de la lista" : "Desvincular del descuento"}
+                        onClick={() => setUnlink(a)}
+                        className="h-8 w-8 text-orange-600 hover:bg-orange-500/10"
+                      >
+                        <Link2Off className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               );
             })}
             {slice.length === 0 && (
               <TableRow>
-                <TableCell colSpan={isCombo ? 5 : 7} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                   Sin artículos para mostrar.
                 </TableCell>
               </TableRow>
@@ -328,21 +290,18 @@ function DetailPanel({ discount }: { discount: Discount }) {
       <LinkArticlesModal
         open={addOpen}
         onOpenChange={setAddOpen}
-        targetLabel={`al descuento "${discount.name}"`}
+        targetLabel={isList && list ? `a la lista "${list.name}"` : `al descuento "${discount.name}"`}
         excludeIds={items.map((i) => i.id)}
-        withQuantity={isCombo}
       />
-      <EditQuantityModal
-        open={!!editQty}
-        onOpenChange={(v) => !v && setEditQty(null)}
-        articleName={editQty?.name}
-        initialQuantity={editQty?._minQty ?? 1}
-        onConfirm={() => setEditQty(null)}
+      <ArticleDetailsModal
+        open={!!viewArt}
+        onOpenChange={(v) => !v && setViewArt(undefined)}
+        article={viewArt}
       />
       <DeleteConfirmModal
         open={!!unlink}
         onOpenChange={(v) => !v && setUnlink(null)}
-        itemName={`el artículo "${unlink?.name}" de este descuento`}
+        itemName={isList ? `el artículo "${unlink?.name}" de la lista` : `el artículo "${unlink?.name}" de este descuento`}
         onConfirm={() => setUnlink(null)}
       />
     </section>

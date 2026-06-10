@@ -221,16 +221,23 @@ export const users: User[] = [
 
 export const currentUser: User = users[0];
 
+// ============== Listas de Precios ==============
+
+export type PriceList = {
+  id: string;
+  name: string;
+  articleIds: string[];
+};
+
+export const priceLists: PriceList[] = [
+  { id: "l1", name: "Campaña Escolar", articleIds: ["1", "2", "3", "4", "5"] },
+  { id: "l2", name: "Temporada Verano", articleIds: ["6", "7", "8"] },
+  { id: "l3", name: "Hardware Importado", articleIds: ["10", "12", "14", "16"] },
+];
+
 // ============== Descuentos ==============
 
-export type DiscountType = "category" | "combo";
-
-export type ComboItem = {
-  articleId: string;
-  variantId?: string;
-  variantName?: string;
-  minQuantity: number;
-};
+export type DiscountType = "category" | "list";
 
 export type Discount = {
   id: string;
@@ -242,7 +249,7 @@ export type Discount = {
   active: boolean;
   type: DiscountType;
   categoryName?: string;
-  comboItems?: ComboItem[];
+  listId?: string;
   createdAt: string;
 };
 
@@ -273,29 +280,26 @@ export const discounts: Discount[] = [
   },
   {
     id: "d3",
-    name: "Combo Oficina Pro",
-    description: "Llevando 2 notebooks + 1 impresora.",
+    name: "Promo Campaña Escolar",
+    description: "Descuento aplicado a la lista Campaña Escolar.",
     percentage: 10,
     fromDate: "01/06/2026",
     toDate: "31/12/2026",
     active: true,
-    type: "combo",
-    comboItems: [
-      { articleId: "1", variantId: "v1", variantName: "8GB / 256GB", minQuantity: 2 },
-      { articleId: "5", minQuantity: 1 },
-    ],
+    type: "list",
+    listId: "l1",
     createdAt: "15/05/2026",
   },
   {
     id: "d4",
-    name: "Combo Gamer",
-    description: "Periférico + monitor.",
+    name: "Promo Hardware Importado",
+    description: "Descuento aplicado a la lista Hardware Importado.",
     percentage: 12,
     fromDate: "01/07/2026",
     toDate: "31/12/2026",
     active: true,
-    type: "combo",
-    comboItems: [{ articleId: "3", minQuantity: 1 }],
+    type: "list",
+    listId: "l3",
     createdAt: "20/06/2026",
   },
   {
