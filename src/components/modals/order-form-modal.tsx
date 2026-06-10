@@ -58,6 +58,7 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
   // sub-modals
   const [articleForSuppliers, setArticleForSuppliers] = useState<Article | null>(null);
   const [supplierCatalog, setSupplierCatalog] = useState<Supplier | null>(null);
+  const [preselectedArticleId, setPreselectedArticleId] = useState<string | null>(null);
 
   const articleResults = useMemo(() => {
     const s = search.trim().toLowerCase();
