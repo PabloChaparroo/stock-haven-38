@@ -1,10 +1,13 @@
 import { useMemo, useState } from "react";
-import { Plus, Search, Calendar, Eye, Pencil, Send, Trash2 } from "lucide-react";
+import { Plus, Search, Calendar as CalendarIcon, Eye, Pencil, Send, Trash2, X } from "lucide-react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SimplePagination } from "@/components/ui/simple-pagination";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { DeleteConfirmModal } from "@/components/modals/delete-confirm-modal";
 import { OrderDetailModal } from "@/components/modals/order-detail-modal";
 import { OrderFormModal } from "@/components/modals/order-form-modal";
@@ -21,22 +24,16 @@ const STATUS_STYLES: Record<PurchaseOrderStatus, string> = {
   Cancelada: "bg-destructive/15 text-destructive",
 };
 
-function toISO(d: string) {
-  const [dd, mm, yyyy] = d.split("/");
-  return `${yyyy}-${mm}-${dd}`;
-}
-function inRange(d: string, from: string, to: string) {
-  const iso = toISO(d);
-  if (from && iso < from) return false;
-  if (to && iso > to) return false;
-  return true;
-}
+const parseDate = (s: string) => {
+  const [d, m, y] = s.split("/").map(Number);
+  return new Date(y, m - 1, d);
+};
 
 export function OrdenesPage() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"all" | PurchaseOrderStatus>("all");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [fromDate, setFromDate] = useState<Date | undefined>();
+  const [toDate, setToDate] = useState<Date | undefined>();
   const [page, setPage] = useState(1);
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -49,10 +46,15 @@ export function OrdenesPage() {
     return purchaseOrders.filter((o) => {
       if (s && !`${o.number} ${o.supplierName}`.toLowerCase().includes(s)) return false;
       if (status !== "all" && o.status !== status) return false;
-      if (!inRange(o.issueDate, from, to)) return false;
+      const d = parseDate(o.issueDate);
+      if (fromDate && d < fromDate) return false;
+      if (toDate) {
+        const end = new Date(toDate); end.setHours(23, 59, 59, 999);
+        if (d > end) return false;
+      }
       return true;
     });
-  }, [q, status, from, to]);
+  }, [q, status, fromDate, toDate]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -94,20 +96,13 @@ export function OrdenesPage() {
             <SelectItem value="Cancelada">Cancelada</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase tracking-wide text-muted-foreground">Desde</span>
-            <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); resetPage(); }} className="h-6 w-[130px] border-0 p-0 text-xs focus-visible:ring-0" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase tracking-wide text-muted-foreground">Hasta</span>
-            <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); resetPage(); }} className="h-6 w-[130px] border-0 p-0 text-xs focus-visible:ring-0" />
-          </div>
-          {(from || to) && (
-            <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => { setFrom(""); setTo(""); resetPage(); }}>Limpiar</Button>
-          )}
-        </div>
+        <DateField label="Desde" value={fromDate} onChange={(d) => { setFromDate(d); resetPage(); }} />
+        <DateField label="Hasta" value={toDate} onChange={(d) => { setToDate(d); resetPage(); }} />
+        {(fromDate || toDate) && (
+          <Button variant="ghost" size="sm" className="h-10 rounded-full" onClick={() => { setFromDate(undefined); setToDate(undefined); resetPage(); }}>
+            <X className="mr-1 h-3.5 w-3.5" /> Limpiar fechas
+          </Button>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border bg-card">
@@ -207,5 +202,27 @@ export function OrdenesPage() {
         }}
       />
     </div>
+  );
+}
+
+function DateField({ label, value, onChange }: { label: string; value?: Date; onChange: (d?: Date) => void }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className={cn(
+            "h-10 justify-start rounded-full px-4 text-sm font-normal",
+            !value && "text-muted-foreground",
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value ? `${label}: ${format(value, "dd/MM/yyyy")}` : label}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar mode="single" selected={value} onSelect={onChange} initialFocus className={cn("p-3 pointer-events-auto")} />
+      </PopoverContent>
+    </Popover>
   );
 }
