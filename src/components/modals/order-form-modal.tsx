@@ -39,7 +39,7 @@ function suppliersForArticle(articleId: string): Supplier[] {
 }
 function articlesForSupplier(supplierId: string): Article[] {
   const n = Number(supplierId);
-  return allArticles.filter((_, i) => (i + n) % 3 !== 0).slice(0, 14);
+  return allArticles.filter((_, i) => (i + n) % 3 !== 0);
 }
 function pricingFor(articleId: string, supplierId: string) {
   const aN = Number(articleId);
