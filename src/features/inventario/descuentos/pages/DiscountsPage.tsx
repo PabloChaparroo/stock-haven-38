@@ -3,13 +3,6 @@ import { Plus, Pencil, Trash2, Percent, Search, Calendar, Link2Off } from "lucid
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   articles,
@@ -98,18 +91,23 @@ export function DiscountsPage() {
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Buscar descuento..."
-            className="pl-9"
+            className="h-10 rounded-full pl-10"
           />
         </div>
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as "active" | "inactive"); setPage(1); }}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="active">Activos</SelectItem>
-            <SelectItem value="inactive">Inactivos</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="inline-flex rounded-full border bg-card p-1">
+          {(["active", "inactive"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => { setStatusFilter(s); setPage(1); }}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-xs font-medium transition",
+                statusFilter === s ? "bg-brand text-brand-foreground" : "text-muted-foreground hover:text-navy",
+              )}
+            >
+              {s === "active" ? "Activos" : "Inactivos"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Cards */}
@@ -213,9 +211,11 @@ function DetailPanel({ discount }: { discount: Discount }) {
             {discount.name}
           </span>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
-          <Plus className="h-4 w-4" /> Agregar artículo
-        </Button>
+        {isCombo && (
+          <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
+            <Plus className="h-4 w-4" /> Agregar artículo
+          </Button>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-xl border bg-card">
