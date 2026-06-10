@@ -211,9 +211,11 @@ function DetailPanel({ discount }: { discount: Discount }) {
             {discount.name}
           </span>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
-          <Plus className="h-4 w-4" /> Agregar artículo
-        </Button>
+        {isCombo && (
+          <Button onClick={() => setAddOpen(true)} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
+            <Plus className="h-4 w-4" /> Agregar artículo
+          </Button>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-xl border bg-card">
