@@ -474,3 +474,47 @@ export function SalidaStockPage() {
     </div>
   );
 }
+
+function FilterRadio({
+  value,
+  id,
+  label,
+  badge,
+}: {
+  value: string;
+  id: string;
+  label: string;
+  badge?: React.ReactNode;
+}) {
+  return (
+    <Label
+      htmlFor={id}
+      className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm font-normal hover:bg-muted"
+    >
+      <span className="flex items-center gap-2.5">
+        <RadioGroupItem value={value} id={id} />
+        <span className="text-foreground">{label}</span>
+      </span>
+      {badge}
+    </Label>
+  );
+}
+
+function MiniBadge({
+  dot,
+  bg,
+  text,
+  children,
+}: {
+  dot: string;
+  bg: string;
+  text: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium", bg, text)}>
+      <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+      {children}
+    </span>
+  );
+}
