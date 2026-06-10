@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Plus, Search, Calendar as CalendarIcon, Eye, Pencil, X, Upload, PackageCheck, StickyNote,
 } from "lucide-react";
@@ -254,15 +254,18 @@ function ReceptionFormModal({
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Initialize from existing
-  useState(() => {});
-  if (open && !selectedOrder && existing) {
-    const o = purchaseOrders.find((p) => p.id === existing.orderId) ?? null;
-    setSelectedOrder(o);
-    setDate(existing.date);
-    setRemito(existing.remito);
-    setObservations(existing.observations ?? "");
-    setLines(existing.lines);
-  }
+  useEffect(() => {
+    if (!open) return;
+    if (existing) {
+      const o = purchaseOrders.find((p) => p.id === existing.orderId) ?? null;
+      setSelectedOrder(o);
+      setDate(existing.date);
+      setRemito(existing.remito);
+      setObservations(existing.observations ?? "");
+      setLines(existing.lines);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, existing?.id]);
 
   const reset = () => {
     setSelectedOrder(null); setDate(""); setRemito(""); setObservations(""); setFile(null); setLines([]);
