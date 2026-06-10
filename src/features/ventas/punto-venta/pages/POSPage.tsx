@@ -94,7 +94,6 @@ export function POSPage() {
 
   return (
     <div className="flex h-[calc(100vh-9rem)] flex-col gap-5 overflow-hidden">
-      <div className="relative">
       <div className="flex gap-3">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
