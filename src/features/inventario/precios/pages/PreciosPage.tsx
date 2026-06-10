@@ -312,14 +312,16 @@ export function PreciosPage() {
                         />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => removeArticle(a.id)}
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {!isCategoryMode && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => removeArticle(a.id)}
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
@@ -327,7 +329,9 @@ export function PreciosPage() {
               {articlesInList.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
-                    Aún no hay artículos. Agregá artículos con el botón superior.
+                    {isCategoryMode
+                      ? "No hay artículos en esta categoría."
+                      : "Aún no hay artículos. Agregá artículos con el botón superior."}
                   </TableCell>
                 </TableRow>
               )}
@@ -345,12 +349,12 @@ export function PreciosPage() {
         </div>
       ) : (
         <div className="rounded-xl border border-dashed bg-muted/20 py-16 text-center text-muted-foreground">
-          Seleccioná o creá una lista para comenzar.
+          Seleccioná una lista o categoría para comenzar.
         </div>
       )}
 
       {/* Sticky footer */}
-      {active && (
+      {(active || isCategoryMode) && (
         <div className="fixed bottom-0 left-0 right-0 z-20 border-t bg-muted/50 backdrop-blur md:left-[var(--sidebar-width,16rem)]">
           <div className="flex flex-wrap items-end gap-4 px-6 py-3">
             <AdjustBlock
