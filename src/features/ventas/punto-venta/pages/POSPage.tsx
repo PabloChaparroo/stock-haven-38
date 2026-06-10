@@ -89,7 +89,7 @@ export function POSPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] flex-col gap-3 overflow-hidden">
+    <div className="flex h-[calc(100vh-9rem)] flex-col gap-3 overflow-hidden">
       <div className="grid flex-1 grid-cols-1 gap-3 overflow-hidden lg:grid-cols-2">
         {/* CART column (left) — includes search above */}
         <section className="flex min-h-0 flex-col gap-3">
