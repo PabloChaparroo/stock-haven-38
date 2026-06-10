@@ -7,14 +7,15 @@ import { Boxes, History, MapPin, Package, Percent, ScanBarcode } from "lucide-re
 import { discounts, priceLists, formatCurrency, type Article, type Discount } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-function discountForArticle(a: Article): Discount | undefined {
+function discountsForArticle(a: Article): Discount[] {
   const active = discounts.filter((d) => d.active);
-  const byCat = active.find((d) => d.type === "category" && d.categoryName === a.category);
-  if (byCat) return byCat;
-  return active.find((d) => {
-    if (d.type !== "list" || !d.listId) return false;
-    const list = priceLists.find((l) => l.id === d.listId);
-    return !!list && list.articleIds.includes(a.id);
+  return active.filter((d) => {
+    if (d.type === "category") return d.categoryName === a.category;
+    if (d.type === "list" && d.listId) {
+      const list = priceLists.find((l) => l.id === d.listId);
+      return !!list && list.articleIds.includes(a.id);
+    }
+    return false;
   });
 }
 
