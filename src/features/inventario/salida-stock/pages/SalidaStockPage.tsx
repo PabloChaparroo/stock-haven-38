@@ -58,13 +58,21 @@ export function SalidaStockPage() {
   const [rows, setRows] = useState<RowsMap>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [draft, setDraft] = useState(DEFAULT_FILTERS);
+  const [applied, setApplied] = useState(DEFAULT_FILTERS);
+  const activeFilterCount =
+    (applied.stock !== "todos" ? 1 : 0) + (applied.system !== "activos" ? 1 : 0);
+
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return articles;
-    return articles.filter((a) =>
-      [a.code, a.name, a.brand, a.category].join(" ").toLowerCase().includes(s),
-    );
-  }, [q]);
+    return articles.filter((a) => {
+      if (s && ![a.code, a.name, a.brand, a.category].join(" ").toLowerCase().includes(s))
+        return false;
+      if (applied.stock !== "todos" && stockStateOf(a) !== applied.stock) return false;
+      return true;
+    });
+  }, [q, applied]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
