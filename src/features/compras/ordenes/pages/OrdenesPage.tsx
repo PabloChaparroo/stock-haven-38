@@ -46,10 +46,15 @@ export function OrdenesPage() {
     return purchaseOrders.filter((o) => {
       if (s && !`${o.number} ${o.supplierName}`.toLowerCase().includes(s)) return false;
       if (status !== "all" && o.status !== status) return false;
-      if (!inRange(o.issueDate, from, to)) return false;
+      const d = parseDate(o.issueDate);
+      if (fromDate && d < fromDate) return false;
+      if (toDate) {
+        const end = new Date(toDate); end.setHours(23, 59, 59, 999);
+        if (d > end) return false;
+      }
       return true;
     });
-  }, [q, status, from, to]);
+  }, [q, status, fromDate, toDate]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
