@@ -83,6 +83,7 @@ export function PreciosPage() {
     const l = lists.find((x) => x.id === id);
     if (!l) return;
     setActiveId(id);
+    setPage(1);
     const map: Record<string, string> = {};
     l.articleIds.forEach((aid) => {
       const a = articles.find((x) => x.id === aid);
