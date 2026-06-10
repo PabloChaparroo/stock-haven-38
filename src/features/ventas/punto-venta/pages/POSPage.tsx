@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Trash2, Eye, ArrowRight, ShoppingCart, ImageIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { articles, discounts, formatCurrency, type Article, type Discount, type SaleItem } from "@/lib/mock-data";
@@ -31,6 +32,7 @@ export function POSPage() {
 
   const [detailArticle, setDetailArticle] = useState<Article | undefined>();
   const [zoomImg, setZoomImg] = useState<{ src: string; alt: string } | null>(null);
+  const [discountInfo, setDiscountInfo] = useState<{ article: Article; discount: Discount } | null>(null);
 
   const catalogRef = useRef<HTMLDivElement>(null);
   const [pageSize, setPageSize] = useState(12);
@@ -193,28 +195,52 @@ export function POSPage() {
                       </button>
                     </div>
 
-                    <div className="mb-2 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); if (a.image) setZoomImg({ src: a.image, alt: a.name }); }}
-                        className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted/40 transition hover:border-brand"
-                        title="Ver imagen"
-                      >
-                        {a.image ? (
-                          <img src={a.image} alt={a.name} className="h-full w-full object-contain" />
-                        ) : (
-                          <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
-                        )}
-                      </button>
-                      <h3 className="line-clamp-2 text-sm font-semibold text-navy">{a.name}</h3>
-                    </div>
+                    <h3 className="mb-2 line-clamp-2 text-sm font-semibold text-navy">{a.name}</h3>
 
-                    <div className={cn(
-                      "mt-auto text-[11px] font-semibold",
-                      stock <= 0 ? "text-destructive" : lowStock ? "text-amber-600" : "text-muted-foreground",
-                    )}>
-                      {stock <= 0 ? "Sin stock" : `${stock} unid.`}
-                    </div>
+                    {(() => {
+                      const disc = discountForArticle(a);
+                      const finalPrice = disc ? a.price * (1 - disc.percentage / 100) : a.price;
+                      return (
+                        <div className="mt-auto flex items-end justify-between gap-2">
+                          <div className="flex min-w-0 flex-col">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="font-mono text-sm font-bold text-brand">{formatCurrency(finalPrice)}</span>
+                              {disc && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setDiscountInfo({ article: a, discount: disc }); }}
+                                  className="rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive hover:bg-destructive/20"
+                                  title="Ver descuento"
+                                >
+                                  -{disc.percentage}%
+                                </button>
+                              )}
+                            </div>
+                            {disc && (
+                              <span className="font-mono text-[10px] text-muted-foreground line-through">{formatCurrency(a.price)}</span>
+                            )}
+                            <span className={cn(
+                              "mt-1 text-[11px] font-semibold",
+                              stock <= 0 ? "text-destructive" : lowStock ? "text-amber-600" : "text-muted-foreground",
+                            )}>
+                              {stock <= 0 ? "Sin stock" : `${stock} unid.`}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); if (a.image) setZoomImg({ src: a.image, alt: a.name }); }}
+                            className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted/40 transition hover:border-brand"
+                            title="Ver imagen"
+                          >
+                            {a.image ? (
+                              <img src={a.image} alt={a.name} className="h-full w-full object-contain" />
+                            ) : (
+                              <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
+                            )}
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })}
@@ -228,6 +254,35 @@ export function POSPage() {
 
       <ArticleDetailsModal open={!!detailArticle} onOpenChange={(o) => !o && setDetailArticle(undefined)} article={detailArticle} />
       <ImageZoomModal open={!!zoomImg} onOpenChange={(o) => !o && setZoomImg(null)} src={zoomImg?.src} alt={zoomImg?.alt} />
+
+      <Dialog open={!!discountInfo} onOpenChange={(o) => !o && setDiscountInfo(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{discountInfo?.discount.name}</DialogTitle>
+            <DialogDescription>
+              Descuento del {discountInfo?.discount.percentage}% {discountInfo?.discount.type === "category" ? `en categoría ${discountInfo?.discount.categoryName}` : "por combo"}
+            </DialogDescription>
+          </DialogHeader>
+          {discountInfo && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
+                <span className="text-muted-foreground">Vigencia</span>
+                <span className="font-medium">{discountInfo.discount.fromDate}{discountInfo.discount.toDate ? ` → ${discountInfo.discount.toDate}` : ""}</span>
+              </div>
+              <div className="flex justify-between rounded-lg border border-border px-3 py-2">
+                <span className="text-muted-foreground">Precio original</span>
+                <span className="font-mono line-through">{formatCurrency(discountInfo.article.price)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-brand/30 bg-brand/5 px-3 py-2">
+                <span className="font-semibold text-navy">Precio con descuento</span>
+                <span className="font-mono text-lg font-bold text-brand">
+                  {formatCurrency(discountInfo.article.price * (1 - discountInfo.discount.percentage / 100))}
+                </span>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <FinalizeSaleModal open={finalizeOpen} onOpenChange={setFinalizeOpen} total={subtotal} items={cart} onConfirm={handleConfirmed} />
       {successData && (
