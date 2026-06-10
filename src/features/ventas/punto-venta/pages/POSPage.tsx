@@ -280,7 +280,7 @@ export function POSPage() {
           <DialogHeader>
             <DialogTitle>{discountInfo?.discount.name}</DialogTitle>
             <DialogDescription>
-              Descuento del {discountInfo?.discount.percentage}% {discountInfo?.discount.type === "category" ? `en categoría ${discountInfo?.discount.categoryName}` : "por combo"}
+              Descuento del {discountInfo?.discount.percentage}% {discountInfo?.discount.type === "category" ? `en categoría ${discountInfo?.discount.categoryName}` : "por lista"}
             </DialogDescription>
           </DialogHeader>
           {discountInfo && (
