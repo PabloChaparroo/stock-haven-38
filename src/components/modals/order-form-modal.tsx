@@ -561,3 +561,59 @@ function SupplierCatalogModal({
     </Dialog>
   );
 }
+
+// ===================== MODAL C — View Draft Items =====================
+function DraftItemsModal({
+  draft,
+  onClose,
+}: {
+  draft: { supplier: { id: string; name: string }; items: DraftItem[]; total: number } | null;
+  onClose: () => void;
+}) {
+  if (!draft) return null;
+  return (
+    <Dialog open={!!draft} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="text-navy">Artículos del borrador — {draft.supplier.name}</DialogTitle>
+          <DialogDescription>{draft.items.length} artículo(s) en este borrador.</DialogDescription>
+        </DialogHeader>
+
+        <div className="overflow-hidden rounded-xl border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/40">
+                <TableHead>Artículo</TableHead>
+                <TableHead className="text-center">Cant.</TableHead>
+                <TableHead className="text-right">P. Unit.</TableHead>
+                <TableHead className="text-right">Subtotal</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {draft.items.map((it) => (
+                <TableRow key={`${it.articleId}-${it.supplierId}`}>
+                  <TableCell>
+                    <div className="font-medium text-navy">{it.name}</div>
+                    <div className="font-mono text-[11px] text-muted-foreground">{it.code}</div>
+                  </TableCell>
+                  <TableCell className="text-center font-mono text-sm">{it.quantity}</TableCell>
+                  <TableCell className="text-right font-mono text-sm">{formatCurrency(it.unitPrice)}</TableCell>
+                  <TableCell className="text-right font-mono text-sm font-semibold">{formatCurrency(it.unitPrice * it.quantity)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl border bg-muted/30 p-3">
+          <span className="text-sm text-muted-foreground">Total</span>
+          <span className="font-mono text-xl font-bold text-navy">{formatCurrency(draft.total)}</span>
+        </div>
+
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={onClose}>Cerrar</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
