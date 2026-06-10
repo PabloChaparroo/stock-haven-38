@@ -6,6 +6,7 @@ import {
   Package,
   Boxes,
   LayoutGrid,
+  List,
   Tags,
   Percent,
   DollarSign,
