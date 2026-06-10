@@ -626,3 +626,86 @@ export const creditNotes: CreditNote[] = invoices
     total: Math.round(iv.total * 0.3),
     reason: "Devolución parcial",
   }));
+
+// ============== Órdenes de Compra ==============
+
+export type PurchaseOrderStatus = "Pendiente" | "Emitida" | "Recibida" | "Cancelada";
+
+export type PurchaseOrderItem = {
+  articleId: string;
+  code: string;
+  name: string;
+  variant?: string;
+  unitPrice: number;
+  qtyOrdered: number;
+  qtyReceived: number;
+  qtyDamaged: number;
+};
+
+export type PurchaseOrder = {
+  id: string;
+  number: string;
+  supplierId: string;
+  supplierName: string;
+  supplierCuit: string;
+  issueDate: string;
+  expectedDate: string;
+  realReceptionDate?: string;
+  issuerOperator: string;
+  receiverOperator?: string;
+  status: PurchaseOrderStatus;
+  items: PurchaseOrderItem[];
+  subtotal: number;
+  taxes: number;
+  total: number;
+  remitoNumber?: string;
+  invoiceNumber?: string;
+  notes?: string;
+};
+
+const poStatusCycle: PurchaseOrderStatus[] = ["Pendiente", "Emitida", "Recibida", "Cancelada", "Emitida", "Recibida", "Pendiente"];
+
+export const purchaseOrders: PurchaseOrder[] = Array.from({ length: 14 }).map((_, i) => {
+  const sup = suppliers[i % suppliers.length];
+  const items: PurchaseOrderItem[] = [articles[i % articles.length], articles[(i + 3) % articles.length]].map((a, idx) => {
+    const qty = ((i + idx) % 5) + 2;
+    const unit = Math.round(a.price / 100) * 100;
+    return {
+      articleId: a.id,
+      code: a.code,
+      name: a.name,
+      variant: a.variants?.[0]?.name,
+      unitPrice: unit,
+      qtyOrdered: qty,
+      qtyReceived: qty,
+      qtyDamaged: 0,
+    };
+  });
+  const subtotal = items.reduce((s, it) => s + it.unitPrice * it.qtyOrdered, 0);
+  const taxes = Math.round(subtotal * 0.21);
+  const status = poStatusCycle[i % poStatusCycle.length];
+  const day = String(((i % 27) + 1)).padStart(2, "0");
+  const month = String(((i % 11) + 1)).padStart(2, "0");
+  const expDay = String((((i % 27) + 8) % 28) + 1).padStart(2, "0");
+  const hasDocs = status === "Recibida";
+  return {
+    id: `po-${i + 1}`,
+    number: `OC-2026-${String(i + 1).padStart(3, "0")}`,
+    supplierId: sup.id,
+    supplierName: sup.name,
+    supplierCuit: sup.cuit,
+    issueDate: `${day}/${month}/2026`,
+    expectedDate: `${expDay}/${month}/2026`,
+    realReceptionDate: status === "Recibida" ? `${expDay}/${month}/2026` : undefined,
+    issuerOperator: "Admin",
+    receiverOperator: status === "Recibida" ? operatorPool[i % operatorPool.length] : undefined,
+    status,
+    items,
+    subtotal,
+    taxes,
+    total: subtotal + taxes,
+    remitoNumber: hasDocs ? `RMT-${String(1000 + i).padStart(4, "0")}-${i + 1}` : undefined,
+    invoiceNumber: hasDocs && i % 2 === 0 ? `FAC-A-${String(i + 1).padStart(3, "0")}-${10 + i}` : undefined,
+    notes: i % 4 === 0 ? "Coordinar recepción en horario matutino." : undefined,
+  };
+});
