@@ -180,20 +180,6 @@ export function POSPage() {
                       stock <= 0 && "cursor-not-allowed opacity-60 hover:translate-y-0 hover:shadow-none",
                     )}
                   >
-                    {/* Thumbnail */}
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); if (a.image) setZoomImg({ src: a.image, alt: a.name }); }}
-                      className="relative mb-3 grid aspect-square w-full place-items-center overflow-hidden rounded-xl border border-border bg-muted/40"
-                      title="Ver imagen"
-                    >
-                      {a.image ? (
-                        <img src={a.image} alt={a.name} className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-105" />
-                      ) : (
-                        <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
-                      )}
-                    </button>
-
                     <div className="mb-2 flex items-start justify-between gap-2">
                       <span className="rounded bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                         {a.category}
@@ -207,7 +193,21 @@ export function POSPage() {
                       </button>
                     </div>
 
-                    <h3 className="mb-2 line-clamp-2 text-sm font-semibold text-navy">{a.name}</h3>
+                    <div className="mb-2 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); if (a.image) setZoomImg({ src: a.image, alt: a.name }); }}
+                        className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted/40 transition hover:border-brand"
+                        title="Ver imagen"
+                      >
+                        {a.image ? (
+                          <img src={a.image} alt={a.name} className="h-full w-full object-contain" />
+                        ) : (
+                          <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
+                        )}
+                      </button>
+                      <h3 className="line-clamp-2 text-sm font-semibold text-navy">{a.name}</h3>
+                    </div>
 
                     <div className={cn(
                       "mt-auto text-[11px] font-semibold",
@@ -220,6 +220,7 @@ export function POSPage() {
               })}
             </div>
           </div>
+
 
           <SimplePagination page={safePage} totalPages={totalPages} onPageChange={setPage} />
         </section>
