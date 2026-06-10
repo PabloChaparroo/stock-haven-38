@@ -26,7 +26,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { articles, priceLists, formatCurrency, type Article, type PriceList } from "@/lib/mock-data";
+import { articles, priceLists, categories, formatCurrency, type Article, type PriceList } from "@/lib/mock-data";
 import { SimplePagination } from "@/components/ui/simple-pagination";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
