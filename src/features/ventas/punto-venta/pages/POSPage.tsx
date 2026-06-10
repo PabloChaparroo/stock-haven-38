@@ -88,9 +88,9 @@ export function POSPage() {
 
   const removeLine = (id: string) => setCart((prev) => prev.filter((l) => l.articleId !== id));
 
-  const handleConfirmed = (r: { paid: number; clientName: string; clientEmail?: string; afip: boolean; invoice?: { number: string; cae: string } }) => {
+  const handleConfirmed = (r: { paid: number; clientName: string; clientEmail?: string; afip: boolean; invoice?: { number: string; cae: string }; remito?: { number: string; kind: "Total" | "Parcial" } }) => {
     setFinalizeOpen(false);
-    setSuccessData({ total: subtotal, invoice: r.invoice?.number, cae: r.invoice?.cae, email: r.clientEmail });
+    setSuccessData({ total: subtotal, invoice: r.invoice?.number, cae: r.invoice?.cae, remito: r.remito?.number, email: r.clientEmail });
     setSuccessOpen(true);
   };
 
