@@ -255,6 +255,35 @@ export function POSPage() {
       <ArticleDetailsModal open={!!detailArticle} onOpenChange={(o) => !o && setDetailArticle(undefined)} article={detailArticle} />
       <ImageZoomModal open={!!zoomImg} onOpenChange={(o) => !o && setZoomImg(null)} src={zoomImg?.src} alt={zoomImg?.alt} />
 
+      <Dialog open={!!discountInfo} onOpenChange={(o) => !o && setDiscountInfo(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{discountInfo?.discount.name}</DialogTitle>
+            <DialogDescription>
+              Descuento del {discountInfo?.discount.percentage}% {discountInfo?.discount.type === "category" ? `en categoría ${discountInfo?.discount.categoryName}` : "por combo"}
+            </DialogDescription>
+          </DialogHeader>
+          {discountInfo && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
+                <span className="text-muted-foreground">Vigencia</span>
+                <span className="font-medium">{discountInfo.discount.startDate} → {discountInfo.discount.endDate}</span>
+              </div>
+              <div className="flex justify-between rounded-lg border border-border px-3 py-2">
+                <span className="text-muted-foreground">Precio original</span>
+                <span className="font-mono line-through">{formatCurrency(discountInfo.article.price)}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-brand/30 bg-brand/5 px-3 py-2">
+                <span className="font-semibold text-navy">Precio con descuento</span>
+                <span className="font-mono text-lg font-bold text-brand">
+                  {formatCurrency(discountInfo.article.price * (1 - discountInfo.discount.percentage / 100))}
+                </span>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <FinalizeSaleModal open={finalizeOpen} onOpenChange={setFinalizeOpen} total={subtotal} items={cart} onConfirm={handleConfirmed} />
       {successData && (
         <SuccessModal
