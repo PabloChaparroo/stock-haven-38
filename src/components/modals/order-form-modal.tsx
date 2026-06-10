@@ -352,6 +352,12 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
           toast.success(`${ids.length} artículo(s) agregados desde ${sup.name}`);
         }}
       />
+
+      {/* MODAL C — view draft items */}
+      <DraftItemsModal
+        draft={viewDraftSupplierId ? draftsBySupplier.find((d) => d.supplier.id === viewDraftSupplierId) ?? null : null}
+        onClose={() => setViewDraftSupplierId(null)}
+      />
     </>
   );
 }
