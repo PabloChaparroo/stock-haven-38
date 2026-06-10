@@ -194,8 +194,8 @@ export function OrdenesPage() {
         </div>
       )}
 
-      <OrderFormModal open={createOpen} onOpenChange={setCreateOpen} mode="create" />
-      <OrderFormModal open={!!editing} onOpenChange={(v) => !v && setEditing(null)} mode="edit" order={editing ?? undefined} />
+      <OrderFormModal open={createOpen} onOpenChange={setCreateOpen} />
+      <OrderFormModal open={!!editing} onOpenChange={(v) => !v && setEditing(null)} />
       <OrderDetailModal open={!!viewing} onOpenChange={(v) => !v && setViewing(null)} order={viewing} />
       <DeleteConfirmModal
         open={!!deleting}
