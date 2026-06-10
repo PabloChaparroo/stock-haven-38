@@ -442,11 +442,15 @@ export type Sale = {
   id: string;
   number: string;
   date: string;
+  time: string;
+  operator: string;
   clientId?: string;
   clientName: string;
   clientDoc?: string;
   items: SaleItem[];
   subtotal: number;
+  discountPercent?: number;
+  discountAmount?: number;
   total: number;
   paid: number;
   status: SaleStatus;
@@ -456,6 +460,7 @@ export type Sale = {
 };
 
 const sampleArticles = articles.slice(0, 6);
+const operatorPool = users.map((u) => `${u.firstName} ${u.lastName}`);
 
 export const sales: Sale[] = Array.from({ length: 14 }).map((_, i) => {
   const items: SaleItem[] = [sampleArticles[i % sampleArticles.length], sampleArticles[(i + 2) % sampleArticles.length]].map((a, idx) => ({
@@ -466,39 +471,61 @@ export const sales: Sale[] = Array.from({ length: 14 }).map((_, i) => {
     quantity: ((i + idx) % 4) + 1,
     delivered: (((i + idx) % 4) + 1) - (i % 3 === 0 ? 1 : 0),
   }));
-  const total = items.reduce((s, it) => s + it.price * it.quantity, 0);
+  const subtotal = items.reduce((s, it) => s + it.price * it.quantity, 0);
+  const discountPercent = i % 3 === 0 ? [5, 10, 15, 20][i % 4] : 0;
+  const discountAmount = Math.round((subtotal * discountPercent) / 100);
+  const total = subtotal - discountAmount;
   const statusCycle: SaleStatus[] = ["Pagado", "Parcial", "Pendiente", "Pagado", "Anulado"];
   const status = statusCycle[i % statusCycle.length];
   const paid = status === "Pagado" ? total : status === "Parcial" ? Math.round(total * 0.6) : status === "Anulado" ? total : 0;
   const clientList = clients.slice(0, 6);
   const c = i % 3 === 0 ? undefined : clientList[i % clientList.length];
+  const day = String(((i % 28) + 1)).padStart(2, "0");
+  const month = String(((i % 6) + 1)).padStart(2, "0");
+  const hour = String(8 + (i % 11)).padStart(2, "0");
+  const minute = String((i * 7) % 60).padStart(2, "0");
+  const hasDeliveries = i % 3 === 0 || i % 5 === 0;
   return {
     id: `s${i + 1}`,
     number: `VTA-${String(45 - i).padStart(5, "0")}`,
-    date: `${String(((i % 6) + 1)).padStart(2, "0")}/06/2026`,
+    date: `${day}/${month}/2026`,
+    time: `${hour}:${minute}`,
+    operator: operatorPool[i % operatorPool.length],
     clientId: c?.id,
     clientName: c ? `${c.firstName} ${c.lastName}` : "Consumidor Final",
     clientDoc: c?.dni,
     items,
-    subtotal: total,
+    subtotal,
+    discountPercent: discountPercent || undefined,
+    discountAmount: discountAmount || undefined,
     total,
     paid,
     status,
     payments:
       paid > 0
-        ? [{ method: (["Efectivo", "Tarjeta", "QR/MercadoPago", "Transferencia"] as PaymentMethod[])[i % 4], amount: paid, date: `${String(((i % 6) + 1)).padStart(2, "0")}/06/2026` }]
+        ? [{ method: (["Efectivo", "Tarjeta", "QR/MercadoPago", "Transferencia"] as PaymentMethod[])[i % 4], amount: paid, date: `${day}/${month}/2026` }]
         : [],
     invoiceNumber: i % 2 === 0 ? `0001-${String(45 - i).padStart(5, "0")}` : undefined,
-    deliveries:
-      i % 3 === 0
-        ? [
-            {
-              id: `del-${i}`,
-              date: `${String(((i % 6) + 1)).padStart(2, "0")}/06/2026`,
-              items: items.map((it) => ({ articleId: it.articleId, name: it.name, quantity: Math.max(0, it.delivered) })),
-            },
-          ]
-        : [],
+    deliveries: hasDeliveries
+      ? [
+          {
+            id: `R-0001-${String(1000 + i).padStart(5, "0")}`,
+            date: `${day}/${month}/2026`,
+            items: items
+              .map((it) => ({ articleId: it.articleId, name: it.name, quantity: Math.max(0, it.delivered) }))
+              .filter((it) => it.quantity > 0),
+          },
+          ...(i % 6 === 0
+            ? [
+                {
+                  id: `R-0001-${String(2000 + i).padStart(5, "0")}`,
+                  date: `${day}/${month}/2026`,
+                  items: items.slice(0, 1).map((it) => ({ articleId: it.articleId, name: it.name, quantity: 1 })),
+                },
+              ]
+            : []),
+        ]
+      : [],
   };
 });
 
