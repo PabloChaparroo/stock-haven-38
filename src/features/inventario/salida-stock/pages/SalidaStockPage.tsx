@@ -136,13 +136,114 @@ export function SalidaStockPage() {
           <span className="h-7 w-1.5 rounded-full bg-brand" />
           <h1 className="text-2xl font-bold text-navy">Salida de Stock</h1>
         </div>
-        <Button
-          disabled={!canSave}
-          onClick={() => setConfirmOpen(true)}
-          className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90 disabled:opacity-50"
-        >
-          <Save className="h-4 w-4" /> Guardar Salida
-        </Button>
+        <div className="flex items-center gap-2">
+          <Popover
+            open={filtersOpen}
+            onOpenChange={(o) => {
+              setFiltersOpen(o);
+              if (o) setDraft(applied);
+            }}
+          >
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "gap-2 border-border/70",
+                  activeFilterCount > 0 && "border-brand text-brand",
+                )}
+              >
+                <Filter className="h-4 w-4" />
+                Filtrar
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1.5 text-xs font-semibold text-brand-foreground">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" sideOffset={8} className="w-80 p-0">
+              <div className="border-b px-4 py-3">
+                <div className="text-sm font-semibold text-navy">Filtros de Catálogo</div>
+              </div>
+              <div className="space-y-5 px-4 py-4">
+                <section>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Estado de Stock
+                  </div>
+                  <RadioGroup
+                    value={draft.stock}
+                    onValueChange={(v) => setDraft((d) => ({ ...d, stock: v as StockState }))}
+                    className="gap-2"
+                  >
+                    <FilterRadio value="todos" id="ss-todos" label="Todos" />
+                    <FilterRadio
+                      value="normal"
+                      id="ss-normal"
+                      label="Stock Normal"
+                      badge={<MiniBadge dot="bg-emerald-500" text="text-emerald-700" bg="bg-emerald-100">Normal</MiniBadge>}
+                    />
+                    <FilterRadio
+                      value="critico"
+                      id="ss-critico"
+                      label="Stock Crítico"
+                      badge={<MiniBadge dot="bg-amber-500" text="text-amber-700" bg="bg-amber-100">Crítico</MiniBadge>}
+                    />
+                    <FilterRadio
+                      value="agotado"
+                      id="ss-agotado"
+                      label="Agotado"
+                      badge={<MiniBadge dot="bg-red-500" text="text-red-700" bg="bg-red-100">Agotado</MiniBadge>}
+                    />
+                  </RadioGroup>
+                </section>
+                <Separator />
+                <section>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Estado en Sistema
+                  </div>
+                  <RadioGroup
+                    value={draft.system}
+                    onValueChange={(v) => setDraft((d) => ({ ...d, system: v as SystemState }))}
+                    className="gap-2"
+                  >
+                    <FilterRadio value="activos" id="ss-sys-act" label="Solo Activos" />
+                    <FilterRadio value="inactivos" id="ss-sys-inact" label="Mostrar Inactivos / Discontinuados" />
+                  </RadioGroup>
+                </section>
+              </div>
+              <div className="flex items-center justify-between border-t px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraft(DEFAULT_FILTERS);
+                    setApplied(DEFAULT_FILTERS);
+                    setPage(1);
+                  }}
+                  className="text-sm font-medium text-destructive hover:underline"
+                >
+                  Limpiar Filtros
+                </button>
+                <Button
+                  onClick={() => {
+                    setApplied(draft);
+                    setPage(1);
+                    setFiltersOpen(false);
+                  }}
+                  className="bg-navy text-navy-foreground hover:bg-navy/90"
+                >
+                  Aplicar Filtros
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button
+            disabled={!canSave}
+            onClick={() => setConfirmOpen(true)}
+            className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90 disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" /> Guardar Salida
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
