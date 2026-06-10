@@ -77,12 +77,24 @@ export function PreciosPage() {
     const l = lists.find((x) => x.id === id);
     if (!l) return;
     setActiveId(id);
+    setActiveCategory(null);
     setPage(1);
     const map: Record<string, string> = {};
     l.articleIds.forEach((aid) => {
       const a = articles.find((x) => x.id === aid);
       if (a) map[aid] = String(a.price);
     });
+    setItems(map);
+  };
+
+  const loadCategory = (name: string) => {
+    setActiveCategory(name);
+    setActiveId(null);
+    setPage(1);
+    const map: Record<string, string> = {};
+    articles
+      .filter((a) => a.category === name)
+      .forEach((a) => { map[a.id] = String(a.price); });
     setItems(map);
   };
 
