@@ -214,11 +214,11 @@ export function PreciosPage() {
     <div className="space-y-5 pb-32">
       <div className="flex items-center gap-3">
         <span className="h-7 w-1.5 rounded-full bg-brand" />
-        <h1 className="text-2xl font-bold text-navy">Actualización por Listas de Precios</h1>
+        <h1 className="text-2xl font-bold text-navy">Actualización de Precios</h1>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card p-4">
-        <div className="flex flex-1 items-center gap-2 min-w-[280px]">
+      <div className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4">
+        <div className="flex flex-1 items-center gap-2 min-w-[260px]">
           <Label className="text-navy font-semibold whitespace-nowrap">Cargar Lista Guardada</Label>
           <Select value={activeId ?? ""} onValueChange={loadList}>
             <SelectTrigger className="h-11 max-w-md border-brand/40 focus:ring-brand">
@@ -233,6 +233,21 @@ export function PreciosPage() {
             </SelectContent>
           </Select>
         </div>
+        <div className="flex flex-1 items-center gap-2 min-w-[260px]">
+          <Label className="text-navy font-semibold whitespace-nowrap">Cargar Categoría</Label>
+          <Select value={activeCategory ?? ""} onValueChange={loadCategory}>
+            <SelectTrigger className="h-11 max-w-md border-brand/40 focus:ring-brand">
+              <SelectValue placeholder="Seleccionar categoría..." />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.name}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button
           variant="outline"
           onClick={() => setCreateOpen(true)}
@@ -242,27 +257,29 @@ export function PreciosPage() {
         </Button>
         <Button
           variant="outline"
-          disabled={!active}
+          disabled={!active && !isCategoryMode}
           onClick={saveListChanges}
           className="gap-2 border-border/70"
         >
-          <Save className="h-4 w-4" /> Guardar cambios en la lista
+          <Save className="h-4 w-4" /> Guardar cambios
         </Button>
       </div>
 
-      {active ? (
+      {active || isCategoryMode ? (
         <div className="overflow-hidden rounded-xl border bg-card">
           <div className="flex items-center justify-between gap-2 border-b bg-muted/30 px-4 py-2.5">
             <div className="text-sm font-semibold text-navy">
-              {active.name} — {articlesInList.length} Artículo{articlesInList.length !== 1 && "s"}
+              {sourceTitle} — {articlesInList.length} Artículo{articlesInList.length !== 1 && "s"}
             </div>
-            <Button
-              size="sm"
-              onClick={() => setAddOpen(true)}
-              className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90"
-            >
-              <Plus className="h-4 w-4" /> Agregar Artículo
-            </Button>
+            {!isCategoryMode && (
+              <Button
+                size="sm"
+                onClick={() => setAddOpen(true)}
+                className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90"
+              >
+                <Plus className="h-4 w-4" /> Agregar Artículo
+              </Button>
+            )}
           </div>
           <Table>
             <TableHeader>
