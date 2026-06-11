@@ -515,11 +515,19 @@ function ReceptionFormModal({
               </Table>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => submit("En Proceso")}>Guardar Borrador</Button>
-              <Button className="bg-navy text-navy-foreground hover:bg-navy/90" onClick={() => submit("Confirmada")}>
-                <PackageCheck className="mr-1.5 h-4 w-4" /> Confirmar Recepción
-              </Button>
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-sm font-medium text-navy">
+                <Checkbox checked={confirmStock} onCheckedChange={(v) => setConfirmStock(!!v)} />
+                Confirmar Ingreso Stock
+              </label>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => submit(confirmStock ? "Confirmada" : "En Proceso")}>
+                  {confirmStock ? "Guardar Confirmada" : "Guardar Borrador"}
+                </Button>
+                <Button className="bg-navy text-navy-foreground hover:bg-navy/90" onClick={() => submit("Confirmada")}>
+                  <PackageCheck className="mr-1.5 h-4 w-4" /> Confirmar Recepción
+                </Button>
+              </div>
             </div>
           </>
         )}
