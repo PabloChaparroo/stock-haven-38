@@ -266,10 +266,7 @@ export function FacturacionPage() {
       </div>
 
       {list.length > 0 && (
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            Mostrando {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, list.length)} de {list.length}
-          </span>
+        <div className="flex justify-center">
           <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
