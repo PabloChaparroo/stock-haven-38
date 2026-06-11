@@ -92,6 +92,10 @@ export function POSPage() {
   const totalUnits = cart.reduce((s, l) => s + l.quantity, 0);
 
   const addToCart = (a: Article) => {
+    if (!openCaja) {
+      toast.error("Abrí una caja antes de comenzar a vender");
+      return;
+    }
     const disc = discountForArticle(a);
     const unitPrice = disc ? (a.price / 100) * (1 - disc.percentage / 100) : a.price / 100;
     setCart((prev) => {
@@ -100,6 +104,7 @@ export function POSPage() {
       return [...prev, { articleId: a.id, name: a.name, category: a.category, price: unitPrice, quantity: 1, delivered: 0 }];
     });
   };
+
 
   const setQty = (id: string, qty: number) =>
     setCart((prev) => prev.flatMap((l) => (l.articleId === id ? (qty > 0 ? [{ ...l, quantity: qty }] : []) : [l])));
