@@ -129,8 +129,8 @@ export function FacturacionComprasPage() {
                   <TableCell className="text-muted-foreground">{o.issueDate}</TableCell>
                   <TableCell className="text-right font-mono font-semibold">{formatCurrency(o.total)}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" className="bg-navy text-navy-foreground hover:bg-navy/90" onClick={() => setRegistering(o)}>
-                      <Upload className="mr-1.5 h-3.5 w-3.5" /> Registrar Factura
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-navy" title="Registrar Factura" onClick={() => setRegistering(o)}>
+                      <Upload className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>

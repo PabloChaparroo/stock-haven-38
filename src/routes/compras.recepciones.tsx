@@ -3,5 +3,5 @@ import { RecepcionesPage } from "@/features/compras/recepciones/pages/Recepcione
 
 export const Route = createFileRoute("/compras/recepciones")({
   component: RecepcionesPage,
-  head: () => ({ meta: [{ title: "Recepción de mercadería — Inventia" }] }),
+  head: () => ({ meta: [{ title: "Recepción de Productos — Inventia" }] }),
 });
