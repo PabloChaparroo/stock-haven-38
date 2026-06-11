@@ -11,6 +11,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { DeleteConfirmModal } from "@/components/modals/delete-confirm-modal";
 import { OrderDetailModal } from "@/components/modals/order-detail-modal";
 import { OrderFormModal } from "@/components/modals/order-form-modal";
+import { SendOrderModal } from "@/components/modals/send-order-modal";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { purchaseOrders, formatCurrency, type PurchaseOrder, type PurchaseOrderStatus } from "@/lib/mock-data";
@@ -40,6 +41,7 @@ export function OrdenesPage() {
   const [editing, setEditing] = useState<PurchaseOrder | null>(null);
   const [viewing, setViewing] = useState<PurchaseOrder | null>(null);
   const [deleting, setDeleting] = useState<PurchaseOrder | null>(null);
+  const [sending, setSending] = useState<PurchaseOrder | null>(null);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -151,7 +153,7 @@ export function OrdenesPage() {
                         className="h-7 w-7 text-brand"
                         title={isPending ? "Enviar al proveedor" : "No disponible"}
                         disabled={!isPending}
-                        onClick={() => toast.success(`Orden ${o.number} enviada al proveedor`)}
+                        onClick={() => setSending(o)}
                       >
                         <Send className="h-4 w-4" />
                       </Button>
@@ -184,8 +186,9 @@ export function OrdenesPage() {
       )}
 
       <OrderFormModal open={createOpen} onOpenChange={setCreateOpen} />
-      <OrderFormModal open={!!editing} onOpenChange={(v) => !v && setEditing(null)} />
+      <OrderFormModal open={!!editing} onOpenChange={(v) => !v && setEditing(null)} existing={editing} />
       <OrderDetailModal open={!!viewing} onOpenChange={(v) => !v && setViewing(null)} order={viewing} />
+      <SendOrderModal order={sending} onClose={() => setSending(null)} />
       <DeleteConfirmModal
         open={!!deleting}
         onOpenChange={(v) => !v && setDeleting(null)}
