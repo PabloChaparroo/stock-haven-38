@@ -35,7 +35,7 @@ const STATUS_STYLES: Record<PayStatus, string> = {
   Vencida: "bg-destructive/15 text-destructive",
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 14;
 
 const parseDate = (s: string) => { const [d, m, y] = s.split("/").map(Number); return new Date(y, m - 1, d); };
 const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
