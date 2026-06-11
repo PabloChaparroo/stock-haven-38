@@ -196,16 +196,22 @@ export function HistorialPage() {
                       <Button size="icon" variant="ghost" className="h-7 w-7 text-navy" onClick={() => setRemito(s)} title="Remito">
                         <Truck className="h-4 w-4" />
                       </Button>
-                      {(s.status === "Parcial" || s.status === "Pendiente") && (
-                        <Button size="icon" variant="ghost" className="h-7 w-7 text-success" onClick={() => setPay(s)} title="Registrar pago">
-                          <DollarSign className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {s.status !== "Anulado" && (
-                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setNc(s)} title="Devolución / NC">
-                          <RotateCcw className="h-4 w-4" />
-                        </Button>
-                      )}
+                      <Button
+                        size="icon" variant="ghost" className="h-7 w-7 text-success"
+                        disabled={!(s.status === "Parcial" || s.status === "Pendiente")}
+                        onClick={() => setPay(s)}
+                        title={s.status === "Parcial" || s.status === "Pendiente" ? "Registrar pago" : "Sin saldo pendiente"}
+                      >
+                        <DollarSign className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon" variant="ghost" className="h-7 w-7 text-destructive"
+                        disabled={s.status === "Anulado"}
+                        onClick={() => setNc(s)}
+                        title={s.status === "Anulado" ? "Venta anulada" : "Devolución / NC"}
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>

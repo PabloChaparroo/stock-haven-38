@@ -83,7 +83,7 @@ const groups: Group[] = [
     icon: ShoppingCart,
     items: [
       { title: "Orden de compra", url: "/compras/ordenes", icon: ClipboardList },
-      { title: "Recepción de mercadería", url: "/compras/recepciones", icon: PackageCheck },
+      { title: "Recepción de Productos", url: "/compras/recepciones", icon: PackageCheck },
       { title: "Facturación", url: "/compras/facturacion", icon: Receipt },
       { title: "Cuentas por pagar", url: "/compras/cuentas-por-pagar", icon: CreditCard },
       { title: "Proveedores", url: "/compras/proveedores", icon: Truck },

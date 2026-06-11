@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Plus, Search, Calendar as CalendarIcon, Eye, Pencil, X, Upload, PackageCheck, StickyNote,
+  Plus, Search, Calendar as CalendarIcon, Eye, Pencil, X, Upload, PackageCheck, StickyNote, CheckCircle2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -87,6 +88,7 @@ export function RecepcionesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Reception | null>(null);
   const [viewing, setViewing] = useState<Reception | null>(null);
+  const [confirming, setConfirming] = useState<Reception | null>(null);
 
   const resetPage = () => setPage(1);
 
@@ -118,7 +120,7 @@ export function RecepcionesPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="h-7 w-1.5 rounded-full bg-brand" />
-          <h1 className="text-2xl font-bold text-navy">Historial de Recepciones</h1>
+          <h1 className="text-2xl font-bold text-navy">Recepción de Productos</h1>
         </div>
         <Button onClick={() => { setEditing(null); setFormOpen(true); }} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
           <Plus className="h-4 w-4" /> Nueva Recepción
@@ -185,6 +187,14 @@ export function RecepcionesPage() {
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Button
+                      size="icon" variant="ghost" className="h-7 w-7 text-success"
+                      title={r.status === "En Proceso" ? "Confirmar e ingresar stock" : "No disponible"}
+                      disabled={r.status !== "En Proceso"}
+                      onClick={() => setConfirming(r)}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                    </Button>
+                    <Button
                       size="icon" variant="ghost" className="h-7 w-7"
                       title={r.status === "En Proceso" ? "Editar" : "Solo lectura"}
                       disabled={r.status !== "En Proceso"}
@@ -215,7 +225,100 @@ export function RecepcionesPage() {
       />
 
       <ReceptionViewModal reception={viewing} onClose={() => setViewing(null)} />
+
+      <ConfirmReceptionModal
+        reception={confirming}
+        onClose={() => setConfirming(null)}
+        onConfirm={(r) => {
+          saveReception({ ...r, status: "Confirmada" });
+          toast.success(`Recepción ${r.number} confirmada — stock actualizado`);
+          setConfirming(null);
+        }}
+      />
     </div>
+  );
+}
+
+function ConfirmReceptionModal({
+  reception, onClose, onConfirm,
+}: {
+  reception: Reception | null;
+  onClose: () => void;
+  onConfirm: (r: Reception) => void;
+}) {
+  const [lines, setLines] = useState<ReceptionLine[]>([]);
+
+  useEffect(() => {
+    if (reception) setLines(reception.lines);
+  }, [reception]);
+
+  if (!reception) return null;
+
+  const updateQty = (id: string, qty: number) => {
+    setLines((prev) => prev.map((l) => (l.articleId === id ? { ...l, received: Math.max(0, qty) } : l)));
+  };
+
+  const totalQty = lines.reduce((s, l) => s + l.received, 0);
+
+  return (
+    <Dialog open={!!reception} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-navy">Confirmar recepción {reception.number}</DialogTitle>
+          <DialogDescription>
+            Revisá las cantidades a ingresar a stock. OC {reception.orderNumber} · {reception.supplierName}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="overflow-hidden rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/40">
+                <TableHead>Artículo</TableHead>
+                <TableHead className="text-center">Esperada</TableHead>
+                <TableHead className="text-center">A ingresar</TableHead>
+                <TableHead className="text-center">Daños</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {lines.map((l) => (
+                <TableRow key={l.articleId}>
+                  <TableCell>
+                    <div className="font-medium text-navy">{l.name}</div>
+                    <div className="font-mono text-xs text-muted-foreground">{l.code}</div>
+                  </TableCell>
+                  <TableCell className="text-center font-mono">{l.expected}</TableCell>
+                  <TableCell className="text-center">
+                    <Input
+                      type="number" min={0}
+                      value={l.received}
+                      onChange={(e) => updateQty(l.articleId, Number(e.target.value) || 0)}
+                      className="mx-auto h-8 w-20 text-center"
+                    />
+                  </TableCell>
+                  <TableCell className="text-center font-mono text-muted-foreground">{l.damaged}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg border bg-success/5 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">Total unidades a ingresar a stock</span>
+          <span className="font-mono text-lg font-bold text-success">{totalQty}</span>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button
+            className="bg-success text-success-foreground hover:bg-success/90 gap-1.5"
+            onClick={() => onConfirm({ ...reception, lines })}
+          >
+            <CheckCircle2 className="h-4 w-4" /> Confirmar e ingresar stock
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -251,6 +354,7 @@ function ReceptionFormModal({
   const [file, setFile] = useState<File | null>(null);
   const [lines, setLines] = useState<ReceptionLine[]>([]);
   const [noteFor, setNoteFor] = useState<string | null>(null);
+  const [confirmStock, setConfirmStock] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Initialize from existing
@@ -411,11 +515,19 @@ function ReceptionFormModal({
               </Table>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => submit("En Proceso")}>Guardar Borrador</Button>
-              <Button className="bg-navy text-navy-foreground hover:bg-navy/90" onClick={() => submit("Confirmada")}>
-                <PackageCheck className="mr-1.5 h-4 w-4" /> Confirmar Recepción
-              </Button>
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-sm font-medium text-navy">
+                <Checkbox checked={confirmStock} onCheckedChange={(v) => setConfirmStock(!!v)} />
+                Confirmar Ingreso Stock
+              </label>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => submit(confirmStock ? "Confirmada" : "En Proceso")}>
+                  {confirmStock ? "Guardar Confirmada" : "Guardar Borrador"}
+                </Button>
+                <Button className="bg-navy text-navy-foreground hover:bg-navy/90" onClick={() => submit("Confirmada")}>
+                  <PackageCheck className="mr-1.5 h-4 w-4" /> Confirmar Recepción
+                </Button>
+              </div>
             </div>
           </>
         )}
