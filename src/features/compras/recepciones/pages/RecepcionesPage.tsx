@@ -354,6 +354,7 @@ function ReceptionFormModal({
   const [file, setFile] = useState<File | null>(null);
   const [lines, setLines] = useState<ReceptionLine[]>([]);
   const [noteFor, setNoteFor] = useState<string | null>(null);
+  const [confirmStock, setConfirmStock] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Initialize from existing
