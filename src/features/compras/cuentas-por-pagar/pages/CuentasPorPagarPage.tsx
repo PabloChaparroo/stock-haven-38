@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Search, Calendar as CalendarIcon, X, Eye, CreditCard, Wallet, AlertTriangle, Banknote } from "lucide-react";
+import { Search, Calendar as CalendarIcon, X, Eye, CreditCard, Wallet, AlertTriangle, Banknote, Building2, Hash, FileText, Plus, Trash2, Receipt, Landmark, Smartphone, ArrowRightLeft } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
