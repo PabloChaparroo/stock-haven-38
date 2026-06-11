@@ -123,7 +123,6 @@ export function CuentasPorPagarPage() {
         return { ...p, paid: newPaid, status };
       }),
     );
-    toast.success(`Pago de ${formatCurrency(amount)} registrado`);
     setPaying(null);
   };
 
