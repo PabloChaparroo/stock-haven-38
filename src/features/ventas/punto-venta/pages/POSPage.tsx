@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search, Trash2, Eye, ArrowRight, ShoppingCart, ImageIcon } from "lucide-react";
+import { Search, Trash2, Eye, ArrowRight, ShoppingCart, ImageIcon, Wallet, Lock, Receipt } from "lucide-react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,9 @@ import { ArticleDetailsModal } from "@/components/modals/article-details-modal";
 import { ImageZoomModal } from "@/components/modals/image-zoom-modal";
 import { FinalizeSaleModal } from "@/components/pos/finalize-sale-modal";
 import { SuccessModal } from "@/components/pos/success-modal";
+
+const CAJAS = ["Caja 1", "Caja 2", "Caja 3"];
+
 
 type CartLine = SaleItem;
 
@@ -31,6 +35,10 @@ export function POSPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
 
+  // Caja
+  const [openCaja, setOpenCaja] = useState<string | null>(null);
+  const [salesCount, setSalesCount] = useState(0);
+
   const [finalizeOpen, setFinalizeOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [successData, setSuccessData] = useState<{ total: number; invoice?: string; cae?: string; remito?: string; email?: string } | null>(null);
@@ -41,6 +49,7 @@ export function POSPage() {
 
   const catalogRef = useRef<HTMLDivElement>(null);
   const [pageSize, setPageSize] = useState(12);
+
 
   useEffect(() => {
     const el = catalogRef.current;
