@@ -225,7 +225,100 @@ export function RecepcionesPage() {
       />
 
       <ReceptionViewModal reception={viewing} onClose={() => setViewing(null)} />
+
+      <ConfirmReceptionModal
+        reception={confirming}
+        onClose={() => setConfirming(null)}
+        onConfirm={(r) => {
+          saveReception({ ...r, status: "Confirmada" });
+          toast.success(`Recepción ${r.number} confirmada — stock actualizado`);
+          setConfirming(null);
+        }}
+      />
     </div>
+  );
+}
+
+function ConfirmReceptionModal({
+  reception, onClose, onConfirm,
+}: {
+  reception: Reception | null;
+  onClose: () => void;
+  onConfirm: (r: Reception) => void;
+}) {
+  const [lines, setLines] = useState<ReceptionLine[]>([]);
+
+  useEffect(() => {
+    if (reception) setLines(reception.lines);
+  }, [reception]);
+
+  if (!reception) return null;
+
+  const updateQty = (id: string, qty: number) => {
+    setLines((prev) => prev.map((l) => (l.articleId === id ? { ...l, received: Math.max(0, qty) } : l)));
+  };
+
+  const totalQty = lines.reduce((s, l) => s + l.received, 0);
+
+  return (
+    <Dialog open={!!reception} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-navy">Confirmar recepción {reception.number}</DialogTitle>
+          <DialogDescription>
+            Revisá las cantidades a ingresar a stock. OC {reception.orderNumber} · {reception.supplierName}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="overflow-hidden rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/40">
+                <TableHead>Artículo</TableHead>
+                <TableHead className="text-center">Esperada</TableHead>
+                <TableHead className="text-center">A ingresar</TableHead>
+                <TableHead className="text-center">Daños</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {lines.map((l) => (
+                <TableRow key={l.articleId}>
+                  <TableCell>
+                    <div className="font-medium text-navy">{l.name}</div>
+                    <div className="font-mono text-xs text-muted-foreground">{l.code}</div>
+                  </TableCell>
+                  <TableCell className="text-center font-mono">{l.expected}</TableCell>
+                  <TableCell className="text-center">
+                    <Input
+                      type="number" min={0}
+                      value={l.received}
+                      onChange={(e) => updateQty(l.articleId, Number(e.target.value) || 0)}
+                      className="mx-auto h-8 w-20 text-center"
+                    />
+                  </TableCell>
+                  <TableCell className="text-center font-mono text-muted-foreground">{l.damaged}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg border bg-success/5 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">Total unidades a ingresar a stock</span>
+          <span className="font-mono text-lg font-bold text-success">{totalQty}</span>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button
+            className="bg-success text-success-foreground hover:bg-success/90 gap-1.5"
+            onClick={() => onConfirm({ ...reception, lines })}
+          >
+            <CheckCircle2 className="h-4 w-4" /> Confirmar e ingresar stock
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
