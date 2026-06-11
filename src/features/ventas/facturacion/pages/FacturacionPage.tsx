@@ -11,7 +11,7 @@ import { invoices, pendingInvoiceSales, creditNotes, formatCurrency } from "@/li
 
 type Tab = "emitidas" | "pendientes" | "nc";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 14;
 
 // dd/MM/yyyy -> yyyy-MM-dd para comparar
 function toISO(d: string) {
