@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Plus, Search, Calendar as CalendarIcon, Eye, Pencil, X, Upload, PackageCheck, StickyNote,
+  Plus, Search, Calendar as CalendarIcon, Eye, Pencil, X, Upload, PackageCheck, StickyNote, CheckCircle2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -87,6 +88,7 @@ export function RecepcionesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Reception | null>(null);
   const [viewing, setViewing] = useState<Reception | null>(null);
+  const [confirming, setConfirming] = useState<Reception | null>(null);
 
   const resetPage = () => setPage(1);
 
@@ -118,7 +120,7 @@ export function RecepcionesPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="h-7 w-1.5 rounded-full bg-brand" />
-          <h1 className="text-2xl font-bold text-navy">Historial de Recepciones</h1>
+          <h1 className="text-2xl font-bold text-navy">Recepción de Productos</h1>
         </div>
         <Button onClick={() => { setEditing(null); setFormOpen(true); }} className="gap-2 bg-navy text-navy-foreground hover:bg-navy/90">
           <Plus className="h-4 w-4" /> Nueva Recepción
@@ -183,6 +185,14 @@ export function RecepcionesPage() {
                   <div className="flex justify-end gap-1">
                     <Button size="icon" variant="ghost" className="h-7 w-7" title="Ver" onClick={() => setViewing(r)}>
                       <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon" variant="ghost" className="h-7 w-7 text-success"
+                      title={r.status === "En Proceso" ? "Confirmar e ingresar stock" : "No disponible"}
+                      disabled={r.status !== "En Proceso"}
+                      onClick={() => setConfirming(r)}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
                     </Button>
                     <Button
                       size="icon" variant="ghost" className="h-7 w-7"
