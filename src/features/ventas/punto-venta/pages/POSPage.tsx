@@ -115,12 +115,23 @@ export function POSPage() {
     setFinalizeOpen(false);
     setSuccessData({ total: subtotal, invoice: r.invoice?.number, cae: r.invoice?.cae, remito: r.remito?.number, email: r.clientEmail });
     setSuccessOpen(true);
+    setSalesCount((n) => n + 1);
+  };
+
+  const handleCloseCaja = () => {
+    if (cart.length > 0) {
+      toast.error("Finalizá el carrito antes de cerrar caja");
+      return;
+    }
+    toast.success(`${openCaja} cerrada · ${salesCount} venta(s) realizadas`);
+    setOpenCaja(null);
+    setSalesCount(0);
   };
 
   return (
     <div className="flex h-[calc(100vh-9rem)] flex-col gap-5 overflow-hidden">
-      <div className="flex gap-3">
-        <div className="relative flex-1">
+      <div className="flex flex-wrap gap-3">
+        <div className="relative min-w-[260px] flex-1">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
           <Input
             autoFocus
@@ -144,7 +155,38 @@ export function POSPage() {
             ))}
           </SelectContent>
         </Select>
+
+        {!openCaja ? (
+          <Select
+            value=""
+            onValueChange={(v) => { setOpenCaja(v); setSalesCount(0); toast.success(`${v} abierta`); }}
+          >
+            <SelectTrigger className="h-14 w-56 rounded-2xl border-2 border-success/40 bg-success/5 font-semibold text-success shadow-sm">
+              <span className="inline-flex items-center gap-2">
+                <Wallet className="h-4 w-4" /> Abrir Caja
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              {CAJAS.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <div className="flex h-14 items-center gap-3 rounded-2xl border-2 border-success/40 bg-success/5 px-4 shadow-sm">
+            <div className="flex items-center gap-2 text-success">
+              <Wallet className="h-4 w-4" />
+              <span className="font-semibold">{openCaja}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-card px-2.5 py-1 text-sm font-medium text-navy">
+              <Receipt className="h-3.5 w-3.5 text-brand" />
+              {salesCount} venta{salesCount === 1 ? "" : "s"}
+            </div>
+            <Button size="sm" variant="outline" onClick={handleCloseCaja} className="border-destructive/40 text-destructive hover:bg-destructive/10">
+              <Lock className="mr-1 h-3.5 w-3.5" /> Cerrar Caja
+            </Button>
+          </div>
+        )}
       </div>
+
 
       <div className="grid flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-2">
         {/* CART */}
