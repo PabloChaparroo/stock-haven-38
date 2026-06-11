@@ -179,8 +179,8 @@ export function OrderFormModal({ open, onOpenChange, existing }: Props) {
                 <ShoppingCart className="h-5 w-5" />
               </div>
               <div>
-                <DialogTitle className="text-navy">Nueva Orden de Compra</DialogTitle>
-                <DialogDescription>Buscá por artículo o proveedor para construir borradores agrupados.</DialogDescription>
+                <DialogTitle className="text-navy">{existing ? `Editar Orden ${existing.number}` : "Nueva Orden de Compra"}</DialogTitle>
+                <DialogDescription>{existing ? "Modificá cantidades, artículos o el proveedor." : "Buscá por artículo o proveedor para construir borradores agrupados."}</DialogDescription>
               </div>
             </div>
           </DialogHeader>
