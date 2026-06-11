@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,14 @@ import { SimplePagination } from "@/components/ui/simple-pagination";
 import { ShoppingCart, Search, Trash2, Star, Eye, Pencil, Package, Truck, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { articles as allArticles, suppliers as allSuppliers, formatCurrency, type Article, type Supplier } from "@/lib/mock-data";
+import { articles as allArticles, suppliers as allSuppliers, formatCurrency, type Article, type Supplier, type PurchaseOrder } from "@/lib/mock-data";
 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  existing?: PurchaseOrder | null;
 };
+
 
 type DraftItem = {
   articleId: string;
@@ -52,7 +54,7 @@ function pricingFor(articleId: string, supplierId: string) {
   return { unitPrice: unit, deliveryDays: delivery };
 }
 
-export function OrderFormModal({ open, onOpenChange }: Props) {
+export function OrderFormModal({ open, onOpenChange, existing }: Props) {
   const [search, setSearch] = useState("");
   const [items, setItems] = useState<DraftItem[]>([]);
 
@@ -61,6 +63,36 @@ export function OrderFormModal({ open, onOpenChange }: Props) {
   const [supplierCatalog, setSupplierCatalog] = useState<Supplier | null>(null);
   const [preselectedArticleId, setPreselectedArticleId] = useState<string | null>(null);
   const [viewDraftSupplierId, setViewDraftSupplierId] = useState<string | null>(null);
+
+  // Prefill when editing
+  useEffect(() => {
+    if (!open) return;
+    if (existing) {
+      const supplier = allSuppliers.find((s) => s.id === existing.supplierId);
+      const drafts: DraftItem[] = existing.items.map((it) => {
+        const art = allArticles.find((a) => a.id === it.articleId);
+        return {
+          articleId: it.articleId,
+          code: it.code,
+          name: it.name,
+          supplierId: existing.supplierId,
+          supplierName: existing.supplierName,
+          stock: art?.stock ?? 0,
+          safetyStock: art?.safetyStock ?? 0,
+          unitPrice: it.unitPrice,
+          quantity: it.qtyOrdered,
+        };
+      });
+      setItems(drafts);
+      // touch supplier to keep TS happy
+      void supplier;
+    } else {
+      setItems([]);
+    }
+    setSearch("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, existing?.id]);
+
 
   const handleRemoveDraft = (supplierId: string) => {
     setItems((p) => p.filter((it) => it.supplierId !== supplierId));
