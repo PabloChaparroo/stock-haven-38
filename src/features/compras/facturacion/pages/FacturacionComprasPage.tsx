@@ -15,7 +15,7 @@ import { purchaseOrders, formatCurrency, type PurchaseOrder } from "@/lib/mock-d
 
 type Tab = "pendientes" | "facturadas";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 14;
 
 const parseDate = (s: string) => {
   const [d, m, y] = s.split("/").map(Number);

@@ -50,7 +50,7 @@ const STATUS_STYLES: Record<ReceptionStatus, string> = {
   Rechazada: "bg-destructive/15 text-destructive",
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 14;
 
 // Mock initial data — built from a few purchase orders
 const initialReceptions: Reception[] = purchaseOrders
